@@ -163,6 +163,8 @@ void Console::Run()
 			//After a reset or power cycle, run the PPU/etc ahead of the CPU (simulates delay CPU takes to get out of reset)
 			_memoryManager->IncMasterClockStartup();
 		}
+
+		std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(10));
 	}
 
 	_movieManager->Stop();
