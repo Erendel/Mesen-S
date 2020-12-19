@@ -6,7 +6,7 @@
 #include "../Utilities/SimpleLock.h"
 #include "InteropNotificationListener.h"
 
-typedef void(__stdcall *NotificationListenerCallback)(int, void*);
+typedef void(__stdcall *NotificationListenerCallback)(ConsoleNotificationType, void*);
 
 class InteropNotificationListeners
 {

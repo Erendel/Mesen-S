@@ -3,7 +3,7 @@
 #include "../Core/INotificationListener.h"
 #include "../Core/NotificationManager.h"
 
-typedef void(__stdcall *NotificationListenerCallback)(int, void*);
+typedef void(__stdcall *NotificationListenerCallback)(ConsoleNotificationType, void*);
 
 class InteropNotificationListener : public INotificationListener
 {
@@ -21,6 +21,6 @@ public:
 
 	void ProcessNotification(ConsoleNotificationType type, void* parameter)
 	{
-		_callback((int)type, parameter);
+		_callback(type, parameter);
 	}
 };
