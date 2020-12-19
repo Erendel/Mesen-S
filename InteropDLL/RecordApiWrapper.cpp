@@ -7,68 +7,82 @@
 extern shared_ptr<Console> _console;
 enum class VideoCodec;
 
-extern "C"
+extern "C" {
+DllExport void __stdcall AviRecord(char* filename, VideoCodec codec, uint32_t compressionLevel)
 {
-	DllExport void __stdcall AviRecord(char* filename, VideoCodec codec, uint32_t compressionLevel)
+	if (_console.get())
 	{
-		if (_console.get()) {
-			_console->GetVideoRenderer()->StartRecording(filename, codec, compressionLevel);
-		}
+		_console->GetVideoRenderer()->StartRecording(filename, codec, compressionLevel);
 	}
-	DllExport void __stdcall AviStop()
-	{
-		if (_console.get()) {
-			_console->GetVideoRenderer()->StopRecording();
-		}
-	}
-	DllExport bool __stdcall AviIsRecording()
-	{
-		return _console.get() ? _console->GetVideoRenderer()->IsRecording() : false;
-	}
+}
 
-	DllExport void __stdcall WaveRecord(char* filename)
+DllExport void __stdcall AviStop()
+{
+	if (_console.get())
 	{
-		if (_console.get()) {
-			_console->GetSoundMixer()->StartRecording(filename);
-		}
+		_console->GetVideoRenderer()->StopRecording();
 	}
-	DllExport void __stdcall WaveStop()
-	{
-		if (_console.get()) {
-			_console->GetSoundMixer()->StopRecording();
-		}
-	}
-	DllExport bool __stdcall WaveIsRecording()
-	{
-		return _console.get() ? _console->GetSoundMixer()->IsRecording() : false;
-	}
+}
 
-	DllExport void __stdcall MoviePlay(char* filename)
-	{
-		if (_console.get()) {
-			_console->GetMovieManager()->Play(string(filename));
-		}
-	}
-	DllExport void __stdcall MovieStop()
-	{
-		if (_console.get()) {
-			_console->GetMovieManager()->Stop();
-		}
-	}
-	DllExport bool __stdcall MoviePlaying()
-	{
-		return _console.get() ? _console->GetMovieManager()->Playing() : false;
-	}
-	DllExport bool __stdcall MovieRecording()
-	{
-		return _console.get() ? _console->GetMovieManager()->Recording() : false;
-	}
-	DllExport void __stdcall MovieRecord(RecordMovieOptions *options)
-	{
-		RecordMovieOptions opt = *options;
+DllExport bool __stdcall AviIsRecording()
+{
+	return _console.get() ? _console->GetVideoRenderer()->IsRecording() : false;
+}
 
-		if (_console.get()) {
-			_console->GetMovieManager()->Record(opt);
-		}
+DllExport void __stdcall WaveRecord(char* filename)
+{
+	if (_console.get())
+	{
+		_console->GetSoundMixer()->StartRecording(filename);
 	}
+}
+
+DllExport void __stdcall WaveStop()
+{
+	if (_console.get())
+	{
+		_console->GetSoundMixer()->StopRecording();
+	}
+}
+
+DllExport bool __stdcall WaveIsRecording()
+{
+	return _console.get() ? _console->GetSoundMixer()->IsRecording() : false;
+}
+
+DllExport void __stdcall MoviePlay(char* filename)
+{
+	if (_console.get())
+	{
+		_console->GetMovieManager()->Play(string(filename));
+	}
+}
+
+DllExport void __stdcall MovieStop()
+{
+	if (_console.get())
+	{
+		_console->GetMovieManager()->Stop();
+	}
+}
+
+DllExport bool __stdcall MoviePlaying()
+{
+	return _console.get() ? _console->GetMovieManager()->Playing() : false;
+}
+
+DllExport bool __stdcall MovieRecording()
+{
+	return _console.get() ? _console->GetMovieManager()->Recording() : false;
+}
+
+DllExport void __stdcall MovieRecord(RecordMovieOptions* options)
+{
+	RecordMovieOptions opt = *options;
+
+	if (_console.get())
+	{
+		_console->GetMovieManager()->Record(opt);
+	}
+}
 }

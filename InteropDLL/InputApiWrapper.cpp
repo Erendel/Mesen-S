@@ -9,67 +9,74 @@ extern shared_ptr<Console> _console;
 
 static string _returnString;
 
-extern "C" 
+extern "C" {
+DllExport void __stdcall SetMousePosition(double x, double y)
 {
-	DllExport void __stdcall SetMousePosition(double x, double y)
-	{
-		KeyManager::SetMousePosition(_console, x, y); 
-	}
+	KeyManager::SetMousePosition(_console, x, y);
+}
 
-	DllExport void __stdcall SetMouseMovement(int16_t x, int16_t y)
-	{
-		KeyManager::SetMouseMovement(x, y);
-	}
+DllExport void __stdcall SetMouseMovement(int16_t x, int16_t y)
+{
+	KeyManager::SetMouseMovement(x, y);
+}
 
-	DllExport void __stdcall UpdateInputDevices()
-	{ 
-		if(_keyManager.get()) {
-			_keyManager->UpdateDevices(); 
-		} 
+DllExport void __stdcall UpdateInputDevices()
+{
+	if (_keyManager.get())
+	{
+		_keyManager->UpdateDevices();
 	}
+}
 
-	DllExport void __stdcall GetPressedKeys(uint32_t *keyBuffer)
+DllExport void __stdcall GetPressedKeys(uint32_t* keyBuffer)
+{
+	vector<uint32_t> pressedKeys = KeyManager::GetPressedKeys();
+	for (size_t i = 0; i < pressedKeys.size() && i < 3; i++)
 	{
-		vector<uint32_t> pressedKeys = KeyManager::GetPressedKeys();
-		for(size_t i = 0; i < pressedKeys.size() && i < 3; i++) {
-			keyBuffer[i] = pressedKeys[i];
-		}
+		keyBuffer[i] = pressedKeys[i];
 	}
+}
 
-	DllExport void __stdcall DisableAllKeys(bool disabled)
+DllExport void __stdcall DisableAllKeys(bool disabled)
+{
+	if (_keyManager.get())
 	{
-		if(_keyManager.get()) {
-			_keyManager->SetDisabled(disabled);
-		}
+		_keyManager->SetDisabled(disabled);
 	}
+}
 
-	DllExport void __stdcall SetKeyState(int32_t scanCode, bool state)
+DllExport void __stdcall SetKeyState(int32_t scanCode, bool state)
+{
+	if (_keyManager.get())
 	{
-		if(_keyManager.get()) {
-			_keyManager->SetKeyState(scanCode, state);
-			_shortcutKeyHandler->ProcessKeys();
-		}
+		_keyManager->SetKeyState(scanCode, state);
+		_shortcutKeyHandler->ProcessKeys();
 	}
-	
-	DllExport void __stdcall ResetKeyState()
-	{
-		if(_keyManager.get()) {
-			_keyManager->ResetKeyState();
-		}
-	}
+}
 
-	DllExport const char* __stdcall GetKeyName(uint32_t keyCode)
+DllExport void __stdcall ResetKeyState()
+{
+	if (_keyManager.get())
 	{
-		_returnString = KeyManager::GetKeyName(keyCode);
-		return _returnString.c_str();
+		_keyManager->ResetKeyState();
 	}
+}
 
-	DllExport uint32_t __stdcall GetKeyCode(char* keyName)
+DllExport const char* __stdcall GetKeyName(uint32_t keyCode)
+{
+	_returnString = KeyManager::GetKeyName(keyCode);
+	return _returnString.c_str();
+}
+
+DllExport uint32_t __stdcall GetKeyCode(char* keyName)
+{
+	if (keyName)
 	{
-		if(keyName) {
-			return KeyManager::GetKeyCode(keyName);
-		} else {
-			return 0;
-		}
+		return KeyManager::GetKeyCode(keyName);
 	}
+	else
+	{
+		return 0;
+	}
+}
 }

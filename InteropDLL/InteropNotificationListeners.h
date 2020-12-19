@@ -6,7 +6,7 @@
 #include "../Utilities/SimpleLock.h"
 #include "InteropNotificationListener.h"
 
-typedef void(__stdcall *NotificationListenerCallback)(ConsoleNotificationType, void*);
+typedef void (__stdcall *NotificationListenerCallback)(ConsoleNotificationType, void*);
 
 class InteropNotificationListeners
 {
@@ -14,7 +14,8 @@ class InteropNotificationListeners
 	vector<shared_ptr<INotificationListener>> _externalNotificationListeners;
 
 public:
-	INotificationListener* RegisterNotificationCallback(NotificationListenerCallback callback, shared_ptr<Console> console)
+	INotificationListener* RegisterNotificationCallback(NotificationListenerCallback callback,
+	                                                    shared_ptr<Console> console)
 	{
 		auto lock = _externalNotificationListenerLock.AcquireSafe();
 		auto listener = shared_ptr<INotificationListener>(new InteropNotificationListener(callback));
@@ -23,7 +24,7 @@ public:
 		return listener.get();
 	}
 
-	void UnregisterNotificationCallback(INotificationListener *listener)
+	void UnregisterNotificationCallback(INotificationListener* listener)
 	{
 		auto lock = _externalNotificationListenerLock.AcquireSafe();
 		_externalNotificationListeners.erase(
