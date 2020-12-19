@@ -60,6 +60,10 @@ extern "C"
 
 	DllExport void __stdcall HistoryViewerRelease()
 	{
+		if (!_historyConsole.get()) {
+			return;
+		}
+
 		_historyConsole->Stop(true);
 		_historyConsole->Release(); // Mesen had True, "For ShutDown"
 		_historyRenderer.reset();
@@ -69,7 +73,7 @@ extern "C"
 
 	DllExport uint32_t __stdcall HistoryViewerGetHistoryLength()
 	{
-		if (_historyConsole) {
+		if (_historyConsole.get()) {
 			return _historyConsole->GetHistoryViewer()->GetHistoryLength();
 		}
 		return 0;
@@ -77,14 +81,14 @@ extern "C"
 
 	DllExport void __stdcall HistoryViewerGetSegments(uint32_t* segmentBuffer, uint32_t& bufferSize)
 	{
-		if (_historyConsole) {
+		if (_historyConsole.get()) {
 			_historyConsole->GetHistoryViewer()->GetHistorySegments(segmentBuffer, bufferSize);
 		}
 	}
 
 	DllExport bool __stdcall HistoryViewerCreateSaveState(const char* outputFile, uint32_t position)
 	{
-		if (_historyConsole) {
+		if (_historyConsole.get()) {
 			return _historyConsole->GetHistoryViewer()->CreateSaveState(outputFile, position);
 		}
 		return false;
@@ -92,7 +96,7 @@ extern "C"
 
 	DllExport bool __stdcall HistoryViewerSaveMovie(const char* movieFile, uint32_t startPosition, uint32_t endPosition)
 	{
-		if (_historyConsole) {
+		if (_historyConsole.get()) {
 			return _historyConsole->GetHistoryViewer()->SaveMovie(movieFile, startPosition, endPosition);
 		}
 		return false;
@@ -100,21 +104,21 @@ extern "C"
 
 	DllExport void __stdcall HistoryViewerResumeGameplay(uint32_t resumeAtSecond)
 	{
-		if (_historyConsole) {
+		if (_historyConsole.get()) {
 			_historyConsole->GetHistoryViewer()->ResumeGameplay(_console, resumeAtSecond);
 		}
 	}
 
 	DllExport void __stdcall HistoryViewerSetPosition(uint32_t seekPosition)
 	{
-		if (_historyConsole) {
+		if (_historyConsole.get()) {
 			_historyConsole->GetHistoryViewer()->SeekTo(seekPosition);
 		}
 	}
 
 	DllExport uint32_t __stdcall HistoryViewerGetPosition()
 	{
-		if (_historyConsole) {
+		if (_historyConsole.get()) {
 			return _historyConsole->GetHistoryViewer()->GetPosition();
 		}
 		return 0;

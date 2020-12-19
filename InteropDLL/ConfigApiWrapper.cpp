@@ -11,58 +11,77 @@ static string _returnString;
 extern "C" {
 	DllExport void __stdcall SetVideoConfig(VideoConfig config)
 	{
-		_console->GetSettings()->SetVideoConfig(config);
+		if (_console.get()) {
+			_console->GetSettings()->SetVideoConfig(config);
+		}
 	}
 
 	DllExport void __stdcall SetAudioConfig(AudioConfig config)
 	{
-		_console->GetSettings()->SetAudioConfig(config);
+		if (_console.get()) {
+			_console->GetSettings()->SetAudioConfig(config);
+		}
 	}
 
 	DllExport void __stdcall SetInputConfig(InputConfig config)
 	{
-		_console->GetSettings()->SetInputConfig(config);
+		if (_console.get()) {
+			_console->GetSettings()->SetInputConfig(config);
+		}
 	}
 
 	DllExport void __stdcall SetEmulationConfig(EmulationConfig config)
 	{
-		_console->GetSettings()->SetEmulationConfig(config);
+		if (_console.get()) {
+			_console->GetSettings()->SetEmulationConfig(config);
+		}
 	}
 	
 	DllExport void __stdcall SetGameboyConfig(GameboyConfig config)
 	{
-		_console->GetSettings()->SetGameboyConfig(config);
+		if (_console.get()) {
+			_console->GetSettings()->SetGameboyConfig(config);
+		}
 	}
 
 	DllExport void __stdcall SetPreferences(PreferencesConfig config)
 	{
-		_console->GetSettings()->SetPreferences(config);
+		if (_console.get()) {
+			_console->GetSettings()->SetPreferences(config);
+		}
 	}
 
 	DllExport void __stdcall SetShortcutKeys(ShortcutKeyInfo shortcuts[], uint32_t count)
 	{
 		vector<ShortcutKeyInfo> shortcutList(shortcuts, shortcuts + count);
-		_console->GetSettings()->SetShortcutKeys(shortcutList);
+
+		if (_console.get()) {
+			_console->GetSettings()->SetShortcutKeys(shortcutList);
+		}
 	}
 
 	DllExport ControllerType __stdcall GetControllerType(int player)
 	{
-		return _console->GetSettings()->GetInputConfig().Controllers[player].Type;
+		return _console.get() ? _console->GetSettings()->GetInputConfig().Controllers[player].Type : ControllerType::None;
 	}
 
 	DllExport const char* __stdcall GetAudioDevices()
 	{
-		_returnString = _soundManager ? _soundManager->GetAvailableDevices() : "";
+		_returnString = _soundManager.get() ? _soundManager->GetAvailableDevices() : "";
 		return _returnString.c_str();
 	}
 
 	DllExport void __stdcall SetEmulationFlag(EmulationFlags flag, bool enabled)
 	{
-		_console->GetSettings()->SetFlagState(flag, enabled);
+		if (_console.get()) {
+			_console->GetSettings()->SetFlagState(flag, enabled);
+		}
 	}
 
 	DllExport void __stdcall SetDebuggerFlag(DebuggerFlags flag, bool enabled)
 	{
-		_console->GetSettings()->SetDebuggerFlag(flag, enabled);
+		if (_console.get()) {
+			_console->GetSettings()->SetDebuggerFlag(flag, enabled);
+		}
 	}
 }

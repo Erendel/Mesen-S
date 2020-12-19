@@ -23,7 +23,7 @@ extern "C"
 
 	DllExport void __stdcall UpdateInputDevices()
 	{ 
-		if(_keyManager) {
+		if(_keyManager.get()) {
 			_keyManager->UpdateDevices(); 
 		} 
 	}
@@ -38,14 +38,14 @@ extern "C"
 
 	DllExport void __stdcall DisableAllKeys(bool disabled)
 	{
-		if(_keyManager) {
+		if(_keyManager.get()) {
 			_keyManager->SetDisabled(disabled);
 		}
 	}
 
 	DllExport void __stdcall SetKeyState(int32_t scanCode, bool state)
 	{
-		if(_keyManager) {
+		if(_keyManager.get()) {
 			_keyManager->SetKeyState(scanCode, state);
 			_shortcutKeyHandler->ProcessKeys();
 		}
@@ -53,7 +53,7 @@ extern "C"
 	
 	DllExport void __stdcall ResetKeyState()
 	{
-		if(_keyManager) {
+		if(_keyManager.get()) {
 			_keyManager->ResetKeyState();
 		}
 	}

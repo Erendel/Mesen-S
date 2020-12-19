@@ -21,7 +21,7 @@ extern "C"
 	
 	DllExport void __stdcall RomTestStop()
 	{
-		if(_recordedRomTest) {
+		if(_recordedRomTest.get()) {
 			_recordedRomTest->Stop();
 			_recordedRomTest.reset();
 		}

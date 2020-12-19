@@ -79,7 +79,10 @@ extern "C" {
 		return true;
 	}
 
-	DllExport uint32_t __stdcall GetMesenVersion() { return _console->GetSettings()->GetVersion(); }
+	DllExport uint32_t __stdcall GetMesenVersion()
+	{
+		return _console ? _console->GetSettings()->GetVersion() : 0;
+	}
 
 	DllExport void __stdcall InitDll()
 	{
@@ -89,6 +92,10 @@ extern "C" {
 
 	DllExport void __stdcall InitializeEmu(const char* homeFolder, void *windowHandle, void *viewerHandle, bool noAudio, bool noVideo, bool noInput)
 	{
+		if (!_console.get()) {
+			return;
+		}
+
 		_console->Initialize();
 
 		FolderUtilities::SetHomeFolder(homeFolder);
@@ -127,21 +134,33 @@ extern "C" {
 	}
 
 	DllExport void __stdcall SetMasterVolume(double volume, ConsoleId consoleId) {
-		AudioConfig config = GetConsoleById(consoleId)->GetSettings()->GetAudioConfig();
+		auto con = GetConsoleById(consoleId);
+
+		if (!con.get()) {
+			return;
+		}
+
+		AudioConfig config = con->GetSettings()->GetAudioConfig();
 		config.MasterVolume = volume;
-		GetConsoleById(consoleId)->GetSettings()->SetAudioConfig(config);
+		con->GetSettings()->SetAudioConfig(config);
 	}
 
 	DllExport void __stdcall SetVideoScale(double scale, ConsoleId consoleId) {
-		VideoConfig config = GetConsoleById(consoleId)->GetSettings()->GetVideoConfig();
+		auto con = GetConsoleById(consoleId);
+
+		if (!con.get()) {
+			return;
+		}
+
+		VideoConfig config = con->GetSettings()->GetVideoConfig();
 		config.VideoScale = scale;
-		GetConsoleById(consoleId)->GetSettings()->SetVideoConfig(config);
+		con->GetSettings()->SetVideoConfig(config);
 	}
 
 
 	DllExport void __stdcall SetFullscreenMode(bool fullscreen, void *windowHandle, uint32_t monitorWidth, uint32_t monitorHeight)
 	{
-		if(_renderer) {
+		if(_renderer.get()) {
 			_renderer->SetFullscreenMode(fullscreen, windowHandle, monitorWidth, monitorHeight);
 		}
 	}
@@ -149,13 +168,17 @@ extern "C" {
 	DllExport bool __stdcall LoadRom(char* filename, char* patchFile)
 	{
 		GameClient::Disconnect();
-		return _console->LoadRom((VirtualFile)filename, patchFile ? (VirtualFile)patchFile : VirtualFile());
+		return _console.get() ? _console->LoadRom((VirtualFile)filename, patchFile ? (VirtualFile)patchFile : VirtualFile()) : false;
 	}
 
 	DllExport void __stdcall AddKnownGameFolder(char* folder) { FolderUtilities::AddKnownGameFolder(folder); }
 
 	DllExport void __stdcall GetRomInfo(InteropRomInfo &info)
 	{
+		if (!_console.get()) {
+			return;
+		}
+
 		RomInfo romInfo = {};
 		string sha1;
 		if(_console->GetCartridge()) {
@@ -174,7 +197,12 @@ extern "C" {
 		memcpy(info.Sha1, sha1.c_str(), sha1.size());
 	}
 	
-	DllExport void __stdcall TakeScreenshot() { _console->GetVideoDecoder()->TakeScreenshot(); }
+	DllExport void __stdcall TakeScreenshot()
+	{
+		if (_console.get()) {
+			_console->GetVideoDecoder()->TakeScreenshot();
+		}
+	}
 
 	DllExport const char* __stdcall GetArchiveRomList(char* filename) { 
 		std::ostringstream out;
@@ -190,33 +218,44 @@ extern "C" {
 
 	DllExport bool __stdcall IsRunning()
 	{
-		return _console->IsRunning();
+		return _console.get() ? _console->IsRunning() : false;
 	}
 
 	DllExport void __stdcall Stop()
 	{
 		GameClient::Disconnect();
-		_console->Stop(true);
+
+		if (_console.get()) {
+			_console->Stop(true);
+		}
 	}
 
 	DllExport void __stdcall Pause(ConsoleId consoleId)
 	{
 		if(!GameClient::Connected()) {
-			GetConsoleById(consoleId)->Pause();
+			auto con = GetConsoleById(consoleId);
+
+			if (con.get()) {
+				con->Pause();
+			}
 		}
 	}
 
 	DllExport void __stdcall Resume(ConsoleId consoleId)
 	{
 		if(!GameClient::Connected()) {
-			GetConsoleById(consoleId)->Resume();
+			auto con = GetConsoleById(consoleId);
+
+			if (con.get()) {
+				con->Resume();
+			}
 		}
 	}
 
 	DllExport bool __stdcall IsPaused(ConsoleId consoleId)
 	{
-		shared_ptr<Console> console = GetConsoleById(consoleId);
-		if(console) {
+		auto console = GetConsoleById(consoleId);
+		if (console.get()) {
 			return console->IsPaused();
 		}
 		return true;
@@ -224,21 +263,21 @@ extern "C" {
 
 	DllExport void __stdcall Reset()
 	{
-		if(!GameClient::Connected()) {
+		if(!GameClient::Connected() && _console.get()) {
 			_console->GetControlManager()->GetSystemActionManager()->Reset();
 		}
 	}
 
 	DllExport void __stdcall PowerCycle()
 	{
-		if(!GameClient::Connected()) {
+		if(!GameClient::Connected() && _console.get()) {
 			_console->GetControlManager()->GetSystemActionManager()->PowerCycle();
 		}
 	}
 
 	DllExport void __stdcall ReloadRom()
 	{
-		if(!GameClient::Connected()) {
+		if(!GameClient::Connected() && _console.get()) {
 			_console->ReloadRom(false);
 		}
 	}
@@ -250,11 +289,12 @@ extern "C" {
 
 		_shortcutKeyHandler.reset();
 		
-		_console->Stop(true);
-		
-		_console->Release();
-		_console.reset();			
+		if (_console.get()) {
+			_console->Stop(true);
+			_console->Release();
+		}
 
+		_console.reset();
 		_renderer.reset();
 		_soundManager.reset();
 		_keyManager.reset();
@@ -279,20 +319,61 @@ extern "C" {
 
 	DllExport ScreenSize __stdcall GetScreenSize(bool ignoreScale, ConsoleId console)
 	{
-		return GetConsoleById(console)->GetVideoDecoder()->GetScreenSize(ignoreScale);
+		auto con = GetConsoleById(console);
+		return con ? con->GetVideoDecoder()->GetScreenSize(ignoreScale) : ScreenSize();
 	}
 	
-	DllExport void __stdcall ClearCheats() { _console->GetCheatManager()->ClearCheats(); }
-	DllExport void __stdcall SetCheats(uint32_t codes[], uint32_t length) { _console->GetCheatManager()->SetCheats(codes, length); }
+	DllExport void __stdcall ClearCheats()
+	{
+		if (_console.get()) {
+			_console->GetCheatManager()->ClearCheats();
+		}
+	}
+	DllExport void __stdcall SetCheats(uint32_t codes[], uint32_t length)
+	{
+		if (_console.get()) {
+			_console->GetCheatManager()->SetCheats(codes, length);
+		}
+	}
 
 	DllExport void __stdcall WriteLogEntry(char* message) { MessageManager::Log(message); }
 
-	DllExport void __stdcall SaveState(uint32_t stateIndex) { _console->GetSaveStateManager()->SaveState(stateIndex); }
-	DllExport void __stdcall LoadState(uint32_t stateIndex) { _console->GetSaveStateManager()->LoadState(stateIndex); }
-	DllExport void __stdcall SaveStateFile(char* filepath) { _console->GetSaveStateManager()->SaveState(filepath); }
-	DllExport void __stdcall LoadStateFile(char* filepath) { _console->GetSaveStateManager()->LoadState(filepath); }
-	DllExport void __stdcall LoadRecentGame(char* filepath, bool resetGame) { _console->GetSaveStateManager()->LoadRecentGame(filepath, resetGame); }
-	DllExport int32_t __stdcall GetSaveStatePreview(char* saveStatePath, uint8_t* pngData) { return _console->GetSaveStateManager()->GetSaveStatePreview(saveStatePath, pngData); }
+	DllExport void __stdcall SaveState(uint32_t stateIndex)
+	{
+		if (_console.get()) {
+			_console->GetSaveStateManager()->SaveState(stateIndex);
+		}
+	}
+	DllExport void __stdcall LoadState(uint32_t stateIndex)
+	{
+		if (_console.get()) {
+			_console->GetSaveStateManager()->LoadState(stateIndex);
+		}
+	}
+	DllExport void __stdcall SaveStateFile(char* filepath)
+	{
+		if (_console.get()) {
+			_console->GetSaveStateManager()->SaveState(filepath);
+		}
+	}
+	DllExport void __stdcall LoadStateFile(char* filepath)
+	{
+		if (_console.get()) {
+			_console->GetSaveStateManager()->LoadState(filepath);
+		}
+	}
+	DllExport void __stdcall LoadRecentGame(char* filepath, bool resetGame)
+	{
+		if (_console.get()) {
+			_console->GetSaveStateManager()->LoadRecentGame(filepath, resetGame);
+		}
+	}
+	
+	DllExport int32_t __stdcall GetSaveStatePreview(char* saveStatePath, uint8_t* pngData)
+	{
+		return _console.get() ? _console->GetSaveStateManager()->GetSaveStatePreview(saveStatePath, pngData) : 0;
+	}
+	
 
 	DllExport void __stdcall PgoRunTest(vector<string> testRoms, bool enableDebugger)
 	{
