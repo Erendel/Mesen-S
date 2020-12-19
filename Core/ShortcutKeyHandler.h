@@ -14,7 +14,7 @@ private:
 	thread _thread;
 	atomic<bool> _stopThread;
 	SimpleLock _lock;
-	
+
 	int _keySetIndex;
 	vector<uint32_t> _pressedKeys;
 	vector<uint32_t> _lastPressedKeys;
@@ -25,9 +25,9 @@ private:
 
 	unordered_set<uint32_t> _keysDown[2];
 	unordered_set<uint32_t> _prevKeysDown[2];
-	
+
 	void CheckMappedKeys();
-	
+
 	bool IsKeyPressed(EmulatorShortcut key);
 	bool IsKeyPressed(KeyCombination comb);
 	bool IsKeyPressed(uint32_t keyCode);

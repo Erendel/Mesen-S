@@ -7,7 +7,7 @@ class Console;
 class SoundResampler
 {
 private:
-	Console *_console;
+	Console* _console;
 
 	double _rateAdjustment = 1.0;
 	double _previousTargetRate = 0;
@@ -20,10 +20,11 @@ private:
 	void UpdateTargetSampleRate(uint32_t sourceRate, uint32_t sampleRate);
 
 public:
-	SoundResampler(Console *console);
+	SoundResampler(Console* console);
 	~SoundResampler();
 
 	double GetRateAdjustment();
 
-	uint32_t Resample(int16_t *inSamples, uint32_t sampleCount, uint32_t sourceRate, uint32_t sampleRate, int16_t *outSamples);
+	uint32_t Resample(int16_t* inSamples, uint32_t sampleCount, uint32_t sourceRate, uint32_t sampleRate,
+	                  int16_t* outSamples);
 };

@@ -29,11 +29,11 @@ private:
 	static constexpr uint32_t LegacyIrqVector = 0xFFFE;
 	static constexpr uint32_t LegacyCoprocessorVector = 0x00FFF4;
 
-	typedef void(Cpu::*Func)();
-	
-	MemoryManager *_memoryManager = nullptr;
-	DmaController *_dmaController = nullptr;
-	Console *_console = nullptr;
+	typedef void (Cpu::*Func)();
+
+	MemoryManager* _memoryManager = nullptr;
+	DmaController* _dmaController = nullptr;
+	Console* _console = nullptr;
 
 	bool _immediateMode = false;
 
@@ -47,9 +47,9 @@ private:
 
 	uint16_t GetDirectAddressIndirectWord(uint16_t offset, bool allowEmulationMode = true);
 	uint32_t GetDirectAddressIndirectLong(uint16_t offset, bool allowEmulationMode = true);
-	
+
 	uint8_t GetOpCode();
-	
+
 	uint16_t GetResetVector();
 
 	void UpdateIrqNmiFlags();
@@ -59,7 +59,7 @@ private:
 	void IdleOrRead();
 	void IdleEndJump();
 	void IdleTakeBranch();
-	
+
 	uint8_t ReadOperandByte();
 	uint16_t ReadOperandWord();
 	uint32_t ReadOperandLong();
@@ -71,9 +71,9 @@ private:
 	void SetSP(uint16_t sp);
 	void SetPS(uint8_t ps);
 
-	void SetRegister(uint8_t &reg, uint8_t value);
-	void SetRegister(uint16_t &reg, uint16_t value, bool eightBitMode);
-	
+	void SetRegister(uint8_t& reg, uint8_t value);
+	void SetRegister(uint16_t& reg, uint16_t value, bool eightBitMode);
+
 	void SetZeroNegativeFlags(uint16_t value);
 	void SetZeroNegativeFlags(uint8_t value);
 
@@ -109,7 +109,7 @@ private:
 	void Sub8(uint8_t value);
 	void Sub16(uint16_t value);
 	void SBC();
-	
+
 	//Branch instructions
 	void BCC();
 	void BCS();
@@ -122,7 +122,7 @@ private:
 	void BVC();
 	void BVS();
 	void BranchRelative(bool branch);
-	
+
 	//Set/clear flag instructions
 	void CLC();
 	void CLD();
@@ -146,7 +146,7 @@ private:
 	void DEC_Acc();
 	void INC_Acc();
 
-	void IncDecReg(uint16_t & reg, int8_t offset);
+	void IncDecReg(uint16_t& reg, int8_t offset);
 	void IncDec(int8_t offset);
 
 	//Compare instructions
@@ -174,10 +174,14 @@ private:
 	void EOR();
 	void ORA();
 
-	template<typename T> T ShiftLeft(T value);
-	template<typename T> T RollLeft(T value);
-	template<typename T> T ShiftRight(T value);
-	template<typename T> T RollRight(T value);
+	template <typename T>
+	T ShiftLeft(T value);
+	template <typename T>
+	T RollLeft(T value);
+	template <typename T>
+	T ShiftRight(T value);
+	template <typename T>
+	T RollRight(T value);
 
 	//Shift operations
 	void ASL_Acc();
@@ -213,10 +217,10 @@ private:
 	void PLY();
 
 	void PushRegister(uint16_t reg, bool eightBitMode);
-	void PullRegister(uint16_t &reg, bool eightBitMode);
+	void PullRegister(uint16_t& reg, bool eightBitMode);
 
 	//Store/load instructions
-	void LoadRegister(uint16_t &reg, bool eightBitMode);
+	void LoadRegister(uint16_t& reg, bool eightBitMode);
 	void StoreRegister(uint16_t val, bool eightBitMode);
 
 	void LDA();
@@ -227,9 +231,10 @@ private:
 	void STX();
 	void STY();
 	void STZ();
-		
+
 	//Test bits
-	template<typename T> void TestBits(T value, bool alterZeroFlagOnly);
+	template <typename T>
+	void TestBits(T value, bool alterZeroFlagOnly);
 	void BIT();
 
 	void TRB();
@@ -282,7 +287,7 @@ private:
 	void AddrMode_BlkMov();
 
 	uint8_t ReadDirectOperandByte();
-	
+
 	//Direct: d
 	void AddrMode_Dir();
 	//Direct Indexed: d,x
@@ -291,7 +296,7 @@ private:
 	void AddrMode_DirIdxY();
 	//Direct Indirect: (d)
 	void AddrMode_DirInd();
-	
+
 	//Direct Indexed Indirect: (d,x)
 	void AddrMode_DirIdxIndX();
 	//Direct Indirect Indexed: (d),y
@@ -313,12 +318,12 @@ private:
 
 	void AddrMode_StkRel();
 	void AddrMode_StkRelIndIdxY();
-	
+
 	void RunOp();
 
 public:
 #ifndef DUMMYCPU
-	Cpu(Console *console);
+	Cpu(Console* console);
 #else
 	DummyCpu(Console* console, CpuType type);
 #endif
@@ -334,7 +339,7 @@ public:
 	bool GetCpuProcFlag(ProcFlags::ProcFlags flag);
 	uint64_t GetCycleCount();
 
-	template<uint64_t value>
+	template <uint64_t value>
 	void IncreaseCycleCount();
 
 	void SetNmiFlag(bool nmiFlag);
@@ -345,7 +350,7 @@ public:
 	void ClearIrqSource(IrqSource source);
 
 	// Inherited via ISerializable
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 
 	void SetReg(CpuRegister reg, uint16_t value);
 	void SetCpuProcFlag(ProcFlags::ProcFlags flag, bool set);
@@ -377,7 +382,7 @@ public:
 
 void SetReg(CpuRegister reg, uint16_t value);
 
-template<uint64_t count>
+template <uint64_t count>
 void Cpu::IncreaseCycleCount()
 {
 	_state.CycleCount += count;

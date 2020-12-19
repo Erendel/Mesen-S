@@ -31,7 +31,7 @@ private:
 	std::unordered_map<uint32_t, KeyCombination> _emulatorKeys[3];
 	std::unordered_map<uint32_t, vector<KeyCombination>> _shortcutSupersets[3];
 
-	void ProcessString(string &str, const char** strPointer);
+	void ProcessString(string& str, const char** strPointer);
 
 	void ClearShortcutKeys();
 	void SetShortcutKey(EmulatorShortcut shortcut, KeyCombination keyCombination, int keySetIndex);
@@ -77,7 +77,7 @@ public:
 
 	void SetDebuggerFlag(DebuggerFlags flag, bool enabled);
 	bool CheckDebuggerFlag(DebuggerFlags flags);
-	
+
 	int GetRandomValue(int maxValue);
 	bool GetRandomBool();
 	void InitializeRam(void* data, uint32_t length);

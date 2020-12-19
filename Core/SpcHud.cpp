@@ -5,7 +5,7 @@
 #include "DebugHud.h"
 #include "SpcFileData.h"
 
-SpcHud::SpcHud(Console * console, SpcFileData* spcData)
+SpcHud::SpcHud(Console* console, SpcFileData* spcData)
 {
 	_mixer = console->GetSoundMixer().get();
 	_hud = console->GetDebugHud().get();
@@ -29,8 +29,11 @@ void SpcHud::Draw(uint32_t frame)
 	_volumesL[_volPosition] = left / 128;
 	_volumesR[_volPosition] = right / 128;
 	_volPosition = (_volPosition + 1) & 0x7F;
-	for(int i = 1; i < 128; i++) {
-		_hud->DrawLine((i - 1)*2, 160 + _volumesL[(_volPosition + i - 1) & 0x7F], i*2, 160 + _volumesL[(_volPosition + i) & 0x7F], 0x30FFAAAA, 1, frame);
-		_hud->DrawLine((i - 1)*2, 160 + _volumesR[(_volPosition + i - 1) & 0x7F], i*2, 160 + _volumesR[(_volPosition + i) & 0x7F], 0x30AAAAFF, 1, frame);
+	for (int i = 1; i < 128; i++)
+	{
+		_hud->DrawLine((i - 1) * 2, 160 + _volumesL[(_volPosition + i - 1) & 0x7F], i * 2,
+		               160 + _volumesL[(_volPosition + i) & 0x7F], 0x30FFAAAA, 1, frame);
+		_hud->DrawLine((i - 1) * 2, 160 + _volumesR[(_volPosition + i - 1) & 0x7F], i * 2,
+		               160 + _volumesR[(_volPosition + i) & 0x7F], 0x30AAAAFF, 1, frame);
 	}
 }

@@ -33,7 +33,7 @@ private:
 
 	shared_ptr<Console> _console;
 	shared_ptr<EmuSettings> _settings;
-	
+
 	bool _hasHistory;
 
 	std::deque<RewindData> _history;
@@ -55,9 +55,9 @@ private:
 	void Stop();
 	void ForceStop();
 
-	void ProcessFrame(void *frameBuffer, uint32_t width, uint32_t height, bool forRewind);
-	bool ProcessAudio(int16_t *soundBuffer, uint32_t sampleCount);
-	
+	void ProcessFrame(void* frameBuffer, uint32_t width, uint32_t height, bool forRewind);
+	bool ProcessAudio(int16_t* soundBuffer, uint32_t sampleCount);
+
 	void ClearBuffer();
 
 public:
@@ -68,7 +68,7 @@ public:
 	void ProcessEndOfFrame();
 
 	void RecordInput(vector<shared_ptr<BaseControlDevice>> devices) override;
-	bool SetInput(BaseControlDevice *device) override;
+	bool SetInput(BaseControlDevice* device) override;
 
 	void StartRewinding(bool forDebugger = false);
 	void StopRewinding(bool forDebugger = false);
@@ -78,7 +78,7 @@ public:
 
 	bool HasHistory();
 
-	void SendFrame(void *frameBuffer, uint32_t width, uint32_t height, bool forRewind);
-	bool SendAudio(int16_t *soundBuffer, uint32_t sampleCount);
+	void SendFrame(void* frameBuffer, uint32_t width, uint32_t height, bool forRewind);
+	bool SendAudio(int16_t* soundBuffer, uint32_t sampleCount);
 	void CopyHistory(shared_ptr<HistoryViewer> destHistoryViewer);
 };

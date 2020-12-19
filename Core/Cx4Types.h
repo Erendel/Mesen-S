@@ -48,7 +48,7 @@ struct Cx4State
 	uint8_t PC;
 
 	//Accumulator
-	uint32_t A; 
+	uint32_t A;
 
 	//Page register
 	uint16_t P;
@@ -76,7 +76,7 @@ struct Cx4State
 	bool Stopped;
 	bool Locked;
 	bool IrqDisabled;
-	
+
 	bool SingleRom;
 
 	uint8_t RomAccessDelay;

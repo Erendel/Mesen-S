@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 #include "stdafx.h"
 #include <thread>
 
@@ -7,9 +7,9 @@ class SimpleLock;
 class LockHandler
 {
 private:
-	SimpleLock *_lock;
+	SimpleLock* _lock;
 public:
-	LockHandler(SimpleLock *lock);
+	LockHandler(SimpleLock* lock);
 	~LockHandler();
 };
 
@@ -33,4 +33,3 @@ public:
 	void WaitForRelease();
 	void Release();
 };
-

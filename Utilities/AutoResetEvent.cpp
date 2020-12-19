@@ -15,10 +15,13 @@ AutoResetEvent::~AutoResetEvent()
 void AutoResetEvent::Wait(int timeoutDelay)
 {
 	std::unique_lock<std::mutex> lock(_mutex);
-	if(timeoutDelay == 0) {
+	if (timeoutDelay == 0)
+	{
 		//Wait until signaled
 		_signal.wait(lock, [this] { return _signaled; });
-	} else {
+	}
+	else
+	{
 		//Wait until signaled or timeout
 		auto timeoutTime = std::chrono::system_clock::now() + std::chrono::duration<int, std::milli>(timeoutDelay);
 		_signal.wait_until(lock, timeoutTime, [this] { return _signaled; });

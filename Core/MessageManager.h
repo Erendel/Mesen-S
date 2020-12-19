@@ -7,7 +7,7 @@
 #include "../Utilities/SimpleLock.h"
 
 #ifdef _DEBUG
-	#define LogDebug(msg) MessageManager::Log(msg);
+#define LogDebug(msg) MessageManager::Log(msg);
 #else
 	#define LogDebug(msg) 
 #endif
@@ -22,7 +22,7 @@ private:
 	static SimpleLock _logLock;
 	static SimpleLock _messageLock;
 	static std::list<string> _log;
-	
+
 public:
 	static void SetOsdState(bool enabled);
 

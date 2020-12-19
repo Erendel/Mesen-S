@@ -36,21 +36,26 @@ struct DspState
 	uint8_t Regs[128];
 };
 
-namespace SpcFlags {
+namespace SpcFlags
+{
 	enum SpcFlags : uint8_t
 	{
 		Carry = 0x01,
 		Zero = 0x02,
-		IrqEnable = 0x04, //unused
+		IrqEnable = 0x04,
+		//unused
 		HalfCarry = 0x08,
-		Break = 0x10, /* Set by the BRK instruction */
-		DirectPage = 0x20, /* Selects page 0 or 1 for direct mode addressing */
+		Break = 0x10,
+		/* Set by the BRK instruction */
+		DirectPage = 0x20,
+		/* Selects page 0 or 1 for direct mode addressing */
 		Overflow = 0x40,
 		Negative = 0x80
 	};
 }
 
-namespace SpcControlFlags {
+namespace SpcControlFlags
+{
 	enum SpcControlFlags : uint8_t
 	{
 		Timer0 = 0x01,
@@ -64,7 +69,8 @@ namespace SpcControlFlags {
 	};
 }
 
-namespace SpcTestFlags {
+namespace SpcTestFlags
+{
 	enum SpcTestFlags : uint8_t
 	{
 		TimersDisabled = 0x01,

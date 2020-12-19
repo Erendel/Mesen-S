@@ -31,7 +31,8 @@ void BatteryManager::SetBatteryRecorder(shared_ptr<IBatteryRecorder> recorder)
 
 void BatteryManager::SaveBattery(string extension, uint8_t* data, uint32_t length)
 {
-	if (_saveEnabled) {
+	if (_saveEnabled)
+	{
 #ifdef LIBRETRO
 		if (extension == ".srm") {
 			//Disable .srm files for libretro, let the frontend handle save ram
@@ -40,7 +41,8 @@ void BatteryManager::SaveBattery(string extension, uint8_t* data, uint32_t lengt
 #endif
 
 		ofstream out(GetBasePath() + extension, ios::binary);
-		if (out) {
+		if (out)
+		{
 			out.write((char*)data, length);
 		}
 	}
@@ -49,21 +51,27 @@ void BatteryManager::SaveBattery(string extension, uint8_t* data, uint32_t lengt
 vector<uint8_t> BatteryManager::LoadBattery(string extension)
 {
 	shared_ptr<IBatteryProvider> provider = _provider.lock();
-	
+
 	vector<uint8_t> batteryData;
-	if(provider) {
+	if (provider)
+	{
 		//Used by movie player to provider initial state of ram at startup
 		batteryData = provider->LoadBattery(extension);
-	} else {
+	}
+	else
+	{
 		VirtualFile file = GetBasePath() + extension;
-		if(file.IsValid()) {
+		if (file.IsValid())
+		{
 			file.ReadFile(batteryData);
 		}
 	}
 
-	if(!batteryData.empty()) {
+	if (!batteryData.empty())
+	{
 		shared_ptr<IBatteryRecorder> recorder = _recorder.lock();
-		if(recorder) {
+		if (recorder)
+		{
 			//Used by movies to record initial state of battery-backed ram at power on
 			recorder->OnLoadBattery(extension, batteryData);
 		}

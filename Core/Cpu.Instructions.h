@@ -4,28 +4,36 @@ Add/substract operations
 void Cpu::Add8(uint8_t value)
 {
 	uint32_t result;
-	if(CheckFlag(ProcFlags::Decimal)) {
+	if (CheckFlag(ProcFlags::Decimal))
+	{
 		result = (_state.A & 0x0F) + (value & 0x0F) + (_state.PS & ProcFlags::Carry);
-		if(result > 0x09) result += 0x06;
+		if (result > 0x09) result += 0x06;
 		result = (_state.A & 0xF0) + (value & 0xF0) + (result > 0x0F ? 0x10 : 0) + (result & 0x0F);
-	} else {
+	}
+	else
+	{
 		result = (_state.A & 0xFF) + value + (_state.PS & ProcFlags::Carry);
 	}
 
-	if(~(_state.A ^ value) & (_state.A ^ result) & 0x80) {
+	if (~(_state.A ^ value) & (_state.A ^ result) & 0x80)
+	{
 		SetFlags(ProcFlags::Overflow);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Overflow);
 	}
 
-	if(CheckFlag(ProcFlags::Decimal) && result > 0x9F) {
+	if (CheckFlag(ProcFlags::Decimal) && result > 0x9F)
+	{
 		result += 0x60;
 	}
 
 	ClearFlags(ProcFlags::Carry | ProcFlags::Negative | ProcFlags::Zero);
 	SetZeroNegativeFlags((uint8_t)result);
 
-	if(result > 0xFF) {
+	if (result > 0xFF)
+	{
 		SetFlags(ProcFlags::Carry);
 	}
 
@@ -35,35 +43,43 @@ void Cpu::Add8(uint8_t value)
 void Cpu::Add16(uint16_t value)
 {
 	uint32_t result;
-	if(CheckFlag(ProcFlags::Decimal)) {
+	if (CheckFlag(ProcFlags::Decimal))
+	{
 		result = (_state.A & 0x0F) + (value & 0x0F) + (_state.PS & ProcFlags::Carry);
 
-		if(result > 0x09) result += 0x06;
+		if (result > 0x09) result += 0x06;
 		result = (_state.A & 0xF0) + (value & 0xF0) + (result > 0x0F ? 0x10 : 0) + (result & 0x0F);
 
-		if(result > 0x9F) result += 0x60;
+		if (result > 0x9F) result += 0x60;
 		result = (_state.A & 0xF00) + (value & 0xF00) + (result > 0xFF ? 0x100 : 0) + (result & 0xFF);
 
-		if(result > 0x9FF) result += 0x600;
+		if (result > 0x9FF) result += 0x600;
 		result = (_state.A & 0xF000) + (value & 0xF000) + (result > 0xFFF ? 0x1000 : 0) + (result & 0xFFF);
-	} else {
+	}
+	else
+	{
 		result = _state.A + value + (_state.PS & ProcFlags::Carry);
 	}
 
-	if(~(_state.A ^ value) & (_state.A ^ result) & 0x8000) {
+	if (~(_state.A ^ value) & (_state.A ^ result) & 0x8000)
+	{
 		SetFlags(ProcFlags::Overflow);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Overflow);
 	}
 
-	if(CheckFlag(ProcFlags::Decimal) && result > 0x9FFF) {
+	if (CheckFlag(ProcFlags::Decimal) && result > 0x9FFF)
+	{
 		result += 0x6000;
 	}
 
 	ClearFlags(ProcFlags::Carry | ProcFlags::Negative | ProcFlags::Zero);
 	SetZeroNegativeFlags((uint16_t)result);
 
-	if(result > 0xFFFF) {
+	if (result > 0xFFFF)
+	{
 		SetFlags(ProcFlags::Carry);
 	}
 
@@ -72,9 +88,12 @@ void Cpu::Add16(uint16_t value)
 
 void Cpu::ADC()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		Add8(GetByteValue());
-	} else {
+	}
+	else
+	{
 		Add16(GetWordValue());
 	}
 }
@@ -82,28 +101,36 @@ void Cpu::ADC()
 void Cpu::Sub8(uint8_t value)
 {
 	int32_t result;
-	if(CheckFlag(ProcFlags::Decimal)) {
+	if (CheckFlag(ProcFlags::Decimal))
+	{
 		result = (_state.A & 0x0F) + (value & 0x0F) + (_state.PS & ProcFlags::Carry);
-		if(result <= 0x0F) result -= 0x06;
+		if (result <= 0x0F) result -= 0x06;
 		result = (_state.A & 0xF0) + (value & 0xF0) + (result > 0x0F ? 0x10 : 0) + (result & 0x0F);
-	} else {
+	}
+	else
+	{
 		result = (_state.A & 0xFF) + value + (_state.PS & ProcFlags::Carry);
 	}
 
-	if(~(_state.A ^ value) & (_state.A ^ result) & 0x80) {
+	if (~(_state.A ^ value) & (_state.A ^ result) & 0x80)
+	{
 		SetFlags(ProcFlags::Overflow);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Overflow);
 	}
 
-	if(CheckFlag(ProcFlags::Decimal) && result <= 0xFF) {
+	if (CheckFlag(ProcFlags::Decimal) && result <= 0xFF)
+	{
 		result -= 0x60;
 	}
 
 	ClearFlags(ProcFlags::Carry | ProcFlags::Negative | ProcFlags::Zero);
 	SetZeroNegativeFlags((uint8_t)result);
 
-	if(result > 0xFF) {
+	if (result > 0xFF)
+	{
 		SetFlags(ProcFlags::Carry);
 	}
 
@@ -113,35 +140,43 @@ void Cpu::Sub8(uint8_t value)
 void Cpu::Sub16(uint16_t value)
 {
 	int32_t result;
-	if(CheckFlag(ProcFlags::Decimal)) {
+	if (CheckFlag(ProcFlags::Decimal))
+	{
 		result = (_state.A & 0x0F) + (value & 0x0F) + (_state.PS & ProcFlags::Carry);
 
-		if(result <= 0x0F) result -= 0x06;
+		if (result <= 0x0F) result -= 0x06;
 		result = (_state.A & 0xF0) + (value & 0xF0) + (result > 0x0F ? 0x10 : 0) + (result & 0x0F);
 
-		if(result <= 0xFF) result -= 0x60;
+		if (result <= 0xFF) result -= 0x60;
 		result = (_state.A & 0xF00) + (value & 0xF00) + (result > 0xFF ? 0x100 : 0) + (result & 0xFF);
 
-		if(result <= 0xFFF) result -= 0x600;
+		if (result <= 0xFFF) result -= 0x600;
 		result = (_state.A & 0xF000) + (value & 0xF000) + (result > 0xFFF ? 0x1000 : 0) + (result & 0xFFF);
-	} else {
+	}
+	else
+	{
 		result = _state.A + value + (_state.PS & ProcFlags::Carry);
 	}
 
-	if(~(_state.A ^ value) & (_state.A ^ result) & 0x8000) {
+	if (~(_state.A ^ value) & (_state.A ^ result) & 0x8000)
+	{
 		SetFlags(ProcFlags::Overflow);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Overflow);
 	}
 
-	if(CheckFlag(ProcFlags::Decimal) && result <= 0xFFFF) {
+	if (CheckFlag(ProcFlags::Decimal) && result <= 0xFFFF)
+	{
 		result -= 0x6000;
 	}
 
 	ClearFlags(ProcFlags::Carry | ProcFlags::Negative | ProcFlags::Zero);
 	SetZeroNegativeFlags((uint16_t)result);
 
-	if(result > 0xFFFF) {
+	if (result > 0xFFFF)
+	{
 		SetFlags(ProcFlags::Carry);
 	}
 
@@ -150,9 +185,12 @@ void Cpu::Sub16(uint16_t value)
 
 void Cpu::SBC()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		Sub8(~GetByteValue());
-	} else {
+	}
+	else
+	{
 		Sub16(~GetWordValue());
 	}
 }
@@ -213,10 +251,12 @@ void Cpu::BVS()
 
 void Cpu::BranchRelative(bool branch)
 {
-	if(branch) {
+	if (branch)
+	{
 		int8_t offset = _operand;
 		Idle();
-		if(_state.EmulationMode && ((uint16_t)(_state.PC + offset) & 0xFF00) != (_state.PC & 0xFF00)) {
+		if (_state.EmulationMode && ((uint16_t)(_state.PC + offset) & 0xFF00) != (_state.PC & 0xFF00))
+		{
 			//Extra cycle in emulation mode if crossing a page
 			Idle();
 		}
@@ -273,7 +313,8 @@ void Cpu::SEP()
 {
 	Idle();
 	SetFlags((uint8_t)_operand);
-	if(CheckFlag(ProcFlags::IndexMode8)) {
+	if (CheckFlag(ProcFlags::IndexMode8))
+	{
 		//Truncate X/Y when 8-bit indexes are enabled
 		_state.Y &= 0xFF;
 		_state.X &= 0xFF;
@@ -323,19 +364,22 @@ void Cpu::INC_Acc()
 	SetRegister(_state.A, _state.A + 1, CheckFlag(ProcFlags::MemoryMode8));
 }
 
-void Cpu::IncDecReg(uint16_t &reg, int8_t offset)
+void Cpu::IncDecReg(uint16_t& reg, int8_t offset)
 {
 	SetRegister(reg, reg + offset, CheckFlag(ProcFlags::IndexMode8));
 }
 
 void Cpu::IncDec(int8_t offset)
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		uint8_t value = GetByteValue() + offset;
 		SetZeroNegativeFlags(value);
 		Idle();
 		Write(_operand, value);
-	} else {
+	}
+	else
+	{
 		uint16_t value = GetWordValue() + offset;
 		SetZeroNegativeFlags(value);
 		Idle();
@@ -348,20 +392,29 @@ Compare instructions
 *********************/
 void Cpu::Compare(uint16_t reg, bool eightBitMode)
 {
-	if(eightBitMode) {
+	if (eightBitMode)
+	{
 		uint8_t value = GetByteValue();
-		if((uint8_t)reg >= value) {
+		if ((uint8_t)reg >= value)
+		{
 			SetFlags(ProcFlags::Carry);
-		} else {
+		}
+		else
+		{
 			ClearFlags(ProcFlags::Carry);
 		}
 		uint8_t result = (uint8_t)reg - value;
 		SetZeroNegativeFlags(result);
-	} else {
+	}
+	else
+	{
 		uint16_t value = GetWordValue();
-		if(reg >= value) {
+		if (reg >= value)
+		{
 			SetFlags(ProcFlags::Carry);
-		} else {
+		}
+		else
+		{
 			ClearFlags(ProcFlags::Carry);
 		}
 
@@ -423,10 +476,13 @@ void Cpu::RTI()
 	Idle();
 	Idle();
 
-	if(_state.EmulationMode) {
+	if (_state.EmulationMode)
+	{
 		SetPS(PopByte());
 		_state.PC = PopWord();
-	} else {
+	}
+	else
+	{
 		SetPS(PopByte());
 		_state.PC = PopWord();
 		_state.K = PopByte();
@@ -461,13 +517,15 @@ Interrupts
 ***********/
 void Cpu::ProcessInterrupt(uint16_t vector, bool forHardwareInterrupt)
 {
-	if(forHardwareInterrupt) {
+	if (forHardwareInterrupt)
+	{
 		//IRQ/NMI waste 2 cycles here.  BRK/COP do not (because they do those 2 cycles while loading the OP code + signature byte)
 		ReadCode(_state.PC);
 		Idle();
 	}
 
-	if(_state.EmulationMode) {
+	if (_state.EmulationMode)
+	{
 		PushWord(_state.PC);
 		PushByte(_state.PS | 0x20);
 
@@ -476,7 +534,9 @@ void Cpu::ProcessInterrupt(uint16_t vector, bool forHardwareInterrupt)
 
 		_state.K = 0;
 		_state.PC = ReadVector(vector);
-	} else {
+	}
+	else
+	{
 		PushByte(_state.K);
 		PushWord(_state.PC);
 		PushByte(_state.PS);
@@ -504,27 +564,36 @@ Bitwise operations
 *******************/
 void Cpu::AND()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		SetRegister(_state.A, _state.A & GetByteValue(), true);
-	} else {
+	}
+	else
+	{
 		SetRegister(_state.A, _state.A & GetWordValue(), false);
 	}
 }
 
 void Cpu::EOR()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		SetRegister(_state.A, _state.A ^ GetByteValue(), true);
-	} else {
+	}
+	else
+	{
 		SetRegister(_state.A, _state.A ^ GetWordValue(), false);
 	}
 }
 
 void Cpu::ORA()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		SetRegister(_state.A, _state.A | GetByteValue(), true);
-	} else {
+	}
+	else
+	{
 		SetRegister(_state.A, _state.A | GetWordValue(), false);
 	}
 }
@@ -532,48 +601,64 @@ void Cpu::ORA()
 /****************
 Shift operations
 *****************/
-template<typename T> T Cpu::ShiftLeft(T value)
+template <typename T>
+T Cpu::ShiftLeft(T value)
 {
 	T result = value << 1;
-	if(value & (1 << (sizeof(T) * 8 - 1))) {
+	if (value & (1 << (sizeof(T) * 8 - 1)))
+	{
 		SetFlags(ProcFlags::Carry);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Carry);
 	}
 	SetZeroNegativeFlags(result);
 	return result;
 }
 
-template<typename T> T Cpu::RollLeft(T value)
+template <typename T>
+T Cpu::RollLeft(T value)
 {
 	T result = value << 1 | (_state.PS & ProcFlags::Carry);
-	if(value & (1 << (sizeof(T) * 8 - 1))) {
+	if (value & (1 << (sizeof(T) * 8 - 1)))
+	{
 		SetFlags(ProcFlags::Carry);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Carry);
 	}
 	SetZeroNegativeFlags(result);
 	return result;
 }
 
-template<typename T> T Cpu::ShiftRight(T value)
+template <typename T>
+T Cpu::ShiftRight(T value)
 {
 	T result = value >> 1;
-	if(value & 0x01) {
+	if (value & 0x01)
+	{
 		SetFlags(ProcFlags::Carry);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Carry);
 	}
 	SetZeroNegativeFlags(result);
 	return result;
 }
 
-template<typename T> T Cpu::RollRight(T value)
+template <typename T>
+T Cpu::RollRight(T value)
 {
 	T result = value >> 1 | ((_state.PS & 0x01) << (sizeof(T) * 8 - 1));
-	if(value & 0x01) {
+	if (value & 0x01)
+	{
 		SetFlags(ProcFlags::Carry);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Carry);
 	}
 	SetZeroNegativeFlags(result);
@@ -582,20 +667,26 @@ template<typename T> T Cpu::RollRight(T value)
 
 void Cpu::ASL_Acc()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		_state.A = (_state.A & 0xFF00) | (ShiftLeft<uint8_t>((uint8_t)_state.A));
-	} else {
+	}
+	else
+	{
 		_state.A = ShiftLeft<uint16_t>(_state.A);
 	}
 }
 
 void Cpu::ASL()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		uint8_t value = GetByteValue();
 		Idle();
 		Write(_operand, ShiftLeft<uint8_t>(value));
-	} else {
+	}
+	else
+	{
 		uint16_t value = GetWordValue();
 		Idle();
 		WriteWord(_operand, ShiftLeft<uint16_t>(value));
@@ -604,20 +695,26 @@ void Cpu::ASL()
 
 void Cpu::LSR_Acc()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		_state.A = (_state.A & 0xFF00) | ShiftRight<uint8_t>((uint8_t)_state.A);
-	} else {
+	}
+	else
+	{
 		_state.A = ShiftRight<uint16_t>(_state.A);
 	}
 }
 
 void Cpu::LSR()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		uint8_t value = GetByteValue();
 		Idle();
 		Write(_operand, ShiftRight<uint8_t>(value));
-	} else {
+	}
+	else
+	{
 		uint16_t value = GetWordValue();
 		Idle();
 		WriteWord(_operand, ShiftRight<uint16_t>(value));
@@ -626,20 +723,26 @@ void Cpu::LSR()
 
 void Cpu::ROL_Acc()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		_state.A = (_state.A & 0xFF00) | RollLeft<uint8_t>((uint8_t)_state.A);
-	} else {
+	}
+	else
+	{
 		_state.A = RollLeft<uint16_t>(_state.A);
 	}
 }
 
 void Cpu::ROL()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		uint8_t value = GetByteValue();
 		Idle();
 		Write(_operand, RollLeft<uint8_t>(value));
-	} else {
+	}
+	else
+	{
 		uint16_t value = GetWordValue();
 		Idle();
 		WriteWord(_operand, RollLeft<uint16_t>(value));
@@ -648,20 +751,26 @@ void Cpu::ROL()
 
 void Cpu::ROR_Acc()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		_state.A = (_state.A & 0xFF00) | RollRight<uint8_t>((uint8_t)_state.A);
-	} else {
+	}
+	else
+	{
 		_state.A = RollRight<uint16_t>(_state.A);
 	}
 }
 
 void Cpu::ROR()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		uint8_t value = GetByteValue();
 		Idle();
 		Write(_operand, RollRight<uint8_t>(value));
-	} else {
+	}
+	else
+	{
 		uint16_t value = GetWordValue();
 		Idle();
 		WriteWord(_operand, RollRight<uint16_t>(value));
@@ -685,14 +794,16 @@ void Cpu::MVN()
 
 	_state.X++;
 	_state.Y++;
-	if(CheckFlag(ProcFlags::IndexMode8)) {
+	if (CheckFlag(ProcFlags::IndexMode8))
+	{
 		_state.X &= 0xFF;
 		_state.Y &= 0xFF;
 	}
 
 	_state.A--;
 
-	if(_state.A != 0xFFFF) {
+	if (_state.A != 0xFFFF)
+	{
 		//Operation isn't done, set the PC back to the start of the instruction
 		_state.PC -= 3;
 	}
@@ -712,14 +823,16 @@ void Cpu::MVP()
 
 	_state.X--;
 	_state.Y--;
-	if(CheckFlag(ProcFlags::IndexMode8)) {
+	if (CheckFlag(ProcFlags::IndexMode8))
+	{
 		_state.X &= 0xFF;
 		_state.Y &= 0xFF;
 	}
 
 	_state.A--;
-		
-	if(_state.A != 0xFFFF) {
+
+	if (_state.A != 0xFFFF)
+	{
 		//Operation isn't done, set the PC back to the start of the instruction
 		_state.PC -= 3;
 	}
@@ -793,9 +906,12 @@ void Cpu::PLP()
 	//"For PLP, (all of) the flags are pulled from the stack. Note that when the e flag is 1, the m and x flag are forced to 1, so after the PLP, both flags will still be 1 no matter what value is pulled from the stack."
 	Idle();
 	Idle();
-	if(_state.EmulationMode) {
+	if (_state.EmulationMode)
+	{
 		SetPS(PopByte() | ProcFlags::MemoryMode8 | ProcFlags::IndexMode8);
-	} else {
+	}
+	else
+	{
 		SetPS(PopByte());
 	}
 }
@@ -844,19 +960,25 @@ void Cpu::PLY()
 void Cpu::PushRegister(uint16_t reg, bool eightBitMode)
 {
 	//"When the x flag is 0, PHX, PHY, PLX, and PLY push and pull a 16-bit value, and when the x flag is 1, PHX, PHY, PLX, and PLY push and pull an 8-bit value."
-	if(eightBitMode) {
+	if (eightBitMode)
+	{
 		PushByte((uint8_t)reg);
-	} else {
+	}
+	else
+	{
 		PushWord(reg);
 	}
 }
 
-void Cpu::PullRegister(uint16_t &reg, bool eightBitMode)
+void Cpu::PullRegister(uint16_t& reg, bool eightBitMode)
 {
 	//"When the x flag is 0, PHX, PHY, PLX, and PLY push and pull a 16-bit value, and when the x flag is 1, PHX, PHY, PLX, and PLY push and pull an 8-bit value."
-	if(eightBitMode) {
+	if (eightBitMode)
+	{
 		SetRegister(reg, PopByte(), true);
-	} else {
+	}
+	else
+	{
 		SetRegister(reg, PopWord(), false);
 	}
 }
@@ -864,20 +986,26 @@ void Cpu::PullRegister(uint16_t &reg, bool eightBitMode)
 /*********************
 Store/load operations
 **********************/
-void Cpu::LoadRegister(uint16_t &reg, bool eightBitMode)
+void Cpu::LoadRegister(uint16_t& reg, bool eightBitMode)
 {
-	if(eightBitMode) {
+	if (eightBitMode)
+	{
 		SetRegister(reg, GetByteValue(), true);
-	} else {
+	}
+	else
+	{
 		SetRegister(reg, GetWordValue(), false);
 	}
 }
 
 void Cpu::StoreRegister(uint16_t val, bool eightBitMode)
 {
-	if(eightBitMode) {
+	if (eightBitMode)
+	{
 		Write(_operand, (uint8_t)val);
-	} else {
+	}
+	else
+	{
 		WriteWord(_operand, val);
 	}
 }
@@ -927,26 +1055,36 @@ void Cpu::STZ()
 /*******************
 Bit test operations
 ********************/
-template<typename T> void Cpu::TestBits(T value, bool alterZeroFlagOnly)
+template <typename T>
+void Cpu::TestBits(T value, bool alterZeroFlagOnly)
 {
-	if(alterZeroFlagOnly) {
+	if (alterZeroFlagOnly)
+	{
 		//"Immediate addressing only affects the z flag (with the result of the bitwise And), but does not affect the n and v flags."
-		if(((T)_state.A & value) == 0) {
+		if (((T)_state.A & value) == 0)
+		{
 			SetFlags(ProcFlags::Zero);
-		} else {
+		}
+		else
+		{
 			ClearFlags(ProcFlags::Zero);
 		}
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Zero | ProcFlags::Overflow | ProcFlags::Negative);
 
-		if(((T)_state.A & value) == 0) {
+		if (((T)_state.A & value) == 0)
+		{
 			SetFlags(ProcFlags::Zero);
 		}
 
-		if(value & (1 << (sizeof(T) * 8 - 2))) {
+		if (value & (1 << (sizeof(T) * 8 - 2)))
+		{
 			SetFlags(ProcFlags::Overflow);
 		}
-		if(value & (1 << (sizeof(T) * 8 - 1))) {
+		if (value & (1 << (sizeof(T) * 8 - 1)))
+		{
 			SetFlags(ProcFlags::Negative);
 		}
 	}
@@ -954,16 +1092,20 @@ template<typename T> void Cpu::TestBits(T value, bool alterZeroFlagOnly)
 
 void Cpu::BIT()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		TestBits<uint8_t>(GetByteValue(), _immediateMode);
-	} else {
+	}
+	else
+	{
 		TestBits<uint16_t>(GetWordValue(), _immediateMode);
 	}
 }
 
 void Cpu::TRB()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		uint8_t value = GetByteValue();
 		TestBits<uint8_t>(value, true);
 
@@ -971,7 +1113,9 @@ void Cpu::TRB()
 		Idle();
 
 		Write(_operand, value);
-	} else {
+	}
+	else
+	{
 		uint16_t value = GetWordValue();
 		TestBits<uint16_t>(value, true);
 
@@ -984,7 +1128,8 @@ void Cpu::TRB()
 
 void Cpu::TSB()
 {
-	if(CheckFlag(ProcFlags::MemoryMode8)) {
+	if (CheckFlag(ProcFlags::MemoryMode8))
+	{
 		uint8_t value = GetByteValue();
 		TestBits<uint8_t>(value, true);
 
@@ -992,7 +1137,9 @@ void Cpu::TSB()
 		Idle();
 
 		Write(_operand, value);
-	} else {
+	}
+	else
+	{
 		uint16_t value = GetWordValue();
 		TestBits<uint16_t>(value, true);
 
@@ -1076,14 +1223,18 @@ void Cpu::XBA()
 void Cpu::XCE()
 {
 	bool carry = CheckFlag(ProcFlags::Carry);
-	if(_state.EmulationMode) {
+	if (_state.EmulationMode)
+	{
 		SetFlags(ProcFlags::Carry);
-	} else {
+	}
+	else
+	{
 		ClearFlags(ProcFlags::Carry);
 	}
 	_state.EmulationMode = carry;
 
-	if(_state.EmulationMode) {
+	if (_state.EmulationMode)
+	{
 		SetPS(_state.PS | ProcFlags::IndexMode8 | ProcFlags::MemoryMode8);
 		_state.SP = 0x100 | (_state.SP & 0xFF);
 	}
@@ -1129,7 +1280,8 @@ void Cpu::AddrMode_AbsIdxX(bool isWrite)
 {
 	uint32_t baseAddr = GetDataAddress(ReadOperandWord());
 	_operand = (baseAddr + _state.X) & 0xFFFFFF;
-	if(isWrite || !CheckFlag(ProcFlags::IndexMode8) || (_operand & 0xFF00) != (baseAddr & 0xFF00)) {
+	if (isWrite || !CheckFlag(ProcFlags::IndexMode8) || (_operand & 0xFF00) != (baseAddr & 0xFF00))
+	{
 		Idle();
 	}
 }
@@ -1138,7 +1290,8 @@ void Cpu::AddrMode_AbsIdxY(bool isWrite)
 {
 	uint32_t baseAddr = GetDataAddress(ReadOperandWord());
 	_operand = (baseAddr + _state.Y) & 0xFFFFFF;
-	if(isWrite || !CheckFlag(ProcFlags::IndexMode8) || (_operand & 0xFF00) != (baseAddr & 0xFF00)) {
+	if (isWrite || !CheckFlag(ProcFlags::IndexMode8) || (_operand & 0xFF00) != (baseAddr & 0xFF00))
+	{
 		Idle();
 	}
 }
@@ -1192,7 +1345,8 @@ void Cpu::AddrMode_BlkMov()
 uint8_t Cpu::ReadDirectOperandByte()
 {
 	uint8_t value = ReadOperandByte();
-	if(_state.D & 0xFF) {
+	if (_state.D & 0xFF)
+	{
 		//Add 1 cycle for direct register low (DL) not equal 0
 		Idle();
 	}
@@ -1232,8 +1386,9 @@ void Cpu::AddrMode_DirIndIdxY(bool isWrite)
 {
 	uint32_t baseAddr = GetDataAddress(GetDirectAddressIndirectWord(ReadDirectOperandByte()));
 	_operand = (baseAddr + _state.Y) & 0xFFFFFF;
-	
-	if(isWrite || !CheckFlag(ProcFlags::IndexMode8) || (_operand & 0xFF00) != (baseAddr & 0xFF00)) {
+
+	if (isWrite || !CheckFlag(ProcFlags::IndexMode8) || (_operand & 0xFF00) != (baseAddr & 0xFF00))
+	{
 		Idle();
 	}
 }
@@ -1268,7 +1423,7 @@ void Cpu::AddrMode_ImmX()
 
 void Cpu::AddrMode_ImmM()
 {
-	_immediateMode = true; 
+	_immediateMode = true;
 	_operand = CheckFlag(ProcFlags::MemoryMode8) ? ReadOperandByte() : ReadOperandWord();
 }
 

@@ -6,8 +6,10 @@ void NotificationManager::RegisterNotificationListener(shared_ptr<INotificationL
 {
 	auto lock = _lock.AcquireSafe();
 
-	for(weak_ptr<INotificationListener> listener : _listeners) {
-		if(listener.lock() == notificationListener) {
+	for (weak_ptr<INotificationListener> listener : _listeners)
+	{
+		if (listener.lock() == notificationListener)
+		{
 			//This listener is already registered, do nothing
 			return;
 		}
@@ -41,9 +43,11 @@ void NotificationManager::SendNotification(ConsoleNotificationType type, void* p
 	}
 
 	//Iterate on a copy without using a lock
-	for(weak_ptr<INotificationListener> notificationListener : listeners) {
+	for (weak_ptr<INotificationListener> notificationListener : listeners)
+	{
 		shared_ptr<INotificationListener> listener = notificationListener.lock();
-		if(listener) {
+		if (listener)
+		{
 			listener->ProcessNotification(type, parameter);
 		}
 	}

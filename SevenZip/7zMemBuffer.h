@@ -14,16 +14,16 @@ typedef struct
 } CSzMemBuffer;
 
 /* reads max(*size, remain file's size) bytes */
-WRes MemBuffer_Read(CSzMemBuffer *p, void *data, size_t *size);
-WRes MemBuffer_Seek(CSzMemBuffer *p, Int64 *pos, ESzSeek origin);
+WRes MemBuffer_Read(CSzMemBuffer* p, void* data, size_t* size);
+WRes MemBuffer_Seek(CSzMemBuffer* p, Int64* pos, ESzSeek origin);
 
 /* ---------- FileInStream ---------- */
 typedef struct
 {
-  ISeekInStream s;
-  CSzMemBuffer buffer;
+	ISeekInStream s;
+	CSzMemBuffer buffer;
 } CMemBufferInStream;
 
-void MemBufferInit(CMemBufferInStream *memBuferStream, CLookToRead *lookStream, void* buffer, size_t size);
+void MemBufferInit(CMemBufferInStream* memBuferStream, CLookToRead* lookStream, void* buffer, size_t size);
 
 EXTERN_C_END

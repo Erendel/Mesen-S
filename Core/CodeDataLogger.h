@@ -10,7 +10,7 @@ private:
 	uint32_t _prgSize = 0;
 	uint32_t _codeSize = 0;
 	uint32_t _dataSize = 0;
-	
+
 	void CalculateStats();
 
 public:
@@ -34,8 +34,8 @@ public:
 	uint8_t GetCpuFlags(uint32_t absoluteAddr);
 	CpuType GetCpuType(uint32_t absoluteAddr);
 
-	void SetCdlData(uint8_t *cdlData, uint32_t length);
-	void GetCdlData(uint32_t offset, uint32_t length, uint8_t *cdlData);
+	void SetCdlData(uint8_t* cdlData, uint32_t length);
+	void GetCdlData(uint32_t offset, uint32_t length, uint8_t* cdlData);
 	uint8_t GetFlags(uint32_t addr);
 
 	void MarkBytesAs(uint32_t start, uint32_t end, uint8_t flags);

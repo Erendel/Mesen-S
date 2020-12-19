@@ -120,7 +120,7 @@ struct AudioConfig
 	uint32_t SampleRate = 48000;
 	uint32_t AudioLatency = 60;
 
-	bool EnableCubicInterpolation  = true;
+	bool EnableCubicInterpolation = true;
 
 	bool MuteSoundInBackground = false;
 	bool ReduceSoundInBackground = true;
@@ -186,7 +186,9 @@ struct KeyMapping
 
 	bool HasKeySet()
 	{
-		if(A || B || X || Y || L || R || Up || Down || Left || Right || Start || Select || TurboA || TurboB || TurboX || TurboY || TurboL || TurboR || TurboStart || TurboSelect) {
+		if (A || B || X || Y || L || R || Up || Down || Left || Right || Start || Select || TurboA || TurboB || TurboX ||
+			TurboY || TurboL || TurboR || TurboStart || TurboSelect)
+		{
 			return true;
 		}
 		return false;
@@ -195,8 +197,10 @@ struct KeyMapping
 private:
 	bool HasKeyBinding(uint32_t* buttons, uint32_t count)
 	{
-		for(uint32_t i = 0; i < count; i++) {
-			if(buttons[i] != 0) {
+		for (uint32_t i = 0; i < count; i++)
+		{
+			if (buttons[i] != 0)
+			{
 				return true;
 			}
 		}
@@ -215,16 +219,20 @@ struct KeyMappingSet
 	vector<KeyMapping> GetKeyMappingArray()
 	{
 		vector<KeyMapping> keyMappings;
-		if(Mapping1.HasKeySet()) {
+		if (Mapping1.HasKeySet())
+		{
 			keyMappings.push_back(Mapping1);
 		}
-		if(Mapping2.HasKeySet()) {
+		if (Mapping2.HasKeySet())
+		{
 			keyMappings.push_back(Mapping2);
 		}
-		if(Mapping3.HasKeySet()) {
+		if (Mapping3.HasKeySet())
+		{
 			keyMappings.push_back(Mapping3);
 		}
-		if(Mapping4.HasKeySet()) {
+		if (Mapping4.HasKeySet())
+		{
 			keyMappings.push_back(Mapping4);
 		}
 		return keyMappings;
@@ -252,7 +260,7 @@ struct InputConfig
 	uint32_t MouseSensitivity = 1;
 
 	InputDisplayPosition DisplayInputPosition = InputDisplayPosition::TopLeft;
-	bool DisplayInputPort[5] = { false, false, false, false, false};
+	bool DisplayInputPort[5] = {false, false, false, false, false};
 	bool DisplayInputHorizontally = true;
 };
 
@@ -315,9 +323,9 @@ struct GameboyConfig
 	bool BlendFrames = true;
 	bool GbcAdjustColors = true;
 
-	uint32_t BgColors[4] = { 0xFFFFFF, 0xB0B0B0, 0x686868, 0x000000 };
-	uint32_t Obj0Colors[4] = { 0xFFFFFF, 0xB0B0B0, 0x686868, 0x000000 };
-	uint32_t Obj1Colors[4] = { 0xFFFFFF, 0xB0B0B0, 0x686868, 0x000000 };
+	uint32_t BgColors[4] = {0xFFFFFF, 0xB0B0B0, 0x686868, 0x000000};
+	uint32_t Obj0Colors[4] = {0xFFFFFF, 0xB0B0B0, 0x686868, 0x000000};
+	uint32_t Obj1Colors[4] = {0xFFFFFF, 0xB0B0B0, 0x686868, 0x000000};
 
 	uint32_t Square1Vol = 100;
 	uint32_t Square2Vol = 100;
@@ -423,7 +431,7 @@ enum class EmulatorShortcut
 	ToggleOsd,
 	ToggleAlwaysOnTop,
 	ToggleDebugInfo,
-	
+
 	ToggleAudio,
 	IncreaseVolume,
 	DecreaseVolume,
@@ -476,13 +484,16 @@ struct KeyCombination
 	vector<uint32_t> GetKeys()
 	{
 		vector<uint32_t> result;
-		if(Key1) {
+		if (Key1)
+		{
 			result.push_back(Key1);
 		}
-		if(Key2) {
+		if (Key2)
+		{
 			result.push_back(Key2);
 		}
-		if(Key3) {
+		if (Key3)
+		{
 			result.push_back(Key3);
 		}
 		return result;
@@ -493,9 +504,12 @@ struct KeyCombination
 		vector<uint32_t> myKeys = GetKeys();
 		vector<uint32_t> otherKeys = keyCombination.GetKeys();
 
-		if(otherKeys.size() > myKeys.size()) {
-			for(size_t i = 0; i < myKeys.size(); i++) {
-				if(std::find(otherKeys.begin(), otherKeys.end(), myKeys[i]) == otherKeys.end()) {
+		if (otherKeys.size() > myKeys.size())
+		{
+			for (size_t i = 0; i < myKeys.size(); i++)
+			{
+				if (std::find(otherKeys.begin(), otherKeys.end(), myKeys[i]) == otherKeys.end())
+				{
 					//Current key combination contains a key not found in the other combination, so it's not a subset
 					return false;
 				}
@@ -522,13 +536,13 @@ enum class DebuggerFlags : uint32_t
 
 	ShowVerifiedData = 0x100,
 	DisassembleVerifiedData = 0x200,
-	
+
 	ShowUnidentifiedData = 0x400,
 	DisassembleUnidentifiedData = 0x800,
-	
+
 	UseAltSpcOpNames = 0x1000,
 	UseLowerCaseDisassembly = 0x2000,
-	
+
 	AutoResetCdl = 0x4000,
 
 	GbBreakOnInvalidOamAccess = 0x10000,

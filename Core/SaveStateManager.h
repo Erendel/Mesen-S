@@ -11,7 +11,7 @@ private:
 	atomic<uint32_t> _lastIndex;
 	shared_ptr<Console> _console;
 
-	string GetStateFilepath(int stateIndex);	
+	string GetStateFilepath(int stateIndex);
 	void SaveScreenshotData(ostream& stream);
 	bool GetScreenshotData(vector<uint8_t>& out, uint32_t& width, uint32_t& height, istream& stream);
 
@@ -23,12 +23,12 @@ public:
 	void SaveState();
 	bool LoadState();
 
-	void GetSaveStateHeader(ostream & stream);
+	void GetSaveStateHeader(ostream& stream);
 
-	void SaveState(ostream &stream);
+	void SaveState(ostream& stream);
 	bool SaveState(string filepath);
 	void SaveState(int stateIndex, bool displayMessage = true);
-	bool LoadState(istream &stream, bool hashCheckRequired = true);
+	bool LoadState(istream& stream, bool hashCheckRequired = true);
 	bool LoadState(string filepath, bool hashCheckRequired = true);
 	bool LoadState(int stateIndex);
 

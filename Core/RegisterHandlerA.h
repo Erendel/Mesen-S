@@ -8,12 +8,13 @@
 class RegisterHandlerA : public IMemoryHandler
 {
 private:
-	DmaController *_dmaController;
-	InternalRegisters *_regs;
-	ControlManager *_controlManager;
+	DmaController* _dmaController;
+	InternalRegisters* _regs;
+	ControlManager* _controlManager;
 
 public:
-	RegisterHandlerA(DmaController *dmaController, InternalRegisters *regs, ControlManager *controlManager) : IMemoryHandler(SnesMemoryType::Register)
+	RegisterHandlerA(DmaController* dmaController, InternalRegisters* regs,
+	                 ControlManager* controlManager) : IMemoryHandler(SnesMemoryType::Register)
 	{
 		_regs = regs;
 		_dmaController = dmaController;
@@ -23,11 +24,16 @@ public:
 	uint8_t Read(uint32_t addr) override
 	{
 		addr &= 0xFFFF;
-		if(addr == 0x4016 || addr == 0x4017) {
+		if (addr == 0x4016 || addr == 0x4017)
+		{
 			return _controlManager->Read(addr);
-		} else if(addr >= 0x4300) {
+		}
+		else if (addr >= 0x4300)
+		{
 			return _dmaController->Read(addr);
-		} else {
+		}
+		else
+		{
 			return _regs->Read(addr);
 		}
 	}
@@ -35,17 +41,22 @@ public:
 	uint8_t Peek(uint32_t addr) override
 	{
 		addr &= 0xFFFF;
-		if(addr == 0x4016 || addr == 0x4017) {
+		if (addr == 0x4016 || addr == 0x4017)
+		{
 			//Avoid side effects for now
 			return 0;
-		} else if(addr >= 0x4300) {
+		}
+		else if (addr >= 0x4300)
+		{
 			return _dmaController->Read(addr);
-		} else {
+		}
+		else
+		{
 			return _regs->Peek(addr);
 		}
 	}
 
-	void PeekBlock(uint32_t addr, uint8_t *output) override
+	void PeekBlock(uint32_t addr, uint8_t* output) override
 	{
 		//Avoid side effects for now
 		memset(output, 0, 0x1000);
@@ -54,17 +65,22 @@ public:
 	void Write(uint32_t addr, uint8_t value) override
 	{
 		addr &= 0xFFFF;
-		if(addr == 0x4016) {
+		if (addr == 0x4016)
+		{
 			return _controlManager->Write(addr, value);
-		} else if(addr == 0x420B || addr == 0x420C || addr >= 0x4300) {
+		}
+		else if (addr == 0x420B || addr == 0x420C || addr >= 0x4300)
+		{
 			_dmaController->Write(addr, value);
-		} else {
+		}
+		else
+		{
 			_regs->Write(addr, value);
 		}
 	}
 
 	AddressInfo GetAbsoluteAddress(uint32_t address) override
 	{
-		return { -1, SnesMemoryType::CpuMemory };
+		return {-1, SnesMemoryType::CpuMemory};
 	}
 };

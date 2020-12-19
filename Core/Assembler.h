@@ -28,9 +28,13 @@ private:
 	bool _needSecondPass;
 
 	shared_ptr<LabelManager> _labelManager;
-	void ProcessLine(string code, uint32_t& instructionAddress, vector<int16_t>& output, std::unordered_map<string, uint32_t>& labels, bool firstPass, std::unordered_map<string, uint32_t>& currentPassLabels);
-	AssemblerSpecialCodes GetLineData(std::smatch match, LineData& lineData, std::unordered_map<string, uint32_t>& labels, bool firstPass);
-	AssemblerSpecialCodes GetAddrModeAndOperandSize(LineData& lineData, std::unordered_map<string, uint32_t>& labels, bool firstPass);
+	void ProcessLine(string code, uint32_t& instructionAddress, vector<int16_t>& output,
+	                 std::unordered_map<string, uint32_t>& labels, bool firstPass,
+	                 std::unordered_map<string, uint32_t>& currentPassLabels);
+	AssemblerSpecialCodes GetLineData(std::smatch match, LineData& lineData,
+	                                  std::unordered_map<string, uint32_t>& labels, bool firstPass);
+	AssemblerSpecialCodes GetAddrModeAndOperandSize(LineData& lineData, std::unordered_map<string, uint32_t>& labels,
+	                                                bool firstPass);
 	void AssembleInstruction(LineData& lineData, uint32_t& instructionAddress, vector<int16_t>& output, bool firstPass);
 
 	bool IsOpModeAvailable(string& opCode, AddrMode mode);

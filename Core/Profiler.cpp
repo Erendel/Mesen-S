@@ -20,11 +20,13 @@ Profiler::~Profiler()
 {
 }
 
-void Profiler::StackFunction(AddressInfo &addr, StackFrameFlags stackFlag)
+void Profiler::StackFunction(AddressInfo& addr, StackFrameFlags stackFlag)
 {
-	if(addr.Address >= 0) {
+	if (addr.Address >= 0)
+	{
 		uint32_t key = addr.Address | ((uint8_t)addr.Type << 24);
-		if(_functions.find(key) == _functions.end()) {
+		if (_functions.find(key) == _functions.end())
+		{
 			_functions[key] = ProfiledFunction();
 			_functions[key].Address = addr;
 		}
@@ -46,16 +48,18 @@ void Profiler::StackFunction(AddressInfo &addr, StackFrameFlags stackFlag)
 void Profiler::UpdateCycles()
 {
 	uint64_t masterClock = _console->GetMasterClock();
-	
+
 	ProfiledFunction& func = _functions[_currentFunction];
 	uint64_t clockGap = masterClock - _prevMasterClock;
 	func.ExclusiveCycles += clockGap;
 	func.InclusiveCycles += clockGap;
-	
+
 	int32_t len = (int32_t)_functionStack.size();
-	for(int32_t i = len - 1; i >= 0; i--) {
+	for (int32_t i = len - 1; i >= 0; i--)
+	{
 		_functions[_functionStack[i]].InclusiveCycles += clockGap;
-		if(_stackFlags[i] != StackFrameFlags::None) {
+		if (_stackFlags[i] != StackFrameFlags::None)
+		{
 			//Don't apply inclusive times to stack frames before an IRQ/NMI
 			break;
 		}
@@ -67,7 +71,8 @@ void Profiler::UpdateCycles()
 
 void Profiler::UnstackFunction()
 {
-	if(!_functionStack.empty()) {
+	if (!_functionStack.empty())
+	{
 		UpdateCycles();
 
 		//Return to the previous function
@@ -99,24 +104,26 @@ void Profiler::InternalReset()
 	_functionStack.clear();
 	_stackFlags.clear();
 	_cycleCountStack.clear();
-	
+
 	_functions.clear();
 	_functions[ResetFunctionIndex] = ProfiledFunction();
-	_functions[ResetFunctionIndex].Address = { ResetFunctionIndex, SnesMemoryType::Register };
+	_functions[ResetFunctionIndex].Address = {ResetFunctionIndex, SnesMemoryType::Register};
 }
 
 void Profiler::GetProfilerData(ProfiledFunction* profilerData, uint32_t& functionCount)
 {
 	DebugBreakHelper helper(_debugger);
-	
+
 	UpdateCycles();
 
 	functionCount = 0;
-	for(auto func : _functions) {
+	for (auto func : _functions)
+	{
 		profilerData[functionCount] = func.second;
 		functionCount++;
 
-		if(functionCount >= 100000) {
+		if (functionCount >= 100000)
+		{
 			break;
 		}
 	}

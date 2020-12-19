@@ -82,7 +82,7 @@ void Console::Release()
 
 	_videoDecoder->StopThread();
 	_videoRenderer->StopThread();
-	
+
 	_videoDecoder.reset();
 	_videoRenderer.reset();
 	_debugHud.reset();
@@ -97,13 +97,18 @@ void Console::Release()
 void Console::RunFrame()
 {
 	_frameRunning = true;
-	if(_settings->CheckFlag(EmulationFlags::GameboyMode)) {
+	if (_settings->CheckFlag(EmulationFlags::GameboyMode))
+	{
 		Gameboy* gameboy = _cart->GetGameboy();
-		while(_frameRunning) {
+		while (_frameRunning)
+		{
 			gameboy->Exec();
 		}
-	} else {
-		while(_frameRunning) {
+	}
+	else
+	{
+		while (_frameRunning)
+		{
 			_cpu->Exec();
 		}
 	}
@@ -111,10 +116,11 @@ void Console::RunFrame()
 
 void Console::Run()
 {
-	if(!_cpu) {
+	if (!_cpu)
+	{
 		return;
 	}
-	
+
 	auto emulationLock = _emulationLock.AcquireSafe();
 	auto lock = _runLock.AcquireSafe();
 
@@ -134,14 +140,20 @@ void Console::Run()
 	_frameLimiter.reset(new FrameLimiter(_frameDelay));
 	_lastFrameTimer.Reset();
 
-	while(!_stopFlag) {
-		bool useRunAhead = _settings->GetEmulationConfig().RunAheadFrames > 0 && !_debugger && !_rewindManager->IsRewinding() && _settings->GetEmulationSpeed() > 0 && _settings->GetEmulationSpeed() <= 100;
-		if(useRunAhead) {
+	while (!_stopFlag)
+	{
+		bool useRunAhead = _settings->GetEmulationConfig().RunAheadFrames > 0 && !_debugger && !_rewindManager->
+			IsRewinding() && _settings->GetEmulationSpeed() > 0 && _settings->GetEmulationSpeed() <= 100;
+		if (useRunAhead)
+		{
 			RunFrameWithRunAhead();
-		} else {
+		}
+		else
+		{
 			RunFrame();
 
-			if (_historyViewer) {
+			if (_historyViewer)
+			{
 				_historyViewer->ProcessEndOfFrame();
 			}
 			_rewindManager->ProcessEndOfFrame();
@@ -150,16 +162,19 @@ void Console::Run()
 
 		WaitForLock();
 
-		if(_pauseOnNextFrame) {
+		if (_pauseOnNextFrame)
+		{
 			_pauseOnNextFrame = false;
 			_paused = true;
 		}
 
-		if(_paused && !_stopFlag && !_debugger) {
+		if (_paused && !_stopFlag && !_debugger)
+		{
 			WaitForPauseEnd();
-		}		
+		}
 
-		if(_memoryManager->GetMasterClock() == 0) {
+		if (_memoryManager->GetMasterClock() == 0)
+		{
 			//After a reset or power cycle, run the PPU/etc ahead of the CPU (simulates delay CPU takes to get out of reset)
 			_memoryManager->IncMasterClockStartup();
 		}
@@ -176,10 +191,13 @@ void Console::Run()
 
 bool Console::ProcessSystemActions()
 {
-	if(_controlManager->GetSystemActionManager()->IsResetPressed()) {
+	if (_controlManager->GetSystemActionManager()->IsResetPressed())
+	{
 		Reset();
 		return true;
-	} else if(_controlManager->GetSystemActionManager()->IsPowerCyclePressed()) {
+	}
+	else if (_controlManager->GetSystemActionManager()->IsPowerCyclePressed())
+	{
 		PowerCycle();
 		return true;
 	}
@@ -196,7 +214,8 @@ void Console::RunFrameWithRunAhead()
 	RunFrame();
 	Serialize(runAheadState, 0);
 
-	while(frameCount > 1) {
+	while (frameCount > 1)
+	{
 		//Run extra frames if the requested run ahead frame count is higher than 1
 		frameCount--;
 		RunFrame();
@@ -206,9 +225,10 @@ void Console::RunFrameWithRunAhead()
 	//Run one frame normally (with audio/video output)
 	RunFrame();
 	_rewindManager->ProcessEndOfFrame();
-	
+
 	bool wasReset = ProcessSystemActions();
-	if(!wasReset) {
+	if (!wasReset)
+	{
 		//Load the state we saved earlier
 		_isRunAheadFrame = true;
 		Deserialize(runAheadState, SaveStateManager::FileFormatVersion, false);
@@ -220,27 +240,33 @@ void Console::ProcessEndOfFrame()
 {
 #ifndef LIBRETRO
 	_cart->RunCoprocessors();
-	if(_cart->GetCoprocessor()) {
+	if (_cart->GetCoprocessor())
+	{
 		_cart->GetCoprocessor()->ProcessEndOfFrame();
 	}
 
-	if(!_isRunAheadFrame) {
+	if (!_isRunAheadFrame)
+	{
 		_frameLimiter->ProcessFrame();
-		while(_frameLimiter->WaitForNextFrame()) {
-			if(_stopFlag || _frameDelay != GetFrameDelay() || _paused || _pauseOnNextFrame || _lockCounter > 0) {
+		while (_frameLimiter->WaitForNextFrame())
+		{
+			if (_stopFlag || _frameDelay != GetFrameDelay() || _paused || _pauseOnNextFrame || _lockCounter > 0)
+			{
 				//Need to process another event, stop sleeping
 				break;
 			}
 		}
 
 		double newFrameDelay = GetFrameDelay();
-		if(newFrameDelay != _frameDelay) {
+		if (newFrameDelay != _frameDelay)
+		{
 			_frameDelay = newFrameDelay;
 			_frameLimiter->SetDelay(_frameDelay);
 		}
 
 		PreferencesConfig cfg = _settings->GetPreferences();
-		if(cfg.ShowDebugInfo) {
+		if (cfg.ShowDebugInfo)
+		{
 			double lastFrameTime = _lastFrameTimer.GetElapsedMS();
 			_lastFrameTimer.Reset();
 			_stats->DisplayStats(this, lastFrameTime);
@@ -266,7 +292,8 @@ void Console::RunSingleFrame()
 	RunFrame();
 
 	_cart->RunCoprocessors();
-	if(_cart->GetCoprocessor()) {
+	if (_cart->GetCoprocessor())
+	{
 		_cart->GetCoprocessor()->ProcessEndOfFrame();
 	}
 
@@ -280,24 +307,28 @@ void Console::Stop(bool sendNotification)
 	_notificationManager->SendNotification(ConsoleNotificationType::BeforeGameUnload);
 
 	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
+	if (debugger)
+	{
 		debugger->SuspendDebugger(false);
 		debugger->Run();
 	}
 
 	_emulationLock.WaitForRelease();
 
-	if(_emuThread) {
+	if (_emuThread)
+	{
 		_emuThread->join();
 		_emuThread.release();
 	}
 
-	if(_cart && !_settings->GetPreferences().DisableGameSelectionScreen) {
+	if (_cart && !_settings->GetPreferences().DisableGameSelectionScreen)
+	{
 		RomInfo romInfo = _cart->GetRomInfo();
 		_saveStateManager->SaveRecentGame(romInfo.RomFile.GetFileName(), romInfo.RomFile, romInfo.PatchFile);
 	}
 
-	if(sendNotification) {
+	if (sendNotification)
+	{
 		_notificationManager->SendNotification(ConsoleNotificationType::BeforeEmulationStop);
 	}
 
@@ -323,7 +354,8 @@ void Console::Stop(bool sendNotification)
 
 	_soundMixer->StopAudio(true);
 
-	if(sendNotification) {
+	if (sendNotification)
+	{
 		_notificationManager->SendNotification(ConsoleNotificationType::EmulationStopped);
 	}
 }
@@ -349,28 +381,34 @@ void Console::Reset()
 	_notificationManager->SendNotification(ConsoleNotificationType::GameReset);
 	ProcessEvent(EventType::Reset);
 
-	if(_cart->GetSpcData()) {
+	if (_cart->GetSpcData())
+	{
 		_spc->LoadSpcFile(_cart->GetSpcData());
 		_spcHud.reset(new SpcHud(this, _cart->GetSpcData()));
-	} else {
+	}
+	else
+	{
 		_spcHud.reset();
 	}
 
-	if(debugger) {
+	if (debugger)
+	{
 		//Debugger was suspended in SystemActionManager::Reset(), resume debugger here
 		debugger->SuspendDebugger(true);
 	}
 
-	_runLock.Release(); 
+	_runLock.Release();
 	_lockCounter--;
 }
 
 void Console::ReloadRom(bool forPowerCycle)
 {
 	shared_ptr<BaseCartridge> cart = _cart;
-	if(cart) {
+	if (cart)
+	{
 		shared_ptr<Debugger> debugger = _debugger;
-		if(debugger) {
+		if (debugger)
+		{
 			debugger->Run();
 		}
 
@@ -388,27 +426,32 @@ void Console::PowerCycle()
 
 bool Console::LoadRom(VirtualFile romFile, VirtualFile patchFile, bool stopRom, bool forPowerCycle)
 {
-	if(_cart) {
+	if (_cart)
+	{
 		//Make sure the battery is saved to disk before we load another game (or reload the same game)
 		_cart->SaveBattery();
 	}
 
 	bool result = false;
-	EmulationConfig orgConfig = _settings->GetEmulationConfig(); //backup emulation config (can be temporarily overriden to control the power on RAM state)
+	EmulationConfig orgConfig = _settings->GetEmulationConfig();
+	//backup emulation config (can be temporarily overriden to control the power on RAM state)
 	shared_ptr<BaseCartridge> cart = forPowerCycle ? _cart : BaseCartridge::CreateCartridge(this, romFile, patchFile);
-	if(cart) {
+	if (cart)
+	{
 		bool debuggerActive = _debugger != nullptr;
-		if(stopRom) {
+		if (stopRom)
+		{
 			KeyManager::UpdateDevices();
 			Stop(false);
 		}
 
 		_cheatManager->ClearCheats(false);
-		
+
 		_cart = cart;
-		
+
 		auto lock = _debuggerLock.AcquireSafe();
-		if(_debugger) {
+		if (_debugger)
+		{
 			//Reset debugger if it was running before
 			_debugger->Release();
 			_debugger.reset();
@@ -427,10 +470,13 @@ bool Console::LoadRom(VirtualFile romFile, VirtualFile patchFile, bool stopRom, 
 
 		_msu1.reset(Msu1::Init(romFile, _spc.get()));
 
-		if(_cart->GetSpcData()) {
+		if (_cart->GetSpcData())
+		{
 			_spc->LoadSpcFile(_cart->GetSpcData());
 			_spcHud.reset(new SpcHud(this, _cart->GetSpcData()));
-		} else {
+		}
+		else
+		{
 			_spcHud.reset();
 		}
 
@@ -438,16 +484,20 @@ bool Console::LoadRom(VirtualFile romFile, VirtualFile patchFile, bool stopRom, 
 		_memoryManager->Initialize(this);
 		_internalRegisters->Initialize(this);
 
-		if(_cart->GetCoprocessor() == nullptr && _cart->GetGameboy()) {
+		if (_cart->GetCoprocessor() == nullptr && _cart->GetGameboy())
+		{
 			_cart->GetGameboy()->PowerOn();
 			_consoleType = _cart->GetGameboy()->IsCgb() ? ConsoleType::GameboyColor : ConsoleType::Gameboy;
 			_settings->SetFlag(EmulationFlags::GameboyMode);
-		} else {
+		}
+		else
+		{
 			_consoleType = ConsoleType::Snes;
 			_settings->ClearFlag(EmulationFlags::GameboyMode);
 		}
 
-		if(debuggerActive) {
+		if (debuggerActive)
+		{
 			GetDebugger();
 		}
 
@@ -458,26 +508,31 @@ bool Console::LoadRom(VirtualFile romFile, VirtualFile patchFile, bool stopRom, 
 		_notificationManager->RegisterNotificationListener(_rewindManager);
 
 		_controlManager->UpdateControlDevices();
-				
+
 		UpdateRegion();
 
 		_notificationManager->SendNotification(ConsoleNotificationType::GameLoaded, (void*)forPowerCycle);
 
 		_paused = false;
 
-		if(!forPowerCycle) {
+		if (!forPowerCycle)
+		{
 			string modelName = _region == ConsoleRegion::Pal ? "PAL" : "NTSC";
 			string messageTitle = MessageManager::Localize("GameLoaded") + " (" + modelName + ")";
-			MessageManager::DisplayMessage(messageTitle, FolderUtilities::GetFilename(GetRomInfo().RomFile.GetFileName(), false));
+			MessageManager::DisplayMessage(messageTitle,
+			                               FolderUtilities::GetFilename(GetRomInfo().RomFile.GetFileName(), false));
 		}
 
-		if(stopRom) {
-			#ifndef LIBRETRO
+		if (stopRom)
+		{
+#ifndef LIBRETRO
 			_emuThread.reset(new thread(&Console::Run, this));
-			#endif
+#endif
 		}
 		result = true;
-	} else {
+	}
+	else
+	{
 		MessageManager::DisplayMessage("Error", "CouldNotLoadFile", romFile.GetFileName());
 	}
 
@@ -488,18 +543,24 @@ bool Console::LoadRom(VirtualFile romFile, VirtualFile patchFile, bool stopRom, 
 RomInfo Console::GetRomInfo()
 {
 	shared_ptr<BaseCartridge> cart = _cart;
-	if(cart) {
+	if (cart)
+	{
 		return cart->GetRomInfo();
-	} else {
+	}
+	else
+	{
 		return {};
 	}
 }
 
 uint64_t Console::GetMasterClock()
 {
-	if(_settings->CheckFlag(EmulationFlags::GameboyMode) && _cart->GetGameboy()) {
+	if (_settings->CheckFlag(EmulationFlags::GameboyMode) && _cart->GetGameboy())
+	{
 		return _cart->GetGameboy()->GetCycleCount();
-	} else {
+	}
+	else
+	{
 		return _memoryManager->GetMasterClock();
 	}
 }
@@ -521,12 +582,16 @@ ConsoleType Console::GetConsoleType()
 
 void Console::UpdateRegion()
 {
-	switch(_settings->GetEmulationConfig().Region) {
-		case ConsoleRegion::Auto: _region = _cart->GetRegion(); break;
+	switch (_settings->GetEmulationConfig().Region)
+	{
+	case ConsoleRegion::Auto: _region = _cart->GetRegion();
+		break;
 
-		default:
-		case ConsoleRegion::Ntsc: _region = ConsoleRegion::Ntsc; break;
-		case ConsoleRegion::Pal: _region = ConsoleRegion::Pal; break;
+	default:
+	case ConsoleRegion::Ntsc: _region = ConsoleRegion::Ntsc;
+		break;
+	case ConsoleRegion::Pal: _region = ConsoleRegion::Pal;
+		break;
 	}
 
 	_masterClockRate = _region == ConsoleRegion::Pal ? 21281370 : 21477270;
@@ -534,12 +599,18 @@ void Console::UpdateRegion()
 
 double Console::GetFps()
 {
-	if(_settings->CheckFlag(EmulationFlags::GameboyMode)) {
+	if (_settings->CheckFlag(EmulationFlags::GameboyMode))
+	{
 		return 59.72750056960583;
-	} else {
-		if(_region == ConsoleRegion::Ntsc) {
+	}
+	else
+	{
+		if (_region == ConsoleRegion::Ntsc)
+		{
 			return _settings->GetVideoConfig().IntegerFpsMode ? 60.0 : 60.0988118623484;
-		} else {
+		}
+		else
+		{
 			return _settings->GetVideoConfig().IntegerFpsMode ? 50.0 : 50.00697796826829;
 		}
 	}
@@ -549,17 +620,28 @@ double Console::GetFrameDelay()
 {
 	uint32_t emulationSpeed = _settings->GetEmulationSpeed();
 	double frameDelay;
-	if(emulationSpeed == 0) {
+	if (emulationSpeed == 0)
+	{
 		frameDelay = 0;
-	} else {
+	}
+	else
+	{
 		UpdateRegion();
-		if(_settings->CheckFlag(EmulationFlags::GameboyMode)) {
+		if (_settings->CheckFlag(EmulationFlags::GameboyMode))
+		{
 			frameDelay = 16.74270629882813;
-		} else {
-			switch(_region) {
-				default:
-				case ConsoleRegion::Ntsc: frameDelay = _settings->GetVideoConfig().IntegerFpsMode ? 16.6666666666666666667 : 16.63926405550947; break;
-				case ConsoleRegion::Pal: frameDelay = _settings->GetVideoConfig().IntegerFpsMode ? 20 : 19.99720882631146; break;
+		}
+		else
+		{
+			switch (_region)
+			{
+			default:
+			case ConsoleRegion::Ntsc: frameDelay = _settings->GetVideoConfig().IntegerFpsMode
+				                                       ? 16.6666666666666666667
+				                                       : 16.63926405550947;
+				break;
+			case ConsoleRegion::Pal: frameDelay = _settings->GetVideoConfig().IntegerFpsMode ? 20 : 19.99720882631146;
+				break;
 			}
 		}
 		frameDelay /= (emulationSpeed / 100.0);
@@ -589,13 +671,19 @@ void Console::CopyRewindData(shared_ptr<Console> sourceConsole)
 void Console::PauseOnNextFrame()
 {
 	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
-		if(_settings->CheckFlag(EmulationFlags::GameboyMode)) {
+	if (debugger)
+	{
+		if (_settings->CheckFlag(EmulationFlags::GameboyMode))
+		{
 			debugger->Step(CpuType::Gameboy, 144, StepType::SpecificScanline);
-		} else {
+		}
+		else
+		{
 			debugger->Step(CpuType::Cpu, 240, StepType::SpecificScanline);
 		}
-	} else {
+	}
+	else
+	{
 		_pauseOnNextFrame = true;
 		_paused = false;
 	}
@@ -604,13 +692,19 @@ void Console::PauseOnNextFrame()
 void Console::Pause()
 {
 	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
-		if(_settings->CheckFlag(EmulationFlags::GameboyMode)) {
+	if (debugger)
+	{
+		if (_settings->CheckFlag(EmulationFlags::GameboyMode))
+		{
 			debugger->Step(CpuType::Gameboy, 1, StepType::Step);
-		} else {
+		}
+		else
+		{
 			debugger->Step(CpuType::Cpu, 1, StepType::Step);
 		}
-	} else {
+	}
+	else
+	{
 		_paused = true;
 	}
 }
@@ -618,9 +712,12 @@ void Console::Pause()
 void Console::Resume()
 {
 	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
+	if (debugger)
+	{
 		debugger->Run();
-	} else {
+	}
+	else
+	{
 		_paused = false;
 	}
 }
@@ -628,9 +725,12 @@ void Console::Resume()
 bool Console::IsPaused()
 {
 	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
+	if (debugger)
+	{
 		return debugger->IsExecutionStopped();
-	} else {
+	}
+	else
+	{
 		return _paused;
 	}
 }
@@ -645,14 +745,16 @@ void Console::WaitForPauseEnd()
 
 	PlatformUtilities::EnableScreensaver();
 	PlatformUtilities::RestoreTimerResolution();
-	while(_paused && !_stopFlag && !_debugger) {
+	while (_paused && !_stopFlag && !_debugger)
+	{
 		//Sleep until emulation is resumed
 		std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(30));
 	}
 
 	PlatformUtilities::DisableScreensaver();
 	_runLock.Acquire();
-	if(!_stopFlag) {
+	if (!_stopFlag)
+	{
 		_notificationManager->SendNotification(ConsoleNotificationType::GameResumed);
 	}
 }
@@ -665,7 +767,8 @@ ConsoleLock Console::AcquireLock()
 void Console::Lock()
 {
 	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
+	if (debugger)
+	{
 		debugger->SuspendDebugger(false);
 	}
 
@@ -676,7 +779,8 @@ void Console::Lock()
 void Console::Unlock()
 {
 	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
+	if (debugger)
+	{
 		debugger->SuspendDebugger(true);
 	}
 
@@ -691,18 +795,24 @@ bool Console::IsThreadPaused()
 
 void Console::WaitForLock()
 {
-	if(_lockCounter > 0) {
+	if (_lockCounter > 0)
+	{
 		//Need to temporarely pause the emu (to save/load a state, etc.)
 		_runLock.Release();
 
 		_threadPaused = true;
 
 		//Spin wait until we are allowed to start again
-		while(_lockCounter > 0) {}
+		while (_lockCounter > 0)
+		{
+		}
 
 		shared_ptr<Debugger> debugger = _debugger;
-		if(debugger) {
-			while(debugger->HasBreakRequest()) {}
+		if (debugger)
+		{
+			while (debugger->HasBreakRequest())
+			{
+			}
 		}
 
 		_threadPaused = false;
@@ -711,12 +821,13 @@ void Console::WaitForLock()
 	}
 }
 
-void Console::Serialize(ostream &out, int compressionLevel)
+void Console::Serialize(ostream& out, int compressionLevel)
 {
 	Serializer serializer(SaveStateManager::FileFormatVersion);
 	bool isGameboyMode = _settings->CheckFlag(EmulationFlags::GameboyMode);
 
-	if(!isGameboyMode) {
+	if (!isGameboyMode)
+	{
 		serializer.Stream(_cpu.get());
 		serializer.Stream(_memoryManager.get());
 		serializer.Stream(_ppu.get());
@@ -725,22 +836,26 @@ void Console::Serialize(ostream &out, int compressionLevel)
 		serializer.Stream(_cart.get());
 		serializer.Stream(_controlManager.get());
 		serializer.Stream(_spc.get());
-		if(_msu1) {
+		if (_msu1)
+		{
 			serializer.Stream(_msu1.get());
 		}
-	} else {
+	}
+	else
+	{
 		serializer.Stream(_cart.get());
 		serializer.Stream(_controlManager.get());
 	}
 	serializer.Save(out, compressionLevel);
 }
 
-void Console::Deserialize(istream &in, uint32_t fileFormatVersion, bool compressed)
+void Console::Deserialize(istream& in, uint32_t fileFormatVersion, bool compressed)
 {
 	Serializer serializer(in, fileFormatVersion, compressed);
 	bool isGameboyMode = _settings->CheckFlag(EmulationFlags::GameboyMode);
 
-	if(!isGameboyMode) {
+	if (!isGameboyMode)
+	{
 		serializer.Stream(_cpu.get());
 		serializer.Stream(_memoryManager.get());
 		serializer.Stream(_ppu.get());
@@ -749,10 +864,13 @@ void Console::Deserialize(istream &in, uint32_t fileFormatVersion, bool compress
 		serializer.Stream(_cart.get());
 		serializer.Stream(_controlManager.get());
 		serializer.Stream(_spc.get());
-		if(_msu1) {
+		if (_msu1)
+		{
 			serializer.Stream(_msu1.get());
 		}
-	} else {
+	}
+	else
+	{
 		serializer.Stream(_cart.get());
 		serializer.Stream(_controlManager.get());
 	}
@@ -862,11 +980,13 @@ shared_ptr<Msu1> Console::GetMsu1()
 shared_ptr<Debugger> Console::GetDebugger(bool autoStart)
 {
 	shared_ptr<Debugger> debugger = _debugger;
-	if(!debugger && autoStart) {
+	if (!debugger && autoStart)
+	{
 		//Lock to make sure we don't try to start debuggers in 2 separate threads at once
 		auto lock = _debuggerLock.AcquireSafe();
 		debugger = _debugger;
-		if(!debugger) {
+		if (!debugger)
+		{
 			debugger.reset(new Debugger(shared_from_this()));
 			_debugger = debugger;
 		}
@@ -910,37 +1030,44 @@ bool Console::IsRunAheadFrame()
 uint32_t Console::GetFrameCount()
 {
 	shared_ptr<BaseCartridge> cart = _cart;
-	if(_settings->CheckFlag(EmulationFlags::GameboyMode) && cart->GetGameboy()) {
+	if (_settings->CheckFlag(EmulationFlags::GameboyMode) && cart->GetGameboy())
+	{
 		GbPpu* ppu = cart->GetGameboy()->GetPpu();
 		return ppu ? ppu->GetFrameCount() : 0;
-	} else {
+	}
+	else
+	{
 		shared_ptr<Ppu> ppu = _ppu;
 		return ppu ? ppu->GetFrameCount() : 0;
 	}
 }
 
-template<CpuType type>
+template <CpuType type>
 void Console::ProcessInterrupt(uint32_t originalPc, uint32_t currentPc, bool forNmi)
 {
-	if(_debugger) {
+	if (_debugger)
+	{
 		_debugger->ProcessInterrupt<type>(originalPc, currentPc, forNmi);
 	}
 }
 
 void Console::ProcessEvent(EventType type)
 {
-	if(type == EventType::EndFrame && _spcHud) {
+	if (type == EventType::EndFrame && _spcHud)
+	{
 		_spcHud->Draw(GetFrameCount());
 	}
 
-	if(_debugger) {
+	if (_debugger)
+	{
 		_debugger->ProcessEvent(type);
 	}
 }
 
 void Console::BreakImmediately(BreakSource source)
 {
-	if(_debugger) {
+	if (_debugger)
+	{
 		_debugger->BreakImmediately(source);
 	}
 }

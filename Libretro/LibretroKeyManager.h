@@ -10,18 +10,22 @@ private:
 	shared_ptr<Console> _console;
 	retro_input_state_t _getInputState = nullptr;
 	retro_input_poll_t _pollInput = nullptr;
-	bool _mouseButtons[3] = { false, false, false };
-	bool _wasPushed[16] = { };
+	bool _mouseButtons[3] = {false, false, false};
+	bool _wasPushed[16] = {};
 
 	bool ProcessAction(uint32_t button)
 	{
-		if(_getInputState(0, RETRO_DEVICE_JOYPAD, 0, button)) {
-			if(!_wasPushed[button]) {
+		if (_getInputState(0, RETRO_DEVICE_JOYPAD, 0, button))
+		{
+			if (!_wasPushed[button])
+			{
 				//Newly pressed, process action
 				_wasPushed[button] = true;
 				return true;
 			}
-		} else {
+		}
+		else
+		{
 			_wasPushed[button] = false;
 		}
 		return false;
@@ -52,11 +56,13 @@ public:
 	// Inherited via IKeyManager
 	virtual void RefreshState() override
 	{
-		if(_pollInput) {
+		if (_pollInput)
+		{
 			_pollInput();
 		}
 
-		if(_getInputState) {
+		if (_getInputState)
+		{
 			int32_t x = _getInputState(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_X);
 			int32_t y = _getInputState(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
 
@@ -68,18 +74,24 @@ public:
 			int16_t dx = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
 			int16_t dy = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_Y);
 			KeyManager::SetMouseMovement(dx, dy);
-			
-			_mouseButtons[(int)MouseButton::LeftButton] = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT) != 0;
-			_mouseButtons[(int)MouseButton::RightButton] = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_RIGHT) != 0;
-			_mouseButtons[(int)MouseButton::MiddleButton] = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_MIDDLE) != 0;
+
+			_mouseButtons[(int)MouseButton::LeftButton] = _getInputState(0, RETRO_DEVICE_MOUSE, 0,
+			                                                             RETRO_DEVICE_ID_MOUSE_LEFT) != 0;
+			_mouseButtons[(int)MouseButton::RightButton] = _getInputState(0, RETRO_DEVICE_MOUSE, 0,
+			                                                              RETRO_DEVICE_ID_MOUSE_RIGHT) != 0;
+			_mouseButtons[(int)MouseButton::MiddleButton] = _getInputState(0, RETRO_DEVICE_MOUSE, 0,
+			                                                               RETRO_DEVICE_ID_MOUSE_MIDDLE) != 0;
 		}
 	}
 
 	virtual bool IsKeyPressed(uint32_t keyCode) override
 	{
-		if(keyCode > 0 && _getInputState) {
+		if (keyCode > 0 && _getInputState)
+		{
 			return _getInputState(keyCode >> 8, RETRO_DEVICE_JOYPAD, 0, (keyCode - 1) & 0xFF) != 0;
-		} else {
+		}
+		else
+		{
 			return false;
 		}
 	}
@@ -97,7 +109,7 @@ public:
 	{
 		return vector<uint32_t>();
 	}
-	
+
 	virtual string GetKeyName(uint32_t keyCode) override
 	{
 		return string();

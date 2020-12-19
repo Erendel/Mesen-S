@@ -15,7 +15,7 @@ private:
 
 	list<ControlDeviceState> _inputData;
 	string _playerName;
-	int _controllerPort;	
+	int _controllerPort;
 	string _connectionHash;
 	string _serverPassword;
 	bool _handshakeCompleted = false;
@@ -35,7 +35,7 @@ private:
 
 protected:
 	void ProcessMessage(NetMessage* message) override;
-	
+
 public:
 	GameServerConnection(shared_ptr<Console> console, shared_ptr<Socket> socket, string serverPassword);
 	virtual ~GameServerConnection();

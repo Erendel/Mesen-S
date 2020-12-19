@@ -75,7 +75,7 @@ private:
 	shared_ptr<LabelManager> _labelManager;
 
 	unique_ptr<ExpressionEvaluator> _watchExpEval[(int)DebugUtilities::GetLastCpuType() + 1];
-	
+
 	SimpleLock _logLock;
 	std::list<string> _debuggerLog;
 
@@ -84,7 +84,7 @@ private:
 	atomic<uint32_t> _suspendRequestCount;
 
 	bool _waitForBreakResume = false;
-	
+
 	void Reset();
 
 public:
@@ -92,10 +92,10 @@ public:
 	~Debugger();
 	void Release();
 
-	template<CpuType type>
+	template <CpuType type>
 	void ProcessMemoryRead(uint32_t addr, uint8_t value, MemoryOperationType opType);
-	
-	template<CpuType type>
+
+	template <CpuType type>
 	void ProcessMemoryWrite(uint32_t addr, uint8_t value, MemoryOperationType opType);
 
 	void ProcessWorkRamRead(uint32_t addr, uint8_t value);
@@ -104,15 +104,15 @@ public:
 	void ProcessPpuRead(uint16_t addr, uint8_t value, SnesMemoryType memoryType);
 	void ProcessPpuWrite(uint16_t addr, uint8_t value, SnesMemoryType memoryType);
 
-	template<CpuType cpuType>
+	template <CpuType cpuType>
 	void ProcessPpuCycle();
 
-	template<CpuType type>
+	template <CpuType type>
 	void ProcessInterrupt(uint32_t originalPc, uint32_t currentPc, bool forNmi);
 
 	void ProcessEvent(EventType type);
 
-	int32_t EvaluateExpression(string expression, CpuType cpuType, EvalResultType &resultType, bool useCache);
+	int32_t EvaluateExpression(string expression, CpuType cpuType, EvalResultType& resultType, bool useCache);
 
 	void Run();
 	void Step(CpuType cpuType, int32_t stepCount, StepType type);
@@ -124,7 +124,8 @@ public:
 
 	void BreakImmediately(BreakSource source);
 
-	void ProcessBreakConditions(bool needBreak, BreakpointManager *bpManager, MemoryOperationInfo &operation, AddressInfo &addressInfo, BreakSource source = BreakSource::Unspecified);
+	void ProcessBreakConditions(bool needBreak, BreakpointManager* bpManager, MemoryOperationInfo& operation,
+	                            AddressInfo& addressInfo, BreakSource source = BreakSource::Unspecified);
 	void SleepUntilResume(BreakSource source, MemoryOperationInfo* operation = nullptr, int breakpointId = -1);
 
 	void GetState(DebugState& state, bool partialPpuState);
@@ -143,15 +144,15 @@ public:
 	AddressInfo GetRelativeAddress(AddressInfo absAddress, CpuType cpuType);
 
 	void GetCdlData(uint32_t offset, uint32_t length, SnesMemoryType memoryType, uint8_t* cdlData);
-	void SetCdlData(CpuType cpuType, uint8_t * cdlData, uint32_t length);
+	void SetCdlData(CpuType cpuType, uint8_t* cdlData, uint32_t length);
 	void MarkBytesAs(CpuType cpuType, uint32_t start, uint32_t end, uint8_t flags);
-	
+
 	void RefreshCodeCache();
 	void RebuildPrgCache(CpuType cpuType);
 
 	void SetBreakpoints(Breakpoint breakpoints[], uint32_t length);
 	void GetBreakpoints(CpuType cpuType, Breakpoint* breakpoints, int& execs, int& reads, int& writes);
-	
+
 	void Log(string message);
 	string GetLog();
 

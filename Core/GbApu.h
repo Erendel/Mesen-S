@@ -52,7 +52,7 @@ public:
 
 	void Run();
 
-	void GetSoundSamples(int16_t* &samples, uint32_t& sampleCount);
+	void GetSoundSamples(int16_t* & samples, uint32_t& sampleCount);
 
 	void ClockFrameSequencer();
 
@@ -62,7 +62,8 @@ public:
 
 	uint8_t ReadCgbRegister(uint16_t addr);
 
-	template<typename T> void ProcessLengthEnableFlag(uint8_t value, T& length, bool& lengthEnabled, bool& enabled);
+	template <typename T>
+	void ProcessLengthEnableFlag(uint8_t value, T& length, bool& lengthEnabled, bool& enabled);
 
 	void Serialize(Serializer& s) override;
 };

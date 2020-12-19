@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-enum class  WindowMaskLogic
+enum class WindowMaskLogic
 {
 	Or = 0,
 	And = 1,
@@ -36,7 +36,8 @@ struct SpriteInfo
 
 	bool IsVisible(uint16_t scanline, bool interlace)
 	{
-		if(X != -256 && (X + Width <= 0 || X > 255)) {
+		if (X != -256 && (X + Width <= 0 || X > 255))
+		{
 			//Sprite is not visible (and must be ignored for time/range flag calculations)
 			//Sprites at X=-256 are always used when considering Time/Range flag calculations, but not actually drawn.
 			return false;
@@ -83,7 +84,7 @@ struct Mode7Config
 	int16_t CenterY;
 
 	uint8_t ValueLatch;
-	
+
 	bool LargeMap;
 	bool FillWithTile0;
 	bool HorizontalMirroring;
@@ -101,19 +102,28 @@ struct WindowConfig
 	uint8_t Left;
 	uint8_t Right;
 
-	template<uint8_t layerIndex>
+	template <uint8_t layerIndex>
 	bool PixelNeedsMasking(int x)
 	{
-		if(InvertedLayers[layerIndex]) {
-			if(Left > Right) {
+		if (InvertedLayers[layerIndex])
+		{
+			if (Left > Right)
+			{
 				return true;
-			} else {
+			}
+			else
+			{
 				return x < Left || x > Right;
 			}
-		} else {
-			if(Left > Right) {
+		}
+		else
+		{
+			if (Left > Right)
+			{
 				return false;
-			} else {
+			}
+			else
+			{
 				return x >= Left && x <= Right;
 			}
 		}

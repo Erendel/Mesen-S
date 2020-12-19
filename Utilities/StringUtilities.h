@@ -9,7 +9,8 @@ public:
 		vector<string> result;
 		size_t index = 0;
 		size_t lastIndex = 0;
-		while((index = input.find(delimiter, index)) != string::npos) {
+		while ((index = input.find(delimiter, index)) != string::npos)
+		{
 			result.push_back(input.substr(lastIndex, index - lastIndex));
 			index++;
 			lastIndex = index;

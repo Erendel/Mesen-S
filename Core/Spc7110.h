@@ -45,7 +45,7 @@ private:
 
 	//Memory mappings
 	uint8_t _sramEnabled = 0;
-	uint8_t _dataRomBanks[3] = { 0, 1, 2 };
+	uint8_t _dataRomBanks[3] = {0, 1, 2};
 	uint8_t _dataRomSize = 0;
 
 	//Data rom
@@ -68,7 +68,7 @@ private:
 
 public:
 	Spc7110(Console* console, bool useRtc);
-	
+
 	uint8_t ReadDataRom(uint32_t addr);
 
 	void Serialize(Serializer& s) override;

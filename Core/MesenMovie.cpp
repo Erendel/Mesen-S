@@ -29,12 +29,15 @@ MesenMovie::~MesenMovie()
 
 void MesenMovie::Stop()
 {
-	if(_playing) {
-		if(!_forTest) {
+	if (_playing)
+	{
+		if (!_forTest)
+		{
 			MessageManager::DisplayMessage("Movies", "MovieEnded");
 		}
 
-		if(_console->GetSettings()->GetPreferences().PauseOnMovieEnd) {
+		if (_console->GetSettings()->GetPreferences().PauseOnMovieEnd)
+		{
 			_console->Pause();
 		}
 
@@ -45,20 +48,24 @@ void MesenMovie::Stop()
 	_console->GetControlManager()->UnregisterInputProvider(this);
 }
 
-bool MesenMovie::SetInput(BaseControlDevice *device)
+bool MesenMovie::SetInput(BaseControlDevice* device)
 {
 	uint32_t inputRowIndex = _console->GetControlManager()->GetPollCounter();
 	_lastPollCounter = inputRowIndex;
 
-	if(_inputData.size() > inputRowIndex && _inputData[inputRowIndex].size() > _deviceIndex) {
+	if (_inputData.size() > inputRowIndex && _inputData[inputRowIndex].size() > _deviceIndex)
+	{
 		device->SetTextState(_inputData[inputRowIndex][_deviceIndex]);
 
 		_deviceIndex++;
-		if(_deviceIndex >= _inputData[inputRowIndex].size()) {
+		if (_deviceIndex >= _inputData[inputRowIndex].size())
+		{
 			//Move to the next frame's data
 			_deviceIndex = 0;
 		}
-	} else {
+	}
+	else
+	{
 		_console->GetMovieManager()->Stop();
 	}
 	return true;
@@ -78,13 +85,14 @@ vector<uint8_t> MesenMovie::LoadBattery(string extension)
 
 void MesenMovie::ProcessNotification(ConsoleNotificationType type, void* parameter)
 {
-	if(type == ConsoleNotificationType::GameLoaded) {
+	if (type == ConsoleNotificationType::GameLoaded)
+	{
 		_console->GetControlManager()->RegisterInputProvider(this);
 		_console->GetControlManager()->SetPollCounter(_lastPollCounter);
 	}
 }
 
-bool MesenMovie::Play(VirtualFile &file)
+bool MesenMovie::Play(VirtualFile& file)
 {
 	_movieFile = file;
 
@@ -95,19 +103,23 @@ bool MesenMovie::Play(VirtualFile &file)
 	_reader->LoadArchive(ss);
 
 	stringstream settingsData, inputData;
-	if(!_reader->GetStream("GameSettings.txt", settingsData)) {
+	if (!_reader->GetStream("GameSettings.txt", settingsData))
+	{
 		MessageManager::Log("[Movie] File not found: GameSettings.txt");
 		return false;
 	}
-	if(!_reader->GetStream("Input.txt", inputData)) {
+	if (!_reader->GetStream("Input.txt", inputData))
+	{
 		MessageManager::Log("[Movie] File not found: Input.txt");
 		return false;
 	}
 
-	while(inputData) {
+	while (inputData)
+	{
 		string line;
 		std::getline(inputData, line);
-		if(line.substr(0, 1) == "|") {
+		if (line.substr(0, 1) == "|")
+		{
 			_inputData.push_back(StringUtilities::Split(line.substr(1), '|'));
 		}
 	}
@@ -115,9 +127,9 @@ bool MesenMovie::Play(VirtualFile &file)
 	_deviceIndex = 0;
 
 	ParseSettings(settingsData);
-	
+
 	_console->Lock();
-		
+
 	_console->GetBatteryManager()->SetBatteryProvider(shared_from_this());
 	_console->GetNotificationManager()->RegisterNotificationListener(shared_from_this());
 	ApplySettings();
@@ -127,8 +139,9 @@ bool MesenMovie::Play(VirtualFile &file)
 	//bool autoConfigureInput = _console->GetSettings()->CheckFlag(EmulationFlags::AutoConfigureInput);
 	//_console->GetSettings()->ClearFlags(EmulationFlags::AutoConfigureInput);
 
-	ControlManager *controlManager = _console->GetControlManager().get();
-	if(controlManager) {
+	ControlManager* controlManager = _console->GetControlManager().get();
+	if (controlManager)
+	{
 		//ControlManager can be empty if no game is loaded
 		controlManager->SetPollCounter(0);
 	}
@@ -145,20 +158,27 @@ bool MesenMovie::Play(VirtualFile &file)
 	_originalCheats = _console->GetCheatManager()->GetCheats();
 
 	controlManager->UpdateControlDevices();
-	if(!_forTest) {
+	if (!_forTest)
+	{
 		_console->PowerCycle();
-	} else {
+	}
+	else
+	{
 		controlManager->RegisterInputProvider(this);
 	}
 
-	LoadCheats();	
+	LoadCheats();
 
 	stringstream saveStateData;
-	if(_reader->GetStream("SaveState.mss", saveStateData)) {
-		if(!_console->GetSaveStateManager()->LoadState(saveStateData, true)) {
+	if (_reader->GetStream("SaveState.mss", saveStateData))
+	{
+		if (!_console->GetSaveStateManager()->LoadState(saveStateData, true))
+		{
 			_console->Resume();
 			return false;
-		} else {
+		}
+		else
+		{
 			_console->GetControlManager()->SetPollCounter(0);
 		}
 	}
@@ -170,32 +190,40 @@ bool MesenMovie::Play(VirtualFile &file)
 	return true;
 }
 
-template<typename T>
-T FromString(string name, const vector<string> &enumNames, T defaultValue)
+template <typename T>
+T FromString(string name, const vector<string>& enumNames, T defaultValue)
 {
-	for(size_t i = 0; i < enumNames.size(); i++) {
-		if(name == enumNames[i]) {
+	for (size_t i = 0; i < enumNames.size(); i++)
+	{
+		if (name == enumNames[i])
+		{
 			return (T)i;
 		}
 	}
 	return defaultValue;
 }
 
-void MesenMovie::ParseSettings(stringstream &data)
+void MesenMovie::ParseSettings(stringstream& data)
 {
-	while(!data.eof()) {
+	while (!data.eof())
+	{
 		string line;
 		std::getline(data, line);
 
-		if(!line.empty()) {
+		if (!line.empty())
+		{
 			size_t index = line.find_first_of(' ');
-			if(index != string::npos) {
+			if (index != string::npos)
+			{
 				string name = line.substr(0, index);
 				string value = line.substr(index + 1);
 
-				if(name == "Cheat") {
+				if (name == "Cheat")
+				{
 					_cheats.push_back(value);
-				} else {
+				}
+				else
+				{
 					_settings[name] = value;
 				}
 			}
@@ -242,15 +270,22 @@ void MesenMovie::ApplySettings()
 	EmulationConfig emuConfig = settings->GetEmulationConfig();
 	InputConfig inputConfig = settings->GetInputConfig();
 
-	inputConfig.Controllers[0].Type = FromString(LoadString(_settings, MovieKeys::Controller1), ControllerTypeNames, ControllerType::None);
-	inputConfig.Controllers[1].Type = FromString(LoadString(_settings, MovieKeys::Controller2), ControllerTypeNames, ControllerType::None);
-	inputConfig.Controllers[2].Type = FromString(LoadString(_settings, MovieKeys::Controller3), ControllerTypeNames, ControllerType::None);
-	inputConfig.Controllers[3].Type = FromString(LoadString(_settings, MovieKeys::Controller4), ControllerTypeNames, ControllerType::None);
-	inputConfig.Controllers[4].Type = FromString(LoadString(_settings, MovieKeys::Controller5), ControllerTypeNames, ControllerType::None);
+	inputConfig.Controllers[0].Type = FromString(LoadString(_settings, MovieKeys::Controller1), ControllerTypeNames,
+	                                             ControllerType::None);
+	inputConfig.Controllers[1].Type = FromString(LoadString(_settings, MovieKeys::Controller2), ControllerTypeNames,
+	                                             ControllerType::None);
+	inputConfig.Controllers[2].Type = FromString(LoadString(_settings, MovieKeys::Controller3), ControllerTypeNames,
+	                                             ControllerType::None);
+	inputConfig.Controllers[3].Type = FromString(LoadString(_settings, MovieKeys::Controller4), ControllerTypeNames,
+	                                             ControllerType::None);
+	inputConfig.Controllers[4].Type = FromString(LoadString(_settings, MovieKeys::Controller5), ControllerTypeNames,
+	                                             ControllerType::None);
 
 	emuConfig.Region = FromString(LoadString(_settings, MovieKeys::Region), ConsoleRegionNames, ConsoleRegion::Ntsc);
-	if(!_forTest) {
-		emuConfig.RamPowerOnState = FromString(LoadString(_settings, MovieKeys::RamPowerOnState), RamStateNames, RamState::AllOnes);
+	if (!_forTest)
+	{
+		emuConfig.RamPowerOnState = FromString(LoadString(_settings, MovieKeys::RamPowerOnState), RamStateNames,
+		                                       RamState::AllOnes);
 	}
 	emuConfig.PpuExtraScanlinesAfterNmi = LoadInt(_settings, MovieKeys::ExtraScanlinesAfterNmi);
 	emuConfig.PpuExtraScanlinesBeforeNmi = LoadInt(_settings, MovieKeys::ExtraScanlinesBeforeNmi);
@@ -260,44 +295,61 @@ void MesenMovie::ApplySettings()
 	settings->SetInputConfig(inputConfig);
 }
 
-uint32_t MesenMovie::LoadInt(std::unordered_map<string, string> &settings, string name, uint32_t defaultValue)
+uint32_t MesenMovie::LoadInt(std::unordered_map<string, string>& settings, string name, uint32_t defaultValue)
 {
 	auto result = settings.find(name);
-	if(result != settings.end()) {
-		try {
+	if (result != settings.end())
+	{
+		try
+		{
 			return (uint32_t)std::stoul(result->second);
-		} catch(std::exception&) {
+		}
+		catch (std::exception&)
+		{
 			MessageManager::Log("[Movies] Invalid value for tag: " + name);
 			return defaultValue;
 		}
-	} else {
+	}
+	else
+	{
 		return defaultValue;
 	}
 }
 
-bool MesenMovie::LoadBool(std::unordered_map<string, string> &settings, string name)
+bool MesenMovie::LoadBool(std::unordered_map<string, string>& settings, string name)
 {
 	auto result = settings.find(name);
-	if(result != settings.end()) {
-		if(result->second == "true") {
+	if (result != settings.end())
+	{
+		if (result->second == "true")
+		{
 			return true;
-		} else if(result->second == "false") {
+		}
+		else if (result->second == "false")
+		{
 			return false;
-		} else {			
+		}
+		else
+		{
 			MessageManager::Log("[Movies] Invalid value for tag: " + name);
 			return false;
 		}
-	} else {
+	}
+	else
+	{
 		return false;
 	}
 }
 
-string MesenMovie::LoadString(std::unordered_map<string, string> &settings, string name)
+string MesenMovie::LoadString(std::unordered_map<string, string>& settings, string name)
 {
 	auto result = settings.find(name);
-	if(result != settings.end()) {
+	if (result != settings.end())
+	{
 		return result->second;
-	} else {
+	}
+	else
+	{
 		return "";
 	}
 }
@@ -305,24 +357,29 @@ string MesenMovie::LoadString(std::unordered_map<string, string> &settings, stri
 void MesenMovie::LoadCheats()
 {
 	vector<CheatCode> cheats;
-	for(string cheatData : _cheats) {
+	for (string cheatData : _cheats)
+	{
 		CheatCode code;
-		if(LoadCheat(cheatData, code)) {
+		if (LoadCheat(cheatData, code))
+		{
 			cheats.push_back(code);
 		}
 	}
 	_console->GetCheatManager()->SetCheats(cheats);
 }
 
-bool MesenMovie::LoadCheat(string cheatData, CheatCode &code)
+bool MesenMovie::LoadCheat(string cheatData, CheatCode& code)
 {
 	vector<string> data = StringUtilities::Split(cheatData, ' ');
 
-	if(data.size() == 2) {
+	if (data.size() == 2)
+	{
 		code.Address = HexUtilities::FromHex(data[0]);
 		code.Value = HexUtilities::FromHex(data[1]);
 		return true;
-	} else {
+	}
+	else
+	{
 		MessageManager::Log("[Movie] Invalid cheat definition: " + cheatData);
 	}
 	return false;

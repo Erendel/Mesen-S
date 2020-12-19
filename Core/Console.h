@@ -53,7 +53,7 @@ private:
 	shared_ptr<InternalRegisters> _internalRegisters;
 	shared_ptr<ControlManager> _controlManager;
 	shared_ptr<DmaController> _dmaController;
-	
+
 	shared_ptr<Msu1> _msu1;
 
 	shared_ptr<Debugger> _debugger;
@@ -73,7 +73,7 @@ private:
 	shared_ptr<SpcHud> _spcHud;
 
 	thread::id _emulationThreadId;
-	
+
 	atomic<uint32_t> _lockCounter;
 	SimpleLock _runLock;
 	SimpleLock _emulationLock;
@@ -124,7 +124,7 @@ public:
 	void PowerCycle();
 
 	void PauseOnNextFrame();
-	
+
 	void Pause();
 	void Resume();
 	bool IsPaused();
@@ -141,8 +141,8 @@ public:
 	void Unlock();
 	bool IsThreadPaused();
 
-	void Serialize(ostream &out, int compressionLevel = 1);
-	void Deserialize(istream &in, uint32_t fileFormatVersion, bool compressed = true);
+	void Serialize(ostream& out, int compressionLevel = 1);
+	void Deserialize(istream& in, uint32_t fileFormatVersion, bool compressed = true);
 
 	shared_ptr<SoundMixer> GetSoundMixer();
 	shared_ptr<VideoRenderer> GetVideoRenderer();
@@ -172,72 +172,84 @@ public:
 	bool IsDebugging();
 
 	thread::id GetEmulationThreadId();
-	
+
 	bool IsRunning();
 	bool IsRunAheadFrame();
 
-	uint32_t GetFrameCount();	
+	uint32_t GetFrameCount();
 	double GetFps();
 
 	void CopyRewindData(shared_ptr<Console> sourceConsole);
 
-	template<CpuType type> __forceinline void ProcessMemoryRead(uint32_t addr, uint8_t value, MemoryOperationType opType)
+	template <CpuType type>
+	__forceinline void ProcessMemoryRead(uint32_t addr, uint8_t value, MemoryOperationType opType)
 	{
-		if(_debugger) {
+		if (_debugger)
+		{
 			_debugger->ProcessMemoryRead<type>(addr, value, opType);
 		}
 	}
 
-	template<CpuType type> __forceinline void ProcessMemoryWrite(uint32_t addr, uint8_t value, MemoryOperationType opType)
+	template <CpuType type>
+	__forceinline void ProcessMemoryWrite(uint32_t addr, uint8_t value, MemoryOperationType opType)
 	{
-		if(_debugger) {
+		if (_debugger)
+		{
 			_debugger->ProcessMemoryWrite<type>(addr, value, opType);
 		}
 	}
 
 	__forceinline void ProcessPpuRead(uint32_t addr, uint8_t value, SnesMemoryType memoryType)
 	{
-		if(_debugger) {
+		if (_debugger)
+		{
 			_debugger->ProcessPpuRead(addr, value, memoryType);
 		}
 	}
 
 	__forceinline void ProcessPpuWrite(uint32_t addr, uint8_t value, SnesMemoryType memoryType)
 	{
-		if(_debugger) {
+		if (_debugger)
+		{
 			_debugger->ProcessPpuWrite(addr, value, memoryType);
 		}
 	}
 
 	__forceinline void ProcessWorkRamRead(uint32_t addr, uint8_t value)
 	{
-		if(_debugger) {
+		if (_debugger)
+		{
 			_debugger->ProcessWorkRamRead(addr, value);
 		}
 	}
 
 	__forceinline void ProcessWorkRamWrite(uint32_t addr, uint8_t value)
 	{
-		if(_debugger) {
+		if (_debugger)
+		{
 			_debugger->ProcessWorkRamWrite(addr, value);
 		}
 	}
-	
-	template<CpuType cpuType> __forceinline void ProcessPpuCycle()
+
+	template <CpuType cpuType>
+	__forceinline void ProcessPpuCycle()
 	{
-		if(_debugger) {
+		if (_debugger)
+		{
 			_debugger->ProcessPpuCycle<cpuType>();
 		}
 	}
 
 	__forceinline void DebugLog(string log)
 	{
-		if(_debugger) {
+		if (_debugger)
+		{
 			_debugger->Log(log);
 		}
 	}
 
-	template<CpuType type> void ProcessInterrupt(uint32_t originalPc, uint32_t currentPc, bool forNmi);
+	template <CpuType type>
+	void ProcessInterrupt(uint32_t originalPc, uint32_t currentPc, bool forNmi);
 	void ProcessEvent(EventType type);
 	void BreakImmediately(BreakSource source);
 };

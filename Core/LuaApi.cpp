@@ -57,45 +57,45 @@ void LuaApi::SetContext(ScriptingContext* context)
 	_ppu = _console->GetPpu().get();
 }
 
-int LuaApi::GetLibrary(lua_State *lua)
+int LuaApi::GetLibrary(lua_State* lua)
 {
 	static const luaL_Reg apilib[] = {
-		{ "read", LuaApi::ReadMemory },
-		{ "write", LuaApi::WriteMemory },
-		{ "readWord", LuaApi::ReadMemoryWord },
-		{ "writeWord", LuaApi::WriteMemoryWord },
-		{ "getPrgRomOffset", LuaApi::GetPrgRomOffset },
-		{ "addMemoryCallback", LuaApi::RegisterMemoryCallback },
-		{ "removeMemoryCallback", LuaApi::UnregisterMemoryCallback },
-		{ "addEventCallback", LuaApi::RegisterEventCallback },
-		{ "removeEventCallback", LuaApi::UnregisterEventCallback },
-		{ "drawString", LuaApi::DrawString },
-		{ "drawPixel", LuaApi::DrawPixel },
-		{ "drawLine", LuaApi::DrawLine },
-		{ "drawRectangle", LuaApi::DrawRectangle },
-		{ "clearScreen", LuaApi::ClearScreen },
-		{ "getScreenBuffer", LuaApi::GetScreenBuffer },
-		{ "setScreenBuffer", LuaApi::SetScreenBuffer },
-		{ "getPixel", LuaApi::GetPixel },
-		{ "getMouseState", LuaApi::GetMouseState },
-		{ "log", LuaApi::Log },
-		{ "displayMessage", LuaApi::DisplayMessage },
-		{ "reset", LuaApi::Reset },
-		{ "breakExecution", LuaApi::Break },
-		{ "resume", LuaApi::Resume },
-		{ "execute", LuaApi::Execute },
-		{ "rewind", LuaApi::Rewind },
-		{ "takeScreenshot", LuaApi::TakeScreenshot },
-		{ "isKeyPressed", LuaApi::IsKeyPressed },
-		{ "getInput", LuaApi::GetInput },
-		{ "getAccessCounters", LuaApi::GetAccessCounters },
-		{ "resetAccessCounters", LuaApi::ResetAccessCounters },
-		{ "getState", LuaApi::GetState },
-		{ "getScriptDataFolder", LuaApi::GetScriptDataFolder },
-		{ "getRomInfo", LuaApi::GetRomInfo },
-		{ "getLogWindowLog", LuaApi::GetLogWindowLog },
-		{ "getLabelAddress", LuaApi::GetLabelAddress },
-		{ NULL,NULL }
+		{"read", LuaApi::ReadMemory},
+		{"write", LuaApi::WriteMemory},
+		{"readWord", LuaApi::ReadMemoryWord},
+		{"writeWord", LuaApi::WriteMemoryWord},
+		{"getPrgRomOffset", LuaApi::GetPrgRomOffset},
+		{"addMemoryCallback", LuaApi::RegisterMemoryCallback},
+		{"removeMemoryCallback", LuaApi::UnregisterMemoryCallback},
+		{"addEventCallback", LuaApi::RegisterEventCallback},
+		{"removeEventCallback", LuaApi::UnregisterEventCallback},
+		{"drawString", LuaApi::DrawString},
+		{"drawPixel", LuaApi::DrawPixel},
+		{"drawLine", LuaApi::DrawLine},
+		{"drawRectangle", LuaApi::DrawRectangle},
+		{"clearScreen", LuaApi::ClearScreen},
+		{"getScreenBuffer", LuaApi::GetScreenBuffer},
+		{"setScreenBuffer", LuaApi::SetScreenBuffer},
+		{"getPixel", LuaApi::GetPixel},
+		{"getMouseState", LuaApi::GetMouseState},
+		{"log", LuaApi::Log},
+		{"displayMessage", LuaApi::DisplayMessage},
+		{"reset", LuaApi::Reset},
+		{"breakExecution", LuaApi::Break},
+		{"resume", LuaApi::Resume},
+		{"execute", LuaApi::Execute},
+		{"rewind", LuaApi::Rewind},
+		{"takeScreenshot", LuaApi::TakeScreenshot},
+		{"isKeyPressed", LuaApi::IsKeyPressed},
+		{"getInput", LuaApi::GetInput},
+		{"getAccessCounters", LuaApi::GetAccessCounters},
+		{"resetAccessCounters", LuaApi::ResetAccessCounters},
+		{"getState", LuaApi::GetState},
+		{"getScriptDataFolder", LuaApi::GetScriptDataFolder},
+		{"getRomInfo", LuaApi::GetRomInfo},
+		{"getLogWindowLog", LuaApi::GetLogWindowLog},
+		{"getLabelAddress", LuaApi::GetLabelAddress},
+		{NULL,NULL}
 	};
 
 	luaL_newlib(lua, apilib);
@@ -205,7 +205,7 @@ int LuaApi::GetLibrary(lua_State *lua)
 	return 1;
 }
 
-int LuaApi::GetLabelAddress(lua_State *lua)
+int LuaApi::GetLabelAddress(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	string label = l.ReadString();
@@ -214,7 +214,8 @@ int LuaApi::GetLabelAddress(lua_State *lua)
 
 	std::shared_ptr<LabelManager> lblMan = _debugger->GetLabelManager();
 	int32_t value = lblMan->GetLabelRelativeAddress(label);
-	if(value == -2) {
+	if (value == -2)
+	{
 		//Check to see if the label is a multi-byte label instead
 		string mbLabel = label + "+0";
 		value = lblMan->GetLabelRelativeAddress(mbLabel);
@@ -226,7 +227,7 @@ int LuaApi::GetLabelAddress(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::ReadMemory(lua_State *lua)
+int LuaApi::ReadMemory(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(3);
@@ -242,7 +243,7 @@ int LuaApi::ReadMemory(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::WriteMemory(lua_State *lua)
+int LuaApi::WriteMemory(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	int type = l.ReadInteger();
@@ -257,7 +258,7 @@ int LuaApi::WriteMemory(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::ReadMemoryWord(lua_State *lua)
+int LuaApi::ReadMemoryWord(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(3);
@@ -273,7 +274,7 @@ int LuaApi::ReadMemoryWord(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::WriteMemoryWord(lua_State *lua)
+int LuaApi::WriteMemoryWord(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	int type = l.ReadInteger();
@@ -288,20 +289,20 @@ int LuaApi::WriteMemoryWord(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::GetPrgRomOffset(lua_State *lua)
+int LuaApi::GetPrgRomOffset(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	int address = l.ReadInteger();
 	checkminparams(1);
 	errorCond(address < 0 || address > 0xFFFF, "address must be between 0 and $FFFF");
-	
-	AddressInfo relAddress { address, SnesMemoryType::CpuMemory };
+
+	AddressInfo relAddress{address, SnesMemoryType::CpuMemory};
 	int32_t prgRomOffset = _debugger->GetAbsoluteAddress(relAddress).Address;
 	l.Return(prgRomOffset);
 	return l.ReturnCount();
 }
 
-int LuaApi::RegisterMemoryCallback(lua_State *lua)
+int LuaApi::RegisterMemoryCallback(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(5);
@@ -312,21 +313,25 @@ int LuaApi::RegisterMemoryCallback(lua_State *lua)
 	int reference = l.GetReference();
 	checkminparams(3);
 
-	if(endAddr == -1) {
+	if (endAddr == -1)
+	{
 		endAddr = startAddr;
 	}
 
 	errorCond(startAddr > endAddr, "start address must be <= end address");
-	errorCond(callbackType < CallbackType::CpuRead || callbackType > CallbackType::CpuExec, "the specified type is invalid");
+	errorCond(callbackType < CallbackType::CpuRead || callbackType > CallbackType::CpuExec,
+	          "the specified type is invalid");
 	errorCond(cpuType < CpuType::Cpu || cpuType > CpuType::Gameboy, "the cpu type is invalid");
 	errorCond(reference == LUA_NOREF, "the specified function could not be found");
 	_context->RegisterMemoryCallback(callbackType, startAddr, endAddr, cpuType, reference);
-	_context->Log("Registered memory callback from $" + HexUtilities::ToHex((uint32_t)startAddr) + " to $" + HexUtilities::ToHex((uint32_t)endAddr));
+	_context->Log(
+		"Registered memory callback from $" + HexUtilities::ToHex((uint32_t)startAddr) + " to $" + HexUtilities::ToHex(
+			(uint32_t)endAddr));
 	l.Return(reference);
 	return l.ReturnCount();
 }
 
-int LuaApi::UnregisterMemoryCallback(lua_State *lua)
+int LuaApi::UnregisterMemoryCallback(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(5);
@@ -339,7 +344,8 @@ int LuaApi::UnregisterMemoryCallback(lua_State *lua)
 
 	checkminparams(3);
 
-	if(endAddr == -1) {
+	if (endAddr == -1)
+	{
 		endAddr = startAddr;
 	}
 
@@ -350,7 +356,7 @@ int LuaApi::UnregisterMemoryCallback(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::RegisterEventCallback(lua_State *lua)
+int LuaApi::RegisterEventCallback(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	EventType type = (EventType)l.ReadInteger();
@@ -363,7 +369,7 @@ int LuaApi::RegisterEventCallback(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::UnregisterEventCallback(lua_State *lua)
+int LuaApi::UnregisterEventCallback(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	EventType type = (EventType)l.ReadInteger();
@@ -375,7 +381,7 @@ int LuaApi::UnregisterEventCallback(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::DrawString(lua_State *lua)
+int LuaApi::DrawString(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(7);
@@ -394,7 +400,7 @@ int LuaApi::DrawString(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::DrawLine(lua_State *lua)
+int LuaApi::DrawLine(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(7);
@@ -413,7 +419,7 @@ int LuaApi::DrawLine(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::DrawPixel(lua_State *lua)
+int LuaApi::DrawPixel(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(5);
@@ -430,7 +436,7 @@ int LuaApi::DrawPixel(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::DrawRectangle(lua_State *lua)
+int LuaApi::DrawRectangle(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(8);
@@ -450,7 +456,7 @@ int LuaApi::DrawRectangle(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::ClearScreen(lua_State *lua)
+int LuaApi::ClearScreen(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
@@ -459,16 +465,20 @@ int LuaApi::ClearScreen(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::GetScreenBuffer(lua_State *lua)
+int LuaApi::GetScreenBuffer(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 
 	int multiplier = _ppu->IsHighResOutput() ? 2 : 1;
 
 	lua_newtable(lua);
-	for(int y = 0; y < 239; y++) {
-		for(int x = 0; x < 256; x++) {
-			lua_pushinteger(lua, DefaultVideoFilter::ToArgb(*(_ppu->GetScreenBuffer() + y * 256 * multiplier * multiplier + x * multiplier)) & 0xFFFFFF);
+	for (int y = 0; y < 239; y++)
+	{
+		for (int x = 0; x < 256; x++)
+		{
+			lua_pushinteger(
+				lua, DefaultVideoFilter::ToArgb(
+					*(_ppu->GetScreenBuffer() + y * 256 * multiplier * multiplier + x * multiplier)) & 0xFFFFFF);
 			lua_rawseti(lua, -2, (y << 8) + x);
 		}
 	}
@@ -476,23 +486,24 @@ int LuaApi::GetScreenBuffer(lua_State *lua)
 	return 1;
 }
 
-int LuaApi::SetScreenBuffer(lua_State *lua)
+int LuaApi::SetScreenBuffer(lua_State* lua)
 {
 	LuaCallHelper l(lua);
-	uint32_t pixels[256*239] = {};
+	uint32_t pixels[256 * 239] = {};
 	luaL_checktype(lua, 1, LUA_TTABLE);
-	for(int i = 0; i < 256*239; i++) {
+	for (int i = 0; i < 256 * 239; i++)
+	{
 		lua_rawgeti(lua, 1, i);
 		pixels[i] = l.ReadInteger() ^ 0xFF000000;
 	}
-	
+
 	int startFrame = _console->GetFrameCount();
 	_console->GetDebugHud()->DrawScreenBuffer(pixels, startFrame);
 
 	return l.ReturnCount();
 }
 
-int LuaApi::GetPixel(lua_State *lua)
+int LuaApi::GetPixel(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	int y = l.ReadInteger();
@@ -503,11 +514,13 @@ int LuaApi::GetPixel(lua_State *lua)
 	int multiplier = _ppu->IsHighResOutput() ? 2 : 1;
 
 	//Ignores intensify & grayscale bits
-	l.Return(DefaultVideoFilter::ToArgb(*(_ppu->GetScreenBuffer() + y * 256 * multiplier * multiplier + x * multiplier)) & 0xFFFFFF);
+	l.Return(
+		DefaultVideoFilter::ToArgb(*(_ppu->GetScreenBuffer() + y * 256 * multiplier * multiplier + x * multiplier)) &
+		0xFFFFFF);
 	return l.ReturnCount();
 }
 
-int LuaApi::GetMouseState(lua_State *lua)
+int LuaApi::GetMouseState(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	MousePosition pos = KeyManager::GetMousePosition();
@@ -521,7 +534,7 @@ int LuaApi::GetMouseState(lua_State *lua)
 	return 1;
 }
 
-int LuaApi::Log(lua_State *lua)
+int LuaApi::Log(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	string text = l.ReadString();
@@ -530,7 +543,7 @@ int LuaApi::Log(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::DisplayMessage(lua_State *lua)
+int LuaApi::DisplayMessage(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	string text = l.ReadString();
@@ -540,7 +553,7 @@ int LuaApi::DisplayMessage(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::Reset(lua_State *lua)
+int LuaApi::Reset(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
@@ -549,7 +562,7 @@ int LuaApi::Reset(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::Break(lua_State *lua)
+int LuaApi::Break(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
@@ -558,7 +571,7 @@ int LuaApi::Break(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::Resume(lua_State *lua)
+int LuaApi::Resume(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
@@ -567,7 +580,7 @@ int LuaApi::Resume(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::Execute(lua_State *lua)
+int LuaApi::Execute(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	StepType type = (StepType)l.ReadInteger();
@@ -582,7 +595,7 @@ int LuaApi::Execute(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::Rewind(lua_State *lua)
+int LuaApi::Rewind(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	int seconds = l.ReadInteger();
@@ -593,7 +606,7 @@ int LuaApi::Rewind(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::TakeScreenshot(lua_State *lua)
+int LuaApi::TakeScreenshot(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
@@ -603,7 +616,7 @@ int LuaApi::TakeScreenshot(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::IsKeyPressed(lua_State *lua)
+int LuaApi::IsKeyPressed(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	string keyName = l.ReadString();
@@ -614,14 +627,15 @@ int LuaApi::IsKeyPressed(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::GetInput(lua_State *lua)
+int LuaApi::GetInput(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	int port = l.ReadInteger();
 	checkparams();
 	errorCond(port < 0 || port > 4, "Invalid port number - must be between 0 to 4");
 
-	shared_ptr<SnesController> controller = std::dynamic_pointer_cast<SnesController>(_console->GetControlManager()->GetControlDevice(port));
+	shared_ptr<SnesController> controller = std::dynamic_pointer_cast<SnesController>(
+		_console->GetControlManager()->GetControlDevice(port));
 	errorCond(controller == nullptr, "Input port must be connected to a standard controller");
 
 	lua_newtable(lua);
@@ -640,7 +654,7 @@ int LuaApi::GetInput(lua_State *lua)
 	return 1;
 }
 
-int LuaApi::GetAccessCounters(lua_State *lua)
+int LuaApi::GetAccessCounters(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	l.ForceParamCount(2);
@@ -656,33 +670,37 @@ int LuaApi::GetAccessCounters(lua_State *lua)
 	_debugger->GetMemoryAccessCounter()->GetAccessCounts(0, size, memoryType, counts.data());
 
 	lua_newtable(lua);
-	switch(operationType) {
-		default:
-		case MemoryOperationType::Read: 
-			for(uint32_t i = 0; i < size; i++) {
-				lua_pushinteger(lua, counts[i].ReadCount);
-				lua_rawseti(lua, -2, i);
-			}
-			break;
+	switch (operationType)
+	{
+	default:
+	case MemoryOperationType::Read:
+		for (uint32_t i = 0; i < size; i++)
+		{
+			lua_pushinteger(lua, counts[i].ReadCount);
+			lua_rawseti(lua, -2, i);
+		}
+		break;
 
-		case MemoryOperationType::Write:
-			for(uint32_t i = 0; i < size; i++) {
-				lua_pushinteger(lua, counts[i].WriteCount);
-				lua_rawseti(lua, -2, i);
-			}
-			break;
+	case MemoryOperationType::Write:
+		for (uint32_t i = 0; i < size; i++)
+		{
+			lua_pushinteger(lua, counts[i].WriteCount);
+			lua_rawseti(lua, -2, i);
+		}
+		break;
 
-		case MemoryOperationType::ExecOpCode:
-			for(uint32_t i = 0; i < size; i++) {
-				lua_pushinteger(lua, counts[i].ExecCount);
-				lua_rawseti(lua, -2, i);
-			}
-			break;
+	case MemoryOperationType::ExecOpCode:
+		for (uint32_t i = 0; i < size; i++)
+		{
+			lua_pushinteger(lua, counts[i].ExecCount);
+			lua_rawseti(lua, -2, i);
+		}
+		break;
 	}
 	return 1;
 }
 
-int LuaApi::ResetAccessCounters(lua_State *lua)
+int LuaApi::ResetAccessCounters(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
@@ -690,19 +708,20 @@ int LuaApi::ResetAccessCounters(lua_State *lua)
 	return l.ReturnCount();
 }
 
-int LuaApi::GetScriptDataFolder(lua_State *lua)
+int LuaApi::GetScriptDataFolder(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
 	string baseFolder = FolderUtilities::CombinePath(FolderUtilities::GetHomeFolder(), "LuaScriptData");
 	FolderUtilities::CreateFolder(baseFolder);
-	string scriptFolder = FolderUtilities::CombinePath(baseFolder, FolderUtilities::GetFilename(_context->GetScriptName(), false));
+	string scriptFolder = FolderUtilities::CombinePath(
+		baseFolder, FolderUtilities::GetFilename(_context->GetScriptName(), false));
 	FolderUtilities::CreateFolder(scriptFolder);
 	l.Return(scriptFolder);
 	return l.ReturnCount();
 }
 
-int LuaApi::GetRomInfo(lua_State *lua)
+int LuaApi::GetRomInfo(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
@@ -717,16 +736,16 @@ int LuaApi::GetRomInfo(lua_State *lua)
 	return 1;
 }
 
-int LuaApi::GetLogWindowLog(lua_State *lua)
+int LuaApi::GetLogWindowLog(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
-	
+
 	l.Return(MessageManager::GetLog());
 	return l.ReturnCount();
 }
 
-int LuaApi::GetState(lua_State *lua)
+int LuaApi::GetState(lua_State* lua)
 {
 	LuaCallHelper l(lua);
 	checkparams();
@@ -759,9 +778,9 @@ int LuaApi::GetState(lua_State *lua)
 	lua_pushintvalue(hClock, state.Ppu.HClock);
 	lua_pushboolvalue(forcedVblank, state.Ppu.ForcedVblank);
 	lua_pushintvalue(screenBrightness, state.Ppu.ScreenBrightness);
-	
+
 	lua_starttable("mode7");
-	
+
 	lua_starttable("matrix");
 	lua_pusharrayvalue(0, state.Ppu.Mode7.Matrix[0]);
 	lua_pusharrayvalue(1, state.Ppu.Mode7.Matrix[0]);
@@ -784,11 +803,12 @@ int LuaApi::GetState(lua_State *lua)
 	lua_pushboolvalue(mode1Bg3Priority, state.Ppu.Mode1Bg3Priority);
 	lua_pushintvalue(mainScreenLayers, state.Ppu.MainScreenLayers);
 	lua_pushintvalue(subScreenLayers, state.Ppu.SubScreenLayers);
-	
+
 	lua_starttable("layers")
-	for(int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++)
+	{
 		lua_pushinteger(lua, i);
-		
+
 		lua_newtable(lua);
 		lua_pushintvalue(tilemapAddress, state.Ppu.Layers[i].TilemapAddress);
 		lua_pushintvalue(chrAddress, state.Ppu.Layers[i].ChrAddress);
@@ -796,34 +816,35 @@ int LuaApi::GetState(lua_State *lua)
 		lua_pushintvalue(vScroll, state.Ppu.Layers[i].VScroll);
 		lua_pushintvalue(doubleWidth, state.Ppu.Layers[i].DoubleWidth);
 		lua_pushintvalue(doubleHeight, state.Ppu.Layers[i].DoubleHeight);
-		lua_pushintvalue(largeTiles, state.Ppu.Layers[i].LargeTiles);		
+		lua_pushintvalue(largeTiles, state.Ppu.Layers[i].LargeTiles);
 
 		lua_settable(lua, -3);
 	}
 	lua_endtable(); //end layers
 
 	lua_starttable("windows")
-	for(int i = 0; i < 2; i++) {
+	for (int i = 0; i < 2; i++)
+	{
 		lua_pushinteger(lua, i);
 
 		lua_newtable(lua);
 		lua_pushintvalue(activeLayers, (
-			(uint8_t)state.Ppu.Window[i].ActiveLayers[0] |
-			((uint8_t)state.Ppu.Window[i].ActiveLayers[1] << 1) |
-			((uint8_t)state.Ppu.Window[i].ActiveLayers[2] << 2) |
-			((uint8_t)state.Ppu.Window[i].ActiveLayers[3] << 3) |
-			((uint8_t)state.Ppu.Window[i].ActiveLayers[4] << 4) |
-			((uint8_t)state.Ppu.Window[i].ActiveLayers[5] << 5)
-		));
+			                 (uint8_t)state.Ppu.Window[i].ActiveLayers[0] |
+			                 ((uint8_t)state.Ppu.Window[i].ActiveLayers[1] << 1) |
+			                 ((uint8_t)state.Ppu.Window[i].ActiveLayers[2] << 2) |
+			                 ((uint8_t)state.Ppu.Window[i].ActiveLayers[3] << 3) |
+			                 ((uint8_t)state.Ppu.Window[i].ActiveLayers[4] << 4) |
+			                 ((uint8_t)state.Ppu.Window[i].ActiveLayers[5] << 5)
+		                 ));
 
 		lua_pushintvalue(invertedLayers, (
-			(uint8_t)state.Ppu.Window[i].InvertedLayers[0] |
-			((uint8_t)state.Ppu.Window[i].InvertedLayers[1] << 1) |
-			((uint8_t)state.Ppu.Window[i].InvertedLayers[2] << 2) |
-			((uint8_t)state.Ppu.Window[i].InvertedLayers[3] << 3) |
-			((uint8_t)state.Ppu.Window[i].InvertedLayers[4] << 4) |
-			((uint8_t)state.Ppu.Window[i].InvertedLayers[5] << 5)
-		));
+			                 (uint8_t)state.Ppu.Window[i].InvertedLayers[0] |
+			                 ((uint8_t)state.Ppu.Window[i].InvertedLayers[1] << 1) |
+			                 ((uint8_t)state.Ppu.Window[i].InvertedLayers[2] << 2) |
+			                 ((uint8_t)state.Ppu.Window[i].InvertedLayers[3] << 3) |
+			                 ((uint8_t)state.Ppu.Window[i].InvertedLayers[4] << 4) |
+			                 ((uint8_t)state.Ppu.Window[i].InvertedLayers[5] << 5)
+		                 ));
 
 		lua_pushintvalue(left, state.Ppu.Window[i].Left);
 		lua_pushintvalue(right, state.Ppu.Window[i].Right);
@@ -831,7 +852,7 @@ int LuaApi::GetState(lua_State *lua)
 		lua_settable(lua, -3);
 	}
 	lua_endtable(); //end windows
-	
+
 	lua_pushboolvalue(windowMaskLogicBg0, (int)state.Ppu.MaskLogic[0]);
 	lua_pushboolvalue(windowMaskLogicBg1, (int)state.Ppu.MaskLogic[1]);
 	lua_pushboolvalue(windowMaskLogicBg2, (int)state.Ppu.MaskLogic[2]);
@@ -859,7 +880,7 @@ int LuaApi::GetState(lua_State *lua)
 
 	lua_pushintvalue(ppu1OpenBus, state.Ppu.Ppu1OpenBus);
 	lua_pushintvalue(ppu2OpenBus, state.Ppu.Ppu2OpenBus);
-	
+
 	lua_pushintvalue(cgramAddress, state.Ppu.CgramAddress);
 	lua_pushintvalue(cgramWriteBuffer, state.Ppu.CgramWriteBuffer);
 	lua_pushboolvalue(cgramAddressLatch, state.Ppu.CgramAddressLatch);
@@ -898,7 +919,7 @@ int LuaApi::GetState(lua_State *lua)
 	lua_pushintvalue(x, state.Spc.X);
 	lua_pushintvalue(y, state.Spc.Y);
 	lua_endtable(); //end spc
-	
+
 	return 1;
 }
 #endif

@@ -46,18 +46,21 @@ Disassembler::Disassembler(shared_ptr<Console> console, shared_ptr<CodeDataLogge
 	_memoryDumper = _debugger->GetMemoryDumper().get();
 	_memoryManager = console->GetMemoryManager().get();
 
-	for(int i = 0; i < (int)DebugUtilities::GetLastCpuType(); i++) {
+	for (int i = 0; i < (int)DebugUtilities::GetLastCpuType(); i++)
+	{
 		_disassemblyResult[i] = vector<DisassemblyResult>();
 		_needDisassemble[i] = true;
 	}
 
-	for(int i = (int)SnesMemoryType::PrgRom; i < (int)SnesMemoryType::Register; i++) {
+	for (int i = (int)SnesMemoryType::PrgRom; i < (int)SnesMemoryType::Register; i++)
+	{
 		InitSource((SnesMemoryType)i);
 	}
 
-	if(_necDsp) {
+	if (_necDsp)
+	{
 		//Build cache for the entire DSP chip (since it only contains instructions)
-		AddressInfo dspStart = { 0, SnesMemoryType::DspProgramRom };
+		AddressInfo dspStart = {0, SnesMemoryType::DspProgramRom};
 		BuildCache(dspStart, 0, CpuType::NecDsp);
 	}
 }
@@ -67,42 +70,49 @@ void Disassembler::InitSource(SnesMemoryType type)
 	uint8_t* src = _memoryDumper->GetMemoryBuffer(type);
 	uint32_t size = _memoryDumper->GetMemorySize(type);
 	_disassemblyCache[(int)type] = vector<DisassemblyInfo>(size);
-	_sources[(int)type] = { src, &_disassemblyCache[(int)type], size };
+	_sources[(int)type] = {src, &_disassemblyCache[(int)type], size};
 }
 
 DisassemblerSource& Disassembler::GetSource(SnesMemoryType type)
 {
-	if(_sources[(int)type].Data == nullptr) {
+	if (_sources[(int)type].Data == nullptr)
+	{
 		throw std::runtime_error("Disassembler::GetSource() invalid memory type");
 	}
 
 	return _sources[(int)type];
 }
 
-uint32_t Disassembler::BuildCache(AddressInfo &addrInfo, uint8_t cpuFlags, CpuType type)
+uint32_t Disassembler::BuildCache(AddressInfo& addrInfo, uint8_t cpuFlags, CpuType type)
 {
 	DisassemblerSource& src = GetSource(addrInfo.Type);
 
 	bool needDisassemble = false;
 	int returnSize = 0;
 	int32_t address = addrInfo.Address;
-	while(address >= 0 && address < (int32_t)src.Cache->size()) {
-		DisassemblyInfo &disInfo = (*src.Cache)[address];
-		if(!disInfo.IsInitialized() || !disInfo.IsValid(cpuFlags)) {
-			disInfo.Initialize(src.Data+address, cpuFlags, type);
-			for(int i = 1; i < disInfo.GetOpSize(); i++) {
+	while (address >= 0 && address < (int32_t)src.Cache->size())
+	{
+		DisassemblyInfo& disInfo = (*src.Cache)[address];
+		if (!disInfo.IsInitialized() || !disInfo.IsValid(cpuFlags))
+		{
+			disInfo.Initialize(src.Data + address, cpuFlags, type);
+			for (int i = 1; i < disInfo.GetOpSize(); i++)
+			{
 				//Clear any instructions that start in the middle of this one
 				//(can happen when resizing an instruction after X/M updates)
 				(*src.Cache)[address + i] = DisassemblyInfo();
 			}
 			needDisassemble = true;
 			returnSize += disInfo.GetOpSize();
-		} else {
+		}
+		else
+		{
 			returnSize += disInfo.GetOpSize();
 			break;
 		}
 
-		if(disInfo.IsUnconditionalJump()) {
+		if (disInfo.IsUnconditionalJump())
+		{
 			//Can't assume what follows is code, stop disassembling
 			break;
 		}
@@ -111,7 +121,8 @@ uint32_t Disassembler::BuildCache(AddressInfo &addrInfo, uint8_t cpuFlags, CpuTy
 		address += disInfo.GetOpSize();
 	}
 
-	if(needDisassemble) {
+	if (needDisassemble)
+	{
 		SetDisassembleFlag(type);
 	}
 
@@ -120,12 +131,15 @@ uint32_t Disassembler::BuildCache(AddressInfo &addrInfo, uint8_t cpuFlags, CpuTy
 
 void Disassembler::SetDisassembleFlag(CpuType type)
 {
-	if(type == CpuType::Cpu || type == CpuType::Sa1 || type == CpuType::Gsu || type == CpuType::Cx4) {
+	if (type == CpuType::Cpu || type == CpuType::Sa1 || type == CpuType::Gsu || type == CpuType::Cx4)
+	{
 		_needDisassemble[(int)CpuType::Cpu] = true;
 		_needDisassemble[(int)CpuType::Sa1] = true;
 		_needDisassemble[(int)CpuType::Gsu] = true;
 		_needDisassemble[(int)CpuType::Cx4] = true;
-	} else {
+	}
+	else
+	{
 		_needDisassemble[(int)type] = true;
 	}
 }
@@ -146,85 +160,97 @@ void Disassembler::InvalidateCache(AddressInfo addrInfo, CpuType type)
 	DisassemblerSource src = GetSource(addrInfo.Type);
 	bool needDisassemble = false;
 
-	if(addrInfo.Address >= 0) {
-		for(int i = 0; i < 4; i++) {
-			if(addrInfo.Address >= i) {
-				if((*src.Cache)[addrInfo.Address - i].IsInitialized()) {
+	if (addrInfo.Address >= 0)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (addrInfo.Address >= i)
+			{
+				if ((*src.Cache)[addrInfo.Address - i].IsInitialized())
+				{
 					(*src.Cache)[addrInfo.Address - i].Reset();
 					needDisassemble = true;
 				}
 			}
 		}
 	}
-	
-	if(needDisassemble) {
+
+	if (needDisassemble)
+	{
 		SetDisassembleFlag(type);
 	}
 }
 
 void Disassembler::Disassemble(CpuType cpuType)
 {
-	if(!_needDisassemble[(int)cpuType]) {
+	if (!_needDisassemble[(int)cpuType])
+	{
 		return;
 	}
 
 	_needDisassemble[(int)cpuType] = false;
 
-	auto lock = _disassemblyLock.AcquireSafe(); 
-	
-	MemoryMappings *mappings = nullptr;
+	auto lock = _disassemblyLock.AcquireSafe();
+
+	MemoryMappings* mappings = nullptr;
 	int32_t maxAddr = 0xFFFFFF;
-	switch(cpuType) {
-		case CpuType::Cpu: 
-			mappings = _memoryManager->GetMemoryMappings();
-			break;
+	switch (cpuType)
+	{
+	case CpuType::Cpu:
+		mappings = _memoryManager->GetMemoryMappings();
+		break;
 
-		case CpuType::Sa1:
-			if(!_sa1) {
-				return;
-			}
-			mappings = _sa1->GetMemoryMappings();
-			break;
+	case CpuType::Sa1:
+		if (!_sa1)
+		{
+			return;
+		}
+		mappings = _sa1->GetMemoryMappings();
+		break;
 
-		case CpuType::Gsu:
-			if(!_gsu) {
-				return;
-			}
-			mappings = _gsu->GetMemoryMappings();
-			break;
+	case CpuType::Gsu:
+		if (!_gsu)
+		{
+			return;
+		}
+		mappings = _gsu->GetMemoryMappings();
+		break;
 
-		case CpuType::NecDsp:
-			if(!_console->GetCartridge()->GetDsp()) {
-				return;
-			}
-			mappings = nullptr;
-			maxAddr = _necDsp->DebugGetProgramRomSize() - 1;
-			break;
+	case CpuType::NecDsp:
+		if (!_console->GetCartridge()->GetDsp())
+		{
+			return;
+		}
+		mappings = nullptr;
+		maxAddr = _necDsp->DebugGetProgramRomSize() - 1;
+		break;
 
-		case CpuType::Spc:
-			mappings = nullptr;
-			maxAddr = 0xFFFF;
-			break;
+	case CpuType::Spc:
+		mappings = nullptr;
+		maxAddr = 0xFFFF;
+		break;
 
-		case CpuType::Gameboy:
-			if(!_gameboy) {
-				return;
-			}
-			mappings = nullptr; 
-			maxAddr = 0xFFFF;
-			break;
+	case CpuType::Gameboy:
+		if (!_gameboy)
+		{
+			return;
+		}
+		mappings = nullptr;
+		maxAddr = 0xFFFF;
+		break;
 
-		case CpuType::Cx4:
-			if(!_console->GetCartridge()->GetCx4()) {
-				return;
-			}
-			mappings = _console->GetCartridge()->GetCx4()->GetMemoryMappings();
-			break;
+	case CpuType::Cx4:
+		if (!_console->GetCartridge()->GetCx4())
+		{
+			return;
+		}
+		mappings = _console->GetCartridge()->GetCx4()->GetMemoryMappings();
+		break;
 
-		default: throw std::runtime_error("Disassemble(): Invalid cpu type");
+	default: throw std::runtime_error("Disassemble(): Invalid cpu type");
 	}
 
-	vector<DisassemblyResult> &results = _disassemblyResult[(int)cpuType];
+	vector<DisassemblyResult>& results = _disassemblyResult[(int)cpuType];
 	results.clear();
 
 	bool disUnident = _settings->CheckDebuggerFlag(DebuggerFlags::DisassembleUnidentifiedData);
@@ -238,54 +264,73 @@ void Disassembler::Disassemble(CpuType cpuType)
 	AddressInfo addrInfo = {};
 	AddressInfo prevAddrInfo = {};
 	int byteCounter = 0;
-	for(int32_t i = 0; i <= maxAddr; i++) {
+	for (int32_t i = 0; i <= maxAddr; i++)
+	{
 		prevAddrInfo = addrInfo;
-		switch(cpuType) {
-			case CpuType::Spc: addrInfo = _spc->GetAbsoluteAddress(i); break;
-			case CpuType::NecDsp: addrInfo = { i, SnesMemoryType::DspProgramRom }; break;
-			case CpuType::Gameboy: addrInfo = _gameboy->GetAbsoluteAddress(i); break;
-			default: addrInfo = mappings->GetAbsoluteAddress(i); break;
+		switch (cpuType)
+		{
+		case CpuType::Spc: addrInfo = _spc->GetAbsoluteAddress(i);
+			break;
+		case CpuType::NecDsp: addrInfo = {i, SnesMemoryType::DspProgramRom};
+			break;
+		case CpuType::Gameboy: addrInfo = _gameboy->GetAbsoluteAddress(i);
+			break;
+		default: addrInfo = mappings->GetAbsoluteAddress(i);
+			break;
 		}
 
-		if(addrInfo.Address < 0) {
+		if (addrInfo.Address < 0)
+		{
 			continue;
 		}
 
 		DisassemblerSource src = GetSource(addrInfo.Type);
 
 		DisassemblyInfo disassemblyInfo = (*src.Cache)[addrInfo.Address];
-		
+
 		uint8_t opSize = 0;
 		uint8_t opCode = (src.Data + addrInfo.Address)[0];
 
 		bool isCode = addrInfo.Type == SnesMemoryType::PrgRom ? _cdl->IsCode(addrInfo.Address) : false;
 		bool isData = addrInfo.Type == SnesMemoryType::PrgRom ? _cdl->IsData(addrInfo.Address) : false;
 
-		if(disassemblyInfo.IsInitialized()) {
+		if (disassemblyInfo.IsInitialized())
+		{
 			opSize = disassemblyInfo.GetOpSize();
-		} else if((isData && disData) || (!isData && !isCode && disUnident)) {
+		}
+		else if ((isData && disData) || (!isData && !isCode && disUnident))
+		{
 			opSize = DisassemblyInfo::GetOpSize(opCode, 0, cpuType);
 		}
 
-		if(opSize > 0) {
-			if(inUnknownBlock || inVerifiedBlock) {
-				int flags = LineFlags::BlockEnd | (inVerifiedBlock ? LineFlags::VerifiedData : 0) | (((inVerifiedBlock && showData) || (inUnknownBlock && showUnident)) ? LineFlags::ShowAsData : 0);
+		if (opSize > 0)
+		{
+			if (inUnknownBlock || inVerifiedBlock)
+			{
+				int flags = LineFlags::BlockEnd | (inVerifiedBlock ? LineFlags::VerifiedData : 0) | (
+					((inVerifiedBlock && showData) || (inUnknownBlock && showUnident)) ? LineFlags::ShowAsData : 0);
 				results.push_back(DisassemblyResult(prevAddrInfo, i - 1, flags));
 				inUnknownBlock = false;
 				inVerifiedBlock = false;
 			}
 			byteCounter = 0;
 
-			if(addrInfo.Type == SnesMemoryType::PrgRom && _cdl->IsSubEntryPoint(addrInfo.Address)) {
-				results.push_back(DisassemblyResult(addrInfo, i, LineFlags::SubStart | LineFlags::BlockStart | LineFlags::VerifiedCode));
+			if (addrInfo.Type == SnesMemoryType::PrgRom && _cdl->IsSubEntryPoint(addrInfo.Address))
+			{
+				results.push_back(DisassemblyResult(addrInfo, i,
+				                                    LineFlags::SubStart | LineFlags::BlockStart | LineFlags::VerifiedCode));
 			}
 
-			if(_labelManager->GetLabelAndComment(addrInfo, labelInfo)) {
+			if (_labelManager->GetLabelAndComment(addrInfo, labelInfo))
+			{
 				bool hasMultipleComment = labelInfo.Comment.find_first_of('\n') != string::npos;
-				if(hasMultipleComment) {
+				if (hasMultipleComment)
+				{
 					int16_t lineCount = 0;
-					for(char c : labelInfo.Comment) {
-						if(c == '\n') {
+					for (char c : labelInfo.Comment)
+					{
+						if (c == '\n')
+						{
 							results.push_back(DisassemblyResult(addrInfo, i, LineFlags::Comment, lineCount));
 							lineCount++;
 						}
@@ -293,42 +338,62 @@ void Disassembler::Disassemble(CpuType cpuType)
 					results.push_back(DisassemblyResult(addrInfo, i, LineFlags::Comment, lineCount));
 				}
 
-				if(labelInfo.Label.size()) {
+				if (labelInfo.Label.size())
+				{
 					results.push_back(DisassemblyResult(addrInfo, i, LineFlags::Label));
 				}
 
-				if(!hasMultipleComment && labelInfo.Comment.size()) {
+				if (!hasMultipleComment && labelInfo.Comment.size())
+				{
 					results.push_back(DisassemblyResult(addrInfo, i, LineFlags::Comment));
-				} else {
+				}
+				else
+				{
 					results.push_back(DisassemblyResult(addrInfo, i));
 				}
-			} else {
+			}
+			else
+			{
 				results.push_back(DisassemblyResult(addrInfo, i));
 			}
 
 			//Move to the end of the instruction (but realign disassembly if another valid instruction is found)
 			//This can sometimes happen if the 2nd byte of BRK/COP is reused as the first byte of the next instruction
 			//Also required when disassembling unvalidated data as code (to realign once we find verified code)
-			for(int j = 1, max = (int)(*src.Cache).size(); j < opSize && addrInfo.Address + j < max; j++) {
-				if((*src.Cache)[addrInfo.Address + j].IsInitialized()) {
+			for (int j = 1, max = (int)(*src.Cache).size(); j < opSize && addrInfo.Address + j < max; j++)
+			{
+				if ((*src.Cache)[addrInfo.Address + j].IsInitialized())
+				{
 					break;
 				}
 				i++;
 			}
 
-			if(DisassemblyInfo::IsReturnInstruction(opCode, cpuType)) {
+			if (DisassemblyInfo::IsReturnInstruction(opCode, cpuType))
+			{
 				//End of function
 				results.push_back(DisassemblyResult(-1, LineFlags::VerifiedCode | LineFlags::BlockEnd));
-			} 
-		} else {
-			if(showData || showUnident) {
-				if((isData && inUnknownBlock) || (!isData && inVerifiedBlock)) {
-					if(isData && inUnknownBlock) {
+			}
+		}
+		else
+		{
+			if (showData || showUnident)
+			{
+				if ((isData && inUnknownBlock) || (!isData && inVerifiedBlock))
+				{
+					if (isData && inUnknownBlock)
+					{
 						//In an unknown block and the next byte is data, end the block
-						results.push_back(DisassemblyResult(prevAddrInfo, i - 1, LineFlags::BlockEnd | (showUnident ? LineFlags::ShowAsData : 0)));
-					} else if(!isData && inVerifiedBlock) {
+						results.push_back(DisassemblyResult(prevAddrInfo, i - 1,
+						                                    LineFlags::BlockEnd | (showUnident ? LineFlags::ShowAsData : 0)));
+					}
+					else if (!isData && inVerifiedBlock)
+					{
 						//In a verified data block and the next byte is unknown, end the block
-						results.push_back(DisassemblyResult(prevAddrInfo, i - 1, LineFlags::BlockEnd | LineFlags::VerifiedData | (showData ? LineFlags::ShowAsData : 0)));
+						results.push_back(DisassemblyResult(prevAddrInfo, i - 1,
+						                                    LineFlags::BlockEnd | LineFlags::VerifiedData | (showData
+							                                    ? LineFlags::ShowAsData
+							                                    : 0)));
 					}
 					inUnknownBlock = false;
 					inVerifiedBlock = false;
@@ -336,29 +401,45 @@ void Disassembler::Disassemble(CpuType cpuType)
 				}
 			}
 
-			if(byteCounter > 0) {
+			if (byteCounter > 0)
+			{
 				//If showing as hex data, add a new data line every 8 bytes
 				byteCounter--;
-				if(byteCounter == 0) {
-					results.push_back(DisassemblyResult(addrInfo, i, LineFlags::ShowAsData | (isData ? LineFlags::VerifiedData : 0)));
+				if (byteCounter == 0)
+				{
+					results.push_back(DisassemblyResult(addrInfo, i,
+					                                    LineFlags::ShowAsData | (isData ? LineFlags::VerifiedData : 0)));
 					byteCounter = 8;
 				}
-			} else if(!inUnknownBlock && !inVerifiedBlock) {
+			}
+			else if (!inUnknownBlock && !inVerifiedBlock)
+			{
 				//If not in a block, start a new block based on the current byte's type (data vs unidentified)
 				bool showAsData = (isData && showData) || ((!isData && !isCode) && showUnident);
-				if(isData) {
+				if (isData)
+				{
 					inVerifiedBlock = true;
-					results.push_back(DisassemblyResult(addrInfo, i, LineFlags::BlockStart | LineFlags::VerifiedData | (showAsData ? LineFlags::ShowAsData : 0)));
-				} else {
+					results.push_back(DisassemblyResult(addrInfo, i,
+					                                    LineFlags::BlockStart | LineFlags::VerifiedData | (showAsData
+						                                    ? LineFlags::ShowAsData
+						                                    : 0)));
+				}
+				else
+				{
 					inUnknownBlock = true;
-					results.push_back(DisassemblyResult(addrInfo, i, LineFlags::BlockStart | (showAsData ? LineFlags::ShowAsData : 0)));
+					results.push_back(DisassemblyResult(addrInfo, i,
+					                                    LineFlags::BlockStart | (showAsData ? LineFlags::ShowAsData : 0)));
 				}
 
-				if(showAsData) {
+				if (showAsData)
+				{
 					//If showing data as hex, add the first row of the block
-					results.push_back(DisassemblyResult(addrInfo, i, LineFlags::ShowAsData | (isData ? LineFlags::VerifiedData : 0)));
+					results.push_back(DisassemblyResult(addrInfo, i,
+					                                    LineFlags::ShowAsData | (isData ? LineFlags::VerifiedData : 0)));
 					byteCounter = 8;
-				} else {
+				}
+				else
+				{
 					//If not showing the data at all, display 1 empty line
 					results.push_back(DisassemblyResult(-1, LineFlags::None | (isData ? LineFlags::VerifiedData : 0)));
 				}
@@ -366,16 +447,19 @@ void Disassembler::Disassemble(CpuType cpuType)
 		}
 	}
 
-	if(inUnknownBlock || inVerifiedBlock) {
-		int flags = LineFlags::BlockEnd | (inVerifiedBlock ? LineFlags::VerifiedData : 0) | (((inVerifiedBlock && showData) || (inUnknownBlock && showUnident)) ? LineFlags::ShowAsData : 0);
+	if (inUnknownBlock || inVerifiedBlock)
+	{
+		int flags = LineFlags::BlockEnd | (inVerifiedBlock ? LineFlags::VerifiedData : 0) | (
+			((inVerifiedBlock && showData) || (inUnknownBlock && showUnident)) ? LineFlags::ShowAsData : 0);
 		results.push_back(DisassemblyResult(addrInfo, maxAddr, flags));
 	}
 }
 
-DisassemblyInfo Disassembler::GetDisassemblyInfo(AddressInfo &info, uint32_t cpuAddress, uint8_t cpuFlags, CpuType type)
+DisassemblyInfo Disassembler::GetDisassemblyInfo(AddressInfo& info, uint32_t cpuAddress, uint8_t cpuFlags, CpuType type)
 {
 	DisassemblyInfo disassemblyInfo = (*GetSource(info.Type).Cache)[info.Address];
-	if(!disassemblyInfo.IsInitialized()) {
+	if (!disassemblyInfo.IsInitialized())
+	{
 		disassemblyInfo.Initialize(cpuAddress, cpuFlags, type, _memoryDumper);
 	}
 	return disassemblyInfo;
@@ -400,14 +484,20 @@ uint32_t Disassembler::GetLineIndex(CpuType type, uint32_t cpuAddress)
 	auto lock = _disassemblyLock.AcquireSafe();
 	vector<DisassemblyResult>& source = _disassemblyResult[(int)type];
 	uint32_t lastAddress = 0;
-	for(size_t i = 1; i < source.size(); i++) {
-		if(source[i].CpuAddress < 0 || (source[i].Flags & LineFlags::SubStart) | (source[i].Flags & LineFlags::Label) || ((source[i].Flags & LineFlags::Comment) && source[i].CommentLine >= 0)) {
+	for (size_t i = 1; i < source.size(); i++)
+	{
+		if (source[i].CpuAddress < 0 || (source[i].Flags & LineFlags::SubStart) | (source[i].Flags & LineFlags::Label) ||
+			((source[i].Flags & LineFlags::Comment) && source[i].CommentLine >= 0))
+		{
 			continue;
 		}
 
-		if(cpuAddress == (uint32_t)source[i].CpuAddress) {
+		if (cpuAddress == (uint32_t)source[i].CpuAddress)
+		{
 			return (uint32_t)i;
-		} else if(cpuAddress >= lastAddress && cpuAddress < (uint32_t)source[i].CpuAddress) {
+		}
+		else if (cpuAddress >= lastAddress && cpuAddress < (uint32_t)source[i].CpuAddress)
+		{
 			return (uint32_t)i - 1;
 		}
 
@@ -416,53 +506,68 @@ uint32_t Disassembler::GetLineIndex(CpuType type, uint32_t cpuAddress)
 	return 0;
 }
 
-bool Disassembler::GetLineData(CpuType type, uint32_t lineIndex, CodeLineData &data)
+bool Disassembler::GetLineData(CpuType type, uint32_t lineIndex, CodeLineData& data)
 {
-	auto lock =_disassemblyLock.AcquireSafe();
+	auto lock = _disassemblyLock.AcquireSafe();
 
 	vector<DisassemblyResult>& source = _disassemblyResult[(int)type];
 	SnesMemoryType memType = DebugUtilities::GetCpuMemoryType(type);
 	int32_t maxAddr = type == CpuType::Spc ? 0xFFFF : 0xFFFFFF;
-	if(lineIndex < source.size()) {
+	if (lineIndex < source.size())
+	{
 		DisassemblyResult result = source[lineIndex];
 		data.Address = -1;
 		data.AbsoluteAddress = -1;
 		data.EffectiveAddress = -1;
 		data.Flags = result.Flags;
 
-		switch(result.Address.Type) {
-			default: break;
-			case SnesMemoryType::GbPrgRom:
-			case SnesMemoryType::PrgRom: data.Flags |= (uint8_t)LineFlags::PrgRom; break;
+		switch (result.Address.Type)
+		{
+		default: break;
+		case SnesMemoryType::GbPrgRom:
+		case SnesMemoryType::PrgRom: data.Flags |= (uint8_t)LineFlags::PrgRom;
+			break;
 
-			case SnesMemoryType::GbWorkRam:
-			case SnesMemoryType::WorkRam: data.Flags |= (uint8_t)LineFlags::WorkRam; break;
-			
-			case SnesMemoryType::GbCartRam:
-			case SnesMemoryType::SaveRam: data.Flags |= (uint8_t)LineFlags::SaveRam; break;
+		case SnesMemoryType::GbWorkRam:
+		case SnesMemoryType::WorkRam: data.Flags |= (uint8_t)LineFlags::WorkRam;
+			break;
+
+		case SnesMemoryType::GbCartRam:
+		case SnesMemoryType::SaveRam: data.Flags |= (uint8_t)LineFlags::SaveRam;
+			break;
 		}
 
 		bool isBlockStartEnd = (data.Flags & (LineFlags::BlockStart | LineFlags::BlockEnd)) != 0;
-		if(!isBlockStartEnd && result.Address.Address >= 0) {
-			if((data.Flags & LineFlags::ShowAsData)) {
+		if (!isBlockStartEnd && result.Address.Address >= 0)
+		{
+			if ((data.Flags & LineFlags::ShowAsData))
+			{
 				FastString str(".db", 3);
-				int nextAddr = lineIndex < source.size() - 2 ? (source[lineIndex+1].CpuAddress + 1) : (maxAddr + 1);
-				for(int i = 0; i < 8 && result.CpuAddress+i < nextAddr; i++) {
+				int nextAddr = lineIndex < source.size() - 2 ? (source[lineIndex + 1].CpuAddress + 1) : (maxAddr + 1);
+				for (int i = 0; i < 8 && result.CpuAddress + i < nextAddr; i++)
+				{
 					str.Write(" $", 2);
 					str.Write(HexUtilities::ToHexChar(_memoryDumper->GetMemoryValue(memType, result.CpuAddress + i)), 2);
 				}
 				data.Address = result.CpuAddress;
 				data.AbsoluteAddress = result.Address.Address;
 				memcpy(data.Text, str.ToString(), str.GetSize());
-			} else if((data.Flags & LineFlags::Comment) && result.CommentLine >= 0) {
-				string comment = ";" + StringUtilities::Split(_labelManager->GetComment(result.Address), '\n')[result.CommentLine];
+			}
+			else if ((data.Flags & LineFlags::Comment) && result.CommentLine >= 0)
+			{
+				string comment = ";" + StringUtilities::Split(_labelManager->GetComment(result.Address), '\n')[result.
+					CommentLine];
 				data.Flags |= LineFlags::VerifiedCode;
 				memcpy(data.Comment, comment.c_str(), std::min<int>((int)comment.size(), 1000));
-			} else if(data.Flags & LineFlags::Label) {
+			}
+			else if (data.Flags & LineFlags::Label)
+			{
 				string label = _labelManager->GetLabel(result.Address) + ":";
 				data.Flags |= LineFlags::VerifiedCode;
 				memcpy(data.Text, label.c_str(), std::min<int>((int)label.size(), 1000));
-			} else {
+			}
+			else
+			{
 				DisassemblerSource src = GetSource(result.Address.Type);
 				DisassemblyInfo disInfo = (*src.Cache)[result.Address.Address];
 				CpuType lineCpuType = disInfo.IsInitialized() ? disInfo.GetCpuType() : type;
@@ -470,88 +575,119 @@ bool Disassembler::GetLineData(CpuType type, uint32_t lineIndex, CodeLineData &d
 				data.Address = result.CpuAddress;
 				data.AbsoluteAddress = result.Address.Address;
 
-				switch(lineCpuType) {
-					case CpuType::Cpu:
-					case CpuType::Sa1: {
+				switch (lineCpuType)
+				{
+				case CpuType::Cpu:
+				case CpuType::Sa1:
+					{
 						CpuState state = type == CpuType::Sa1 ? _sa1->GetCpuState() : _cpu->GetState();
 						state.PC = (uint16_t)result.CpuAddress;
 						state.K = (result.CpuAddress >> 16);
 
-						if(!disInfo.IsInitialized()) {
+						if (!disInfo.IsInitialized())
+						{
 							disInfo = DisassemblyInfo(src.Data + result.Address.Address, state.PS, lineCpuType);
-						} else {
-							data.Flags |= (result.Address.Type != SnesMemoryType::PrgRom || _cdl->IsCode(data.AbsoluteAddress)) ? LineFlags::VerifiedCode : LineFlags::UnexecutedCode;
+						}
+						else
+						{
+							data.Flags |= (result.Address.Type != SnesMemoryType::PrgRom || _cdl->IsCode(data.AbsoluteAddress))
+								              ? LineFlags::VerifiedCode
+								              : LineFlags::UnexecutedCode;
 						}
 
 						data.OpSize = disInfo.GetOpSize();
 						data.EffectiveAddress = disInfo.GetEffectiveAddress(_console, &state, lineCpuType);
 
-						if(data.EffectiveAddress >= 0) {
+						if (data.EffectiveAddress >= 0)
+						{
 							data.Value = disInfo.GetMemoryValue(data.EffectiveAddress, _memoryDumper, memType, data.ValueSize);
-						} else {
+						}
+						else
+						{
 							data.ValueSize = 0;
 						}
 						break;
 					}
-					
-					case CpuType::Spc: {
+
+				case CpuType::Spc:
+					{
 						SpcState state = _spc->GetState();
 						state.PC = (uint16_t)result.CpuAddress;
 
-						if(!disInfo.IsInitialized()) {
+						if (!disInfo.IsInitialized())
+						{
 							disInfo = DisassemblyInfo(src.Data + result.Address.Address, 0, CpuType::Spc);
-						} else {
+						}
+						else
+						{
 							data.Flags |= LineFlags::VerifiedCode;
 						}
 
 						data.OpSize = disInfo.GetOpSize();
 						data.EffectiveAddress = disInfo.GetEffectiveAddress(_console, &state, lineCpuType);
-						if(data.EffectiveAddress >= 0) {
+						if (data.EffectiveAddress >= 0)
+						{
 							data.Value = disInfo.GetMemoryValue(data.EffectiveAddress, _memoryDumper, memType, data.ValueSize);
 							data.ValueSize = 1;
-						} else {
+						}
+						else
+						{
 							data.ValueSize = 0;
 						}
 						break;
 					}
 
-					case CpuType::Gsu: {
+				case CpuType::Gsu:
+					{
 						GsuState state = _gsu->GetState();
-						if(!disInfo.IsInitialized()) {
+						if (!disInfo.IsInitialized())
+						{
 							disInfo = DisassemblyInfo(src.Data + result.Address.Address, 0, CpuType::Gsu);
-						} else {
+						}
+						else
+						{
 							data.Flags |= LineFlags::VerifiedCode;
 						}
 
 						data.OpSize = disInfo.GetOpSize();
 						data.EffectiveAddress = disInfo.GetEffectiveAddress(_console, &state, lineCpuType);
-						if(data.EffectiveAddress >= 0) {
+						if (data.EffectiveAddress >= 0)
+						{
 							data.Value = disInfo.GetMemoryValue(data.EffectiveAddress, _memoryDumper, memType, data.ValueSize);
 							data.ValueSize = 2;
-						} else {
+						}
+						else
+						{
 							data.ValueSize = 0;
 						}
 						break;
 					}
-					
-					case CpuType::NecDsp:
-					case CpuType::Cx4:
-						if(!disInfo.IsInitialized()) {
-							disInfo = DisassemblyInfo(src.Data + result.Address.Address, 0, type);
-						} else {
-							data.Flags |= LineFlags::VerifiedCode;
-						}
 
-						data.OpSize = disInfo.GetOpSize();
-						data.EffectiveAddress = -1;
-						data.ValueSize = 0;
-						break;
+				case CpuType::NecDsp:
+				case CpuType::Cx4:
+					if (!disInfo.IsInitialized())
+					{
+						disInfo = DisassemblyInfo(src.Data + result.Address.Address, 0, type);
+					}
+					else
+					{
+						data.Flags |= LineFlags::VerifiedCode;
+					}
 
-					case CpuType::Gameboy: {
+					data.OpSize = disInfo.GetOpSize();
+					data.EffectiveAddress = -1;
+					data.ValueSize = 0;
+					break;
+
+				case CpuType::Gameboy:
+					{
 						GbCpuState state = _gameboy->GetCpu()->GetState();
-						if(!disInfo.IsInitialized()) {
+						if (!disInfo.IsInitialized())
+						{
 							disInfo = DisassemblyInfo(src.Data + result.Address.Address, 0, CpuType::Gameboy);
-						} else {
+						}
+						else
+						{
 							data.Flags |= LineFlags::VerifiedCode;
 						}
 
@@ -568,27 +704,38 @@ bool Disassembler::GetLineData(CpuType type, uint32_t lineIndex, CodeLineData &d
 
 				disInfo.GetByteCode(data.ByteCode);
 
-				if(data.Flags & LineFlags::Comment) {
+				if (data.Flags & LineFlags::Comment)
+				{
 					string comment = ";" + _labelManager->GetComment(result.Address);
 					memcpy(data.Comment, comment.c_str(), std::min<int>((int)comment.size(), 1000));
-				} else {
+				}
+				else
+				{
 					data.Comment[0] = 0;
 				}
 			}
-		} else {
-			if(data.Flags & LineFlags::SubStart) {
+		}
+		else
+		{
+			if (data.Flags & LineFlags::SubStart)
+			{
 				string label = _labelManager->GetLabel(result.Address);
-				if(label.empty()) {
+				if (label.empty())
+				{
 					label = "sub start";
 				}
 				memcpy(data.Text, label.c_str(), label.size() + 1);
-			} else if(data.Flags & LineFlags::BlockStart) {
+			}
+			else if (data.Flags & LineFlags::BlockStart)
+			{
 				string label = (data.Flags & LineFlags::VerifiedData) ? "data" : "unidentified";
 				memcpy(data.Text, label.c_str(), label.size() + 1);
 			}
 
-			if(data.Flags & (LineFlags::BlockStart | LineFlags::BlockEnd)) {
-				if(!(data.Flags & (LineFlags::ShowAsData | LineFlags::SubStart))) {
+			if (data.Flags & (LineFlags::BlockStart | LineFlags::BlockEnd))
+			{
+				if (!(data.Flags & (LineFlags::ShowAsData | LineFlags::SubStart)))
+				{
 					//For hidden blocks, give the start/end lines an address
 					data.Address = result.CpuAddress;
 					data.AbsoluteAddress = result.Address.Address;
@@ -600,25 +747,31 @@ bool Disassembler::GetLineData(CpuType type, uint32_t lineIndex, CodeLineData &d
 	return false;
 }
 
-int32_t Disassembler::SearchDisassembly(CpuType type, const char *searchString, int32_t startPosition, int32_t endPosition, bool searchBackwards)
+int32_t Disassembler::SearchDisassembly(CpuType type, const char* searchString, int32_t startPosition,
+                                        int32_t endPosition, bool searchBackwards)
 {
 	auto lock = _disassemblyLock.AcquireSafe();
 	vector<DisassemblyResult>& source = _disassemblyResult[(int)type];
 	int step = searchBackwards ? -1 : 1;
 	CodeLineData lineData = {};
-	for(int i = startPosition; i != endPosition; i += step) {
+	for (int i = startPosition; i != endPosition; i += step)
+	{
 		GetLineData(type, i, lineData);
 		string line = lineData.Text;
 		std::transform(line.begin(), line.end(), line.begin(), ::tolower);
 
-		if(line.find(searchString) != string::npos) {
+		if (line.find(searchString) != string::npos)
+		{
 			return i;
 		}
 
 		//Continue search from start/end of document
-		if(!searchBackwards && i == (int)(source.size() - 1)) {
+		if (!searchBackwards && i == (int)(source.size() - 1))
+		{
 			i = 0;
-		} else if(searchBackwards && i == 0) {
+		}
+		else if (searchBackwards && i == 0)
+		{
 			i = (int32_t)(source.size() - 1);
 		}
 	}

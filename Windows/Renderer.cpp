@@ -13,7 +13,8 @@
 
 using namespace DirectX;
 
-Renderer::Renderer(shared_ptr<Console> console, HWND hWnd, bool registerAsMessageManager) : BaseRenderer(console, registerAsMessageManager)
+Renderer::Renderer(shared_ptr<Console> console, HWND hWnd, bool registerAsMessageManager) : BaseRenderer(
+	console, registerAsMessageManager)
 {
 	_hWnd = hWnd;
 
@@ -23,7 +24,8 @@ Renderer::Renderer(shared_ptr<Console> console, HWND hWnd, bool registerAsMessag
 Renderer::~Renderer()
 {
 	shared_ptr<VideoRenderer> videoRenderer = _console->GetVideoRenderer();
-	if(videoRenderer) {
+	if (videoRenderer)
+	{
 		videoRenderer->UnregisterRenderingDevice(this);
 	}
 	CleanupDevice();
@@ -31,7 +33,8 @@ Renderer::~Renderer()
 
 void Renderer::SetFullscreenMode(bool fullscreen, void* windowHandle, uint32_t monitorWidth, uint32_t monitorHeight)
 {
-	if(fullscreen != _fullscreen || _hWnd != (HWND)windowHandle) {
+	if (fullscreen != _fullscreen || _hWnd != (HWND)windowHandle)
+	{
 		_hWnd = (HWND)windowHandle;
 		_monitorWidth = monitorWidth;
 		_monitorHeight = monitorHeight;
@@ -43,21 +46,29 @@ void Renderer::SetScreenSize(uint32_t width, uint32_t height)
 {
 	ScreenSize screenSize = _console->GetVideoDecoder()->GetScreenSize(false);
 	VideoConfig cfg = _console->GetSettings()->GetVideoConfig();
-	if(_screenHeight != screenSize.Height || _screenWidth != screenSize.Width || _nesFrameHeight != height || _nesFrameWidth != width || _newFullscreen != _fullscreen || _useBilinearInterpolation != cfg.UseBilinearInterpolation) {
+	if (_screenHeight != screenSize.Height || _screenWidth != screenSize.Width || _nesFrameHeight != height ||
+		_nesFrameWidth != width || _newFullscreen != _fullscreen || _useBilinearInterpolation != cfg.
+		UseBilinearInterpolation)
+	{
 		auto frameLock = _frameLock.AcquireSafe();
 		auto textureLock = _textureLock.AcquireSafe();
 		screenSize = _console->GetVideoDecoder()->GetScreenSize(false);
-		if(_screenHeight != screenSize.Height || _screenWidth != screenSize.Width || _nesFrameHeight != height || _nesFrameWidth != width || _newFullscreen != _fullscreen || _useBilinearInterpolation != cfg.UseBilinearInterpolation) {
+		if (_screenHeight != screenSize.Height || _screenWidth != screenSize.Width || _nesFrameHeight != height ||
+			_nesFrameWidth != width || _newFullscreen != _fullscreen || _useBilinearInterpolation != cfg.
+			UseBilinearInterpolation)
+		{
 			_nesFrameHeight = height;
 			_nesFrameWidth = width;
-			_newFrameBufferSize = width*height;
+			_newFrameBufferSize = width * height;
 
 			bool needReset = _fullscreen != _newFullscreen || _useBilinearInterpolation != cfg.UseBilinearInterpolation;
 			bool fullscreenResizeMode = _fullscreen && _newFullscreen;
 
-			if(_pSwapChain && _fullscreen && !_newFullscreen) {
+			if (_pSwapChain && _fullscreen && !_newFullscreen)
+			{
 				HRESULT hr = _pSwapChain->SetFullscreenState(FALSE, NULL);
-				if(FAILED(hr)) {
+				if (FAILED(hr))
+				{
 					MessageManager::Log("SetFullscreenState(FALSE) failed - Error:" + std::to_string(hr));
 				}
 			}
@@ -67,21 +78,26 @@ void Renderer::SetScreenSize(uint32_t width, uint32_t height)
 			_screenHeight = screenSize.Height;
 			_screenWidth = screenSize.Width;
 
-			if(_fullscreen) {
+			if (_fullscreen)
+			{
 				_realScreenHeight = _monitorHeight;
 				_realScreenWidth = _monitorWidth;
 
 				//Ensure the screen width/height is smaller or equal to the fullscreen resolution, no matter the requested scale
-				if(_monitorHeight < _screenHeight || _monitorWidth < _screenWidth) {
+				if (_monitorHeight < _screenHeight || _monitorWidth < _screenWidth)
+				{
 					double scale = (double)screenSize.Width / (double)screenSize.Height;
 					_screenHeight = _monitorHeight;
 					_screenWidth = (uint32_t)(scale * _screenHeight);
-					if(_monitorWidth < _screenWidth) {
+					if (_monitorWidth < _screenWidth)
+					{
 						_screenWidth = _monitorWidth;
 						_screenHeight = (uint32_t)(_screenWidth / scale);
 					}
 				}
-			} else {
+			}
+			else
+			{
 				_realScreenHeight = screenSize.Height;
 				_realScreenWidth = screenSize.Width;
 			}
@@ -89,15 +105,21 @@ void Renderer::SetScreenSize(uint32_t width, uint32_t height)
 			_leftMargin = (_realScreenWidth - _screenWidth) / 2;
 			_topMargin = (_realScreenHeight - _screenHeight) / 2;
 
-			_screenBufferSize = _realScreenHeight*_realScreenWidth;
+			_screenBufferSize = _realScreenHeight * _realScreenWidth;
 
-			if(!_pSwapChain || needReset) {
+			if (!_pSwapChain || needReset)
+			{
 				Reset();
-			} else {
-				if(fullscreenResizeMode) {
+			}
+			else
+			{
+				if (fullscreenResizeMode)
+				{
 					ResetNesBuffers();
 					CreateNesBuffers();
-				} else {
+				}
+				else
+				{
 					ResetNesBuffers();
 					ReleaseRenderTargetView();
 					_pSwapChain->ResizeBuffers(1, _realScreenWidth, _realScreenHeight, DXGI_FORMAT_B8G8R8A8_UNORM_SRGB, 0);
@@ -113,9 +135,12 @@ void Renderer::Reset()
 {
 	auto lock = _frameLock.AcquireSafe();
 	CleanupDevice();
-	if(FAILED(InitDevice())) {
+	if (FAILED(InitDevice()))
+	{
 		CleanupDevice();
-	} else {
+	}
+	else
+	{
 		_console->GetVideoRenderer()->RegisterRenderingDevice(this);
 	}
 }
@@ -124,28 +149,34 @@ void Renderer::CleanupDevice()
 {
 	ResetNesBuffers();
 	ReleaseRenderTargetView();
-	if(_pAlphaEnableBlendingState) {
+	if (_pAlphaEnableBlendingState)
+	{
 		_pAlphaEnableBlendingState->Release();
 		_pAlphaEnableBlendingState = nullptr;
 	}
-	if(_pDepthDisabledStencilState) {
+	if (_pDepthDisabledStencilState)
+	{
 		_pDepthDisabledStencilState->Release();
 		_pDepthDisabledStencilState = nullptr;
 	}
-	if(_samplerState) {
+	if (_samplerState)
+	{
 		_samplerState->Release();
 		_samplerState = nullptr;
 	}
-	if(_pSwapChain) {
+	if (_pSwapChain)
+	{
 		_pSwapChain->SetFullscreenState(false, nullptr);
 		_pSwapChain->Release();
 		_pSwapChain = nullptr;
 	}
-	if(_pDeviceContext) {
+	if (_pDeviceContext)
+	{
 		_pDeviceContext->Release();
 		_pDeviceContext = nullptr;
 	}
-	if(_pd3dDevice) {
+	if (_pd3dDevice)
+	{
 		_pd3dDevice->Release();
 		_pd3dDevice = nullptr;
 	}
@@ -153,19 +184,23 @@ void Renderer::CleanupDevice()
 
 void Renderer::ResetNesBuffers()
 {
-	if(_pTexture) {
+	if (_pTexture)
+	{
 		_pTexture->Release();
 		_pTexture = nullptr;
 	}
-	if(_overlayTexture) {
+	if (_overlayTexture)
+	{
 		_overlayTexture->Release();
 		_overlayTexture = nullptr;
 	}
-	if(_pTextureSrv) {
+	if (_pTextureSrv)
+	{
 		_pTextureSrv->Release();
 		_pTextureSrv = nullptr;
 	}
-	if(_pOverlaySrv) {
+	if (_pOverlaySrv)
+	{
 		_pOverlaySrv->Release();
 		_pOverlaySrv = nullptr;
 	}
@@ -178,7 +213,8 @@ void Renderer::ResetNesBuffers()
 
 void Renderer::ReleaseRenderTargetView()
 {
-	if(_pRenderTargetView) {
+	if (_pRenderTargetView)
+	{
 		_pRenderTargetView->Release();
 		_pRenderTargetView = nullptr;
 	}
@@ -189,14 +225,16 @@ HRESULT Renderer::CreateRenderTargetView()
 	// Create a render target view
 	ID3D11Texture2D* pBackBuffer = nullptr;
 	HRESULT hr = _pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		MessageManager::Log("SwapChain::GetBuffer() failed - Error:" + std::to_string(hr));
 		return hr;
 	}
 
 	hr = _pd3dDevice->CreateRenderTargetView(pBackBuffer, nullptr, &_pRenderTargetView);
 	pBackBuffer->Release();
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		MessageManager::Log("D3DDevice::CreateRenderTargetView() failed - Error:" + std::to_string(hr));
 		return hr;
 	}
@@ -218,25 +256,29 @@ HRESULT Renderer::CreateNesBuffers()
 	vp.TopLeftY = 0;
 	_pDeviceContext->RSSetViewports(1, &vp);
 
-	_textureBuffer[0] = new uint8_t[_nesFrameWidth*_nesFrameHeight * 4];
-	_textureBuffer[1] = new uint8_t[_nesFrameWidth*_nesFrameHeight * 4];
-	memset(_textureBuffer[0], 0, _nesFrameWidth*_nesFrameHeight * 4);
-	memset(_textureBuffer[1], 0, _nesFrameWidth*_nesFrameHeight * 4);
+	_textureBuffer[0] = new uint8_t[_nesFrameWidth * _nesFrameHeight * 4];
+	_textureBuffer[1] = new uint8_t[_nesFrameWidth * _nesFrameHeight * 4];
+	memset(_textureBuffer[0], 0, _nesFrameWidth * _nesFrameHeight * 4);
+	memset(_textureBuffer[1], 0, _nesFrameWidth * _nesFrameHeight * 4);
 
 	_pTexture = CreateTexture(_nesFrameWidth, _nesFrameHeight);
-	if(!_pTexture) {
+	if (!_pTexture)
+	{
 		return S_FALSE;
 	}
 	_overlayTexture = CreateTexture(8, 8);
-	if(!_overlayTexture) {
+	if (!_overlayTexture)
+	{
 		return S_FALSE;
 	}
 	_pTextureSrv = GetShaderResourceView(_pTexture);
-	if(!_pTextureSrv) {
+	if (!_pTextureSrv)
+	{
 		return S_FALSE;
 	}
 	_pOverlaySrv = GetShaderResourceView(_overlayTexture);
-	if(!_pOverlaySrv) {
+	if (!_pOverlaySrv)
+	{
 		return S_FALSE;
 	}
 
@@ -296,38 +338,49 @@ HRESULT Renderer::InitDevice()
 
 	D3D_DRIVER_TYPE driverType = D3D_DRIVER_TYPE_NULL;
 	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_1;
-	for(UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++) {
+	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
+	{
 		driverType = driverTypes[driverTypeIndex];
 		featureLevel = D3D_FEATURE_LEVEL_11_1;
-		hr = D3D11CreateDeviceAndSwapChain(nullptr, driverType, nullptr, createDeviceFlags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &sd, &_pSwapChain, &_pd3dDevice, &featureLevel, &_pDeviceContext);
+		hr = D3D11CreateDeviceAndSwapChain(nullptr, driverType, nullptr, createDeviceFlags, featureLevels,
+		                                   numFeatureLevels, D3D11_SDK_VERSION, &sd, &_pSwapChain, &_pd3dDevice,
+		                                   &featureLevel, &_pDeviceContext);
 
 		/*if(FAILED(hr)) {
 			MessageManager::Log("D3D11CreateDeviceAndSwapChain() failed - Error:" + std::to_string(hr));
 		}*/
 
-		if(hr == E_INVALIDARG) {
+		if (hr == E_INVALIDARG)
+		{
 			// DirectX 11.0 platforms will not recognize D3D_FEATURE_LEVEL_11_1 so we need to retry without it
 			featureLevel = D3D_FEATURE_LEVEL_11_0;
-			hr = D3D11CreateDeviceAndSwapChain(nullptr, driverType, nullptr, createDeviceFlags, &featureLevels[1], numFeatureLevels - 1, D3D11_SDK_VERSION, &sd, &_pSwapChain, &_pd3dDevice, &featureLevel, &_pDeviceContext);
+			hr = D3D11CreateDeviceAndSwapChain(nullptr, driverType, nullptr, createDeviceFlags, &featureLevels[1],
+			                                   numFeatureLevels - 1, D3D11_SDK_VERSION, &sd, &_pSwapChain, &_pd3dDevice,
+			                                   &featureLevel, &_pDeviceContext);
 		}
 
-		if(SUCCEEDED(hr)) {
+		if (SUCCEEDED(hr))
+		{
 			break;
 		}
 	}
-		
-	if(FAILED(hr)) {
+
+	if (FAILED(hr))
+	{
 		MessageManager::Log("D3D11CreateDeviceAndSwapChain() failed - Error:" + std::to_string(hr));
 		return hr;
 	}
 
-	if(_fullscreen) {
+	if (_fullscreen)
+	{
 		hr = _pSwapChain->SetFullscreenState(TRUE, NULL);
-		if(FAILED(hr)) {
+		if (FAILED(hr))
+		{
 			MessageManager::Log("SetFullscreenState(true) failed - Error:" + std::to_string(hr));
 			MessageManager::Log("Switching back to windowed mode");
 			hr = _pSwapChain->SetFullscreenState(FALSE, NULL);
-			if(FAILED(hr)) {
+			if (FAILED(hr))
+			{
 				MessageManager::Log("SetFullscreenState(false) failed - Error:" + std::to_string(hr));
 				return hr;
 			}
@@ -335,7 +388,8 @@ HRESULT Renderer::InitDevice()
 	}
 
 	hr = CreateRenderTargetView();
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		return hr;
 	}
 
@@ -358,7 +412,8 @@ HRESULT Renderer::InitDevice()
 
 	// Create the state using the device.
 	hr = _pd3dDevice->CreateDepthStencilState(&depthDisabledStencilDesc, &_pDepthDisabledStencilState);
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		MessageManager::Log("D3DDevice::CreateDepthStencilState() failed - Error:" + std::to_string(hr));
 		return hr;
 	}
@@ -379,7 +434,8 @@ HRESULT Renderer::InitDevice()
 
 	// Create the blend state using the description.
 	hr = _pd3dDevice->CreateBlendState(&blendStateDescription, &_pAlphaEnableBlendingState);
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		MessageManager::Log("D3DDevice::CreateBlendState() failed - Error:" + std::to_string(hr));
 		return hr;
 	}
@@ -389,17 +445,19 @@ HRESULT Renderer::InitDevice()
 	blendFactor[1] = 0.0f;
 	blendFactor[2] = 0.0f;
 	blendFactor[3] = 0.0f;
-	
+
 	_pDeviceContext->OMSetBlendState(_pAlphaEnableBlendingState, blendFactor, 0xffffffff);
 	_pDeviceContext->OMSetDepthStencilState(_pDepthDisabledStencilState, 1);
 
 	hr = CreateNesBuffers();
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		return hr;
 	}
 
 	hr = CreateSamplerState();
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		return hr;
 	}
 
@@ -425,7 +483,8 @@ HRESULT Renderer::CreateSamplerState()
 	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 
 	HRESULT hr = _pd3dDevice->CreateSamplerState(&samplerDesc, &_samplerState);
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		MessageManager::Log("D3DDevice::CreateSamplerState() failed - Error:" + std::to_string(hr));
 	}
 
@@ -452,7 +511,8 @@ ID3D11Texture2D* Renderer::CreateTexture(uint32_t width, uint32_t height)
 	desc.MiscFlags = 0;
 
 	HRESULT hr = _pd3dDevice->CreateTexture2D(&desc, nullptr, &texture);
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		MessageManager::Log("D3DDevice::CreateTexture() failed - Error:" + std::to_string(hr));
 		return nullptr;
 	}
@@ -461,9 +521,10 @@ ID3D11Texture2D* Renderer::CreateTexture(uint32_t width, uint32_t height)
 
 ID3D11ShaderResourceView* Renderer::GetShaderResourceView(ID3D11Texture2D* texture)
 {
-	ID3D11ShaderResourceView *shaderResourceView = nullptr;
+	ID3D11ShaderResourceView* shaderResourceView = nullptr;
 	HRESULT hr = _pd3dDevice->CreateShaderResourceView(texture, nullptr, &shaderResourceView);
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		MessageManager::Log("D3DDevice::CreateShaderResourceView() failed - Error:" + std::to_string(hr));
 		return nullptr;
 	}
@@ -477,25 +538,29 @@ void Renderer::DrawString(string message, float x, float y, DirectX::FXMVECTOR c
 	DrawString(textStr, x, y, color, scale, font);
 }
 
-void Renderer::DrawString(std::wstring message, float x, float y, DirectX::FXMVECTOR color, float scale, SpriteFont* font)
+void Renderer::DrawString(std::wstring message, float x, float y, DirectX::FXMVECTOR color, float scale,
+                          SpriteFont* font)
 {
-	const wchar_t *text = message.c_str();
-	if(font == nullptr) {
+	const wchar_t* text = message.c_str();
+	if (font == nullptr)
+	{
 		font = _font.get();
 	}
 
-	font->DrawString(_spriteBatch.get(), text, XMFLOAT2(x+_leftMargin, y+_topMargin), color, 0.0f, XMFLOAT2(0, 0), scale);
+	font->DrawString(_spriteBatch.get(), text, XMFLOAT2(x + _leftMargin, y + _topMargin), color, 0.0f, XMFLOAT2(0, 0),
+	                 scale);
 }
 
-void Renderer::UpdateFrame(void *frameBuffer, uint32_t width, uint32_t height)
+void Renderer::UpdateFrame(void* frameBuffer, uint32_t width, uint32_t height)
 {
 	SetScreenSize(width, height);
 
 	uint32_t bpp = 4;
 	auto lock = _textureLock.AcquireSafe();
-	if(_textureBuffer[0]) {
+	if (_textureBuffer[0])
+	{
 		//_textureBuffer[0] may be null if directx failed to initialize properly
-		memcpy(_textureBuffer[0], frameBuffer, width*height*bpp);
+		memcpy(_textureBuffer[0], frameBuffer, width * height * bpp);
 		_needFlip = true;
 		_frameChanged = true;
 	}
@@ -504,14 +569,16 @@ void Renderer::UpdateFrame(void *frameBuffer, uint32_t width, uint32_t height)
 void Renderer::DrawScreen()
 {
 	//Swap buffers - emulator always writes to _textureBuffer[0], screen always draws _textureBuffer[1]
-	if(_needFlip) {
+	if (_needFlip)
+	{
 		auto lock = _textureLock.AcquireSafe();
 		uint8_t* textureBuffer = _textureBuffer[0];
 		_textureBuffer[0] = _textureBuffer[1];
 		_textureBuffer[1] = textureBuffer;
 		_needFlip = false;
 
-		if(_frameChanged) {
+		if (_frameChanged)
+		{
 			_frameChanged = false;
 			_renderedFrameCount++;
 		}
@@ -522,13 +589,15 @@ void Renderer::DrawScreen()
 	uint32_t rowPitch = _nesFrameWidth * bpp;
 	D3D11_MAPPED_SUBRESOURCE dd;
 	HRESULT hr = _pDeviceContext->Map(_pTexture, 0, D3D11_MAP_WRITE_DISCARD, 0, &dd);
-	if(FAILED(hr)) {
+	if (FAILED(hr))
+	{
 		MessageManager::Log("DeviceContext::Map() failed - Error:" + std::to_string(hr));
 		return;
 	}
 	uint8_t* surfacePointer = (uint8_t*)dd.pData;
 	uint8_t* videoBuffer = _textureBuffer[1];
-	for(uint32_t i = 0, iMax = _nesFrameHeight; i < iMax; i++) {
+	for (uint32_t i = 0, iMax = _nesFrameHeight; i < iMax; i++)
+	{
 		memcpy(surfacePointer, videoBuffer, rowPitch);
 		videoBuffer += rowPitch;
 		surfacePointer += dd.RowPitch;
@@ -538,15 +607,15 @@ void Renderer::DrawScreen()
 	RECT destRect;
 	destRect.left = _leftMargin;
 	destRect.top = _topMargin;
-	destRect.right = _screenWidth+_leftMargin;
-	destRect.bottom = _screenHeight+_topMargin;
+	destRect.right = _screenWidth + _leftMargin;
+	destRect.bottom = _screenHeight + _topMargin;
 
 	_spriteBatch->Draw(_pTextureSrv, destRect);
 }
 
 void Renderer::DrawPauseScreen()
 {
-	const static XMVECTORF32 transparentBlue = { { { 1.0f, 0.6f, 0.0f, 0.66f } } };
+	const static XMVECTORF32 transparentBlue = {{{1.0f, 0.6f, 0.0f, 0.66f}}};
 	DrawString("I", 15, 15, transparentBlue, 2.0f, _font.get());
 	DrawString("I", 32, 15, transparentBlue, 2.0f, _font.get());
 }
@@ -555,18 +624,22 @@ void Renderer::Render()
 {
 	bool paused = _console->IsPaused();
 
-	if(_noUpdateCount > 10 || _frameChanged || paused || IsMessageShown()) {
+	if (_noUpdateCount > 10 || _frameChanged || paused || IsMessageShown())
+	{
 		_noUpdateCount = 0;
-		
+
 		auto lock = _frameLock.AcquireSafe();
-		if(_newFullscreen != _fullscreen) {
+		if (_newFullscreen != _fullscreen)
+		{
 			SetScreenSize(_nesFrameWidth, _nesFrameHeight);
 		}
 
-		if(_pDeviceContext == nullptr) {
+		if (_pDeviceContext == nullptr)
+		{
 			//DirectX failed to initialize, try to init
 			Reset();
-			if(_pDeviceContext == nullptr) {
+			if (_pDeviceContext == nullptr)
+			{
 				//Can't init, prevent crash
 				return;
 			}
@@ -580,8 +653,10 @@ void Renderer::Render()
 		//Draw screen
 		DrawScreen();
 
-		if(_console->IsRunning()) {
-			if(paused) {
+		if (_console->IsRunning())
+		{
+			if (paused)
+			{
 				DrawPauseScreen();
 			}
 			DrawCounters();
@@ -595,23 +670,29 @@ void Renderer::Render()
 
 		bool waitVSync = _console->GetSettings()->GetVideoConfig().VerticalSync;
 		HRESULT hr = _pSwapChain->Present(waitVSync ? 1 : 0, 0);
-		if(FAILED(hr)) {
+		if (FAILED(hr))
+		{
 			MessageManager::Log("SwapChain::Present() failed - Error:" + std::to_string(hr));
-			if(hr == DXGI_ERROR_DEVICE_REMOVED) {
-				MessageManager::Log("D3DDevice: GetDeviceRemovedReason: " + std::to_string(_pd3dDevice->GetDeviceRemovedReason()));
+			if (hr == DXGI_ERROR_DEVICE_REMOVED)
+			{
+				MessageManager::Log(
+					"D3DDevice: GetDeviceRemovedReason: " + std::to_string(_pd3dDevice->GetDeviceRemovedReason()));
 			}
 			MessageManager::Log("Trying to reset DX...");
 			Reset();
 		}
-	} else {
+	}
+	else
+	{
 		_noUpdateCount++;
 	}
 }
 
 void Renderer::DrawString(std::wstring message, int x, int y, uint8_t r, uint8_t g, uint8_t b, uint8_t opacity)
 {
-	XMVECTORF32 color = { (float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)opacity / 255.0f };
-	_font->DrawString(_spriteBatch.get(), message.c_str(), XMFLOAT2((float)x+_leftMargin, (float)y+_topMargin), color);
+	XMVECTORF32 color = {(float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)opacity / 255.0f};
+	_font->DrawString(_spriteBatch.get(), message.c_str(), XMFLOAT2((float)x + _leftMargin, (float)y + _topMargin),
+	                  color);
 }
 
 float Renderer::MeasureString(std::wstring text)

@@ -16,7 +16,9 @@
 DummyCpu::DummyCpu(Console* console, CpuType type)
 {
 	_console = console;
-	_memoryMappings = type == CpuType::Cpu ? console->GetMemoryManager()->GetMemoryMappings() : console->GetCartridge()->GetSa1()->GetMemoryMappings();
+	_memoryMappings = type == CpuType::Cpu
+		                  ? console->GetMemoryManager()->GetMemoryMappings()
+		                  : console->GetCartridge()->GetSa1()->GetMemoryMappings();
 	_dmaController = nullptr;
 	_memoryManager = nullptr;
 }
@@ -33,7 +35,7 @@ void DummyCpu::Write(uint32_t addr, uint8_t value, MemoryOperationType type)
 	LogWrite(addr, value);
 }
 
-void DummyCpu::SetDummyState(CpuState &state)
+void DummyCpu::SetDummyState(CpuState& state)
 {
 	_state = state;
 	_state.StopState = CpuStopState::Running;
@@ -65,13 +67,13 @@ void DummyCpu::LogWrite(uint32_t addr, uint8_t value)
 	_writeCounter++;
 }
 
-void DummyCpu::GetWriteInfo(uint32_t index, uint32_t &addr, uint8_t &value)
+void DummyCpu::GetWriteInfo(uint32_t index, uint32_t& addr, uint8_t& value)
 {
 	addr = _writeAddresses[index];
 	value = _writeValue[index];
 }
 
-void DummyCpu::GetReadInfo(uint32_t index, uint32_t &addr, uint8_t &value)
+void DummyCpu::GetReadInfo(uint32_t index, uint32_t& addr, uint8_t& value)
 {
 	addr = _readAddresses[index];
 	value = _readValue[index];

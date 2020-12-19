@@ -12,7 +12,7 @@
 
 #include "Spc.h"
 
-DummySpc::DummySpc(uint8_t *spcRam, SpcState &state)
+DummySpc::DummySpc(uint8_t* spcRam, SpcState& state)
 {
 	_ram = spcRam;
 
@@ -37,9 +37,11 @@ DummySpc::~DummySpc()
 
 void DummySpc::Step()
 {
-	do {
+	do
+	{
 		ProcessCycle();
-	} while(_opStep != SpcOpStep::ReadOpCode);
+	}
+	while (_opStep != SpcOpStep::ReadOpCode);
 }
 
 uint32_t DummySpc::GetWriteCount()
@@ -66,13 +68,13 @@ void DummySpc::LogWrite(uint32_t addr, uint8_t value)
 	_writeCounter++;
 }
 
-void DummySpc::GetWriteInfo(uint32_t index, uint32_t &addr, uint8_t &value)
+void DummySpc::GetWriteInfo(uint32_t index, uint32_t& addr, uint8_t& value)
 {
 	addr = _writeAddresses[index];
 	value = _writeValue[index];
 }
 
-void DummySpc::GetReadInfo(uint32_t index, uint32_t &addr, uint8_t &value)
+void DummySpc::GetReadInfo(uint32_t index, uint32_t& addr, uint8_t& value)
 {
 	addr = _readAddresses[index];
 	value = _readValue[index];

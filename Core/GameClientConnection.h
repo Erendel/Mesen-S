@@ -45,14 +45,14 @@ protected:
 	void ProcessMessage(NetMessage* message) override;
 
 public:
-	GameClientConnection(shared_ptr<Console> console, shared_ptr<Socket> socket, ClientConnectionData &connectionData);
+	GameClientConnection(shared_ptr<Console> console, shared_ptr<Socket> socket, ClientConnectionData& connectionData);
 	virtual ~GameClientConnection();
 
 	void Shutdown();
 
 	void ProcessNotification(ConsoleNotificationType type, void* parameter) override;
 
-	bool SetInput(BaseControlDevice *device) override;
+	bool SetInput(BaseControlDevice* device) override;
 	void InitControlDevice();
 	void SendInput();
 

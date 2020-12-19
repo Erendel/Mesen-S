@@ -68,13 +68,13 @@ public:
 
 	void Exec();
 	void Run(uint64_t runUntilClock);
-	
+
 	void LoadBattery();
 	void SaveBattery();
 
 	GbPpu* GetPpu();
 	GbCpu* GetCpu();
-	void GetSoundSamples(int16_t* &samples, uint32_t& sampleCount);
+	void GetSoundSamples(int16_t* & samples, uint32_t& sampleCount);
 	GbState GetState();
 	GameboyHeader GetHeader();
 

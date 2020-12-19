@@ -27,30 +27,36 @@ void Sa1Cpu::Exec()
 {
 	_immediateMode = false;
 
-	switch(_state.StopState) {
-		case CpuStopState::Running: RunOp(); break;
-		case CpuStopState::Stopped:
-			//STP was executed, CPU no longer executes any code
-			_state.CycleCount++;
-			return;
+	switch (_state.StopState)
+	{
+	case CpuStopState::Running: RunOp();
+		break;
+	case CpuStopState::Stopped:
+		//STP was executed, CPU no longer executes any code
+		_state.CycleCount++;
+		return;
 
-		case CpuStopState::WaitingForIrq:
-			//WAI
+	case CpuStopState::WaitingForIrq:
+		//WAI
+		Idle();
+		if (_state.IrqSource || _state.NeedNmi)
+		{
 			Idle();
-			if(_state.IrqSource || _state.NeedNmi) {
-				Idle();
-				_state.StopState = CpuStopState::Running;
-			}
-			break;
+			_state.StopState = CpuStopState::Running;
+		}
+		break;
 	}
 
 	//Use the state of the IRQ/NMI flags on the previous cycle to determine if an IRQ is processed or not
-	if(_state.PrevNeedNmi) {
+	if (_state.PrevNeedNmi)
+	{
 		_state.NeedNmi = false;
 		uint32_t originalPc = GetProgramAddress(_state.PC);
 		ProcessInterrupt(_state.EmulationMode ? Sa1Cpu::LegacyNmiVector : Sa1Cpu::NmiVector, true);
 		_console->ProcessInterrupt<CpuType::Sa1>(originalPc, GetProgramAddress(_state.PC), true);
-	} else if(_state.PrevIrqSource) {
+	}
+	else if (_state.PrevIrqSource)
+	{
 		uint32_t originalPc = GetProgramAddress(_state.PC);
 		ProcessInterrupt(_state.EmulationMode ? Sa1Cpu::LegacyIrqVector : Sa1Cpu::IrqVector, true);
 		_console->ProcessInterrupt<CpuType::Sa1>(originalPc, GetProgramAddress(_state.PC), false);
@@ -68,10 +74,12 @@ void Sa1Cpu::Idle()
 void Sa1Cpu::IdleEndJump()
 {
 	IMemoryHandler* handler = _sa1->GetMemoryMappings()->GetHandler(_state.PC);
-	if(handler && handler->GetMemoryType() == SnesMemoryType::PrgRom) {
+	if (handler && handler->GetMemoryType() == SnesMemoryType::PrgRom)
+	{
 		//Jumps/returns in PRG ROM take an extra cycle
 		_state.CycleCount++;
-		if(_sa1->GetSnesCpuMemoryType() == SnesMemoryType::PrgRom) {
+		if (_sa1->GetSnesCpuMemoryType() == SnesMemoryType::PrgRom)
+		{
 			//Add an extra wait cycle if a conflict occurs at the same time
 			_state.CycleCount++;
 		}
@@ -80,9 +88,11 @@ void Sa1Cpu::IdleEndJump()
 
 void Sa1Cpu::IdleTakeBranch()
 {
-	if(_state.PC & 0x01) {
+	if (_state.PC & 0x01)
+	{
 		IMemoryHandler* handler = _sa1->GetMemoryMappings()->GetHandler(_state.PC);
-		if(handler && handler->GetMemoryType() == SnesMemoryType::PrgRom) {
+		if (handler && handler->GetMemoryType() == SnesMemoryType::PrgRom)
+		{
 			//Branches to an odd address take an extra cycle
 			_state.CycleCount++;
 		}
@@ -91,23 +101,29 @@ void Sa1Cpu::IdleTakeBranch()
 
 bool Sa1Cpu::IsAccessConflict()
 {
-	return _sa1->GetSnesCpuMemoryType() == _sa1->GetSa1MemoryType() && _sa1->GetSa1MemoryType() != SnesMemoryType::Register;
+	return _sa1->GetSnesCpuMemoryType() == _sa1->GetSa1MemoryType() && _sa1->GetSa1MemoryType() !=
+		SnesMemoryType::Register;
 }
 
 void Sa1Cpu::ProcessCpuCycle(uint32_t addr)
 {
 	_state.CycleCount++;
 
-	if(_sa1->GetSa1MemoryType() == SnesMemoryType::SaveRam) {
+	if (_sa1->GetSa1MemoryType() == SnesMemoryType::SaveRam)
+	{
 		//BWRAM (save ram) access takes 2 cycles
 		_state.CycleCount++;
-		if(IsAccessConflict()) {
+		if (IsAccessConflict())
+		{
 			_state.CycleCount += 2;
 		}
-	} else if(IsAccessConflict()) {
+	}
+	else if (IsAccessConflict())
+	{
 		//Add a wait cycle when a conflict occurs between both CPUs
 		_state.CycleCount++;
-		if(_sa1->GetSa1MemoryType() == SnesMemoryType::Sa1InternalRam && _sa1->IsSnesCpuFastRomSpeed()) {
+		if (_sa1->GetSa1MemoryType() == SnesMemoryType::Sa1InternalRam && _sa1->IsSnesCpuFastRomSpeed())
+		{
 			//If it's an IRAM access during FastROM access (speed = 6), add another wait cycle
 			_state.CycleCount++;
 		}
@@ -146,42 +162,52 @@ void Sa1Cpu::IncreaseCycleCount(uint64_t cycleCount)
 
 void Sa1Cpu::SetReg(CpuRegister reg, uint16_t value)
 {
-	switch (reg) {
+	switch (reg)
+	{
 	case CpuRegister::CpuRegA:
-	{
-		_state.A = value;
-	} break;
+		{
+			_state.A = value;
+		}
+		break;
 	case CpuRegister::CpuRegX:
-	{
-		_state.X = value;
-	} break;
+		{
+			_state.X = value;
+		}
+		break;
 	case CpuRegister::CpuRegY:
-	{
-		_state.Y = value;
-	} break;
+		{
+			_state.Y = value;
+		}
+		break;
 	case CpuRegister::CpuRegSP:
-	{
-		_state.SP = value;
-	} break;
+		{
+			_state.SP = value;
+		}
+		break;
 	case CpuRegister::CpuRegD:
-	{
-		_state.D = value;
-	} break;
+		{
+			_state.D = value;
+		}
+		break;
 	case CpuRegister::CpuRegPC:
-	{
-		_state.PC = value;
-	} break;
+		{
+			_state.PC = value;
+		}
+		break;
 	case CpuRegister::CpuRegK:
-	{
-		_state.K = value & 0xFF;
-	} break;
+		{
+			_state.K = value & 0xFF;
+		}
+		break;
 	case CpuRegister::CpuRegDBR:
-	{
-		_state.DBR = value & 0xFF;
-	} break;
+		{
+			_state.DBR = value & 0xFF;
+		}
+		break;
 	case CpuRegister::CpuRegPS:
-	{
-		_state.PS = value & 0xFF;
-	} break;
+		{
+			_state.PS = value & 0xFF;
+		}
+		break;
 	}
 }

@@ -20,7 +20,7 @@ protected:
 	shared_ptr<Console> _console;
 	FrameInfo _baseFrameInfo;
 
-	virtual void ApplyFilter(uint16_t *ppuOutputBuffer) = 0;
+	virtual void ApplyFilter(uint16_t* ppuOutputBuffer) = 0;
 	virtual void OnBeforeApplyFilter();
 	bool IsOddFrame();
 	uint32_t GetBufferSize();
@@ -31,12 +31,12 @@ public:
 	virtual ~BaseVideoFilter();
 
 	uint32_t* GetOutputBuffer();
-	void SendFrame(uint16_t *ppuOutputBuffer, uint32_t frameNumber);
+	void SendFrame(uint16_t* ppuOutputBuffer, uint32_t frameNumber);
 	void TakeScreenshot(string romName, VideoFilterType filterType);
-	void TakeScreenshot(VideoFilterType filterType, string filename, std::stringstream *stream = nullptr);
+	void TakeScreenshot(VideoFilterType filterType, string filename, std::stringstream* stream = nullptr);
 
 	virtual OverscanDimensions GetOverscan();
-	
+
 	void SetBaseFrameInfo(FrameInfo frameInfo);
 	virtual FrameInfo GetFrameInfo();
 };

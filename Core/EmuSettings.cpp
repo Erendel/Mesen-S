@@ -31,15 +31,19 @@ uint32_t EmuSettings::GetVersion()
 string EmuSettings::GetVersionString()
 {
 	uint32_t version = GetVersion();
-	return std::to_string(version >> 16) + "." + std::to_string((version >> 8) & 0xFF) + "." + std::to_string(version & 0xFF);
+	return std::to_string(version >> 16) + "." + std::to_string((version >> 8) & 0xFF) + "." + std::to_string(
+		version & 0xFF);
 }
 
-void EmuSettings::ProcessString(string & str, const char ** strPointer)
+void EmuSettings::ProcessString(string& str, const char** strPointer)
 {
 	//Make a copy of the string and keep it (the original pointer will not be valid after the call is over)
-	if(*strPointer) {
+	if (*strPointer)
+	{
 		str = *strPointer;
-	} else {
+	}
+	else
+	{
 		str.clear();
 	}
 	*strPointer = str.c_str();
@@ -70,14 +74,16 @@ AudioConfig EmuSettings::GetAudioConfig()
 void EmuSettings::SetInputConfig(InputConfig config)
 {
 	bool controllersChanged = false;
-	for(int i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++)
+	{
 		controllersChanged |= _input.Controllers[i].Type != config.Controllers[i].Type;
 	}
 
 	_input = config;
 	_inputConfigVersion++;
 
-	if(controllersChanged) {
+	if (controllersChanged)
+	{
 		//Used by net play
 		_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::ConfigChanged);
 	}
@@ -85,8 +91,10 @@ void EmuSettings::SetInputConfig(InputConfig config)
 
 InputConfig EmuSettings::GetInputConfig()
 {
-	if(CheckFlag(EmulationFlags::GameboyMode)) {
-		if(_input.Controllers[0].Type != ControllerType::SnesController) {
+	if (CheckFlag(EmulationFlags::GameboyMode))
+	{
+		if (_input.Controllers[0].Type != ControllerType::SnesController)
+		{
 			//Force SNES controller for P1 for gameboy-only mode
 			InputConfig input = _input;
 			input.Controllers[0].Type = ControllerType::SnesController;
@@ -103,14 +111,20 @@ uint32_t EmuSettings::GetInputConfigVersion()
 
 void EmuSettings::SetEmulationConfig(EmulationConfig config)
 {
-	bool prevOverclockEnabled = _emulation.PpuExtraScanlinesAfterNmi > 0 || _emulation.PpuExtraScanlinesBeforeNmi > 0 || _emulation.GsuClockSpeed > 100;
-	bool overclockEnabled = config.PpuExtraScanlinesAfterNmi > 0 || config.PpuExtraScanlinesBeforeNmi > 0 || config.GsuClockSpeed > 100;
+	bool prevOverclockEnabled = _emulation.PpuExtraScanlinesAfterNmi > 0 || _emulation.PpuExtraScanlinesBeforeNmi > 0 ||
+		_emulation.GsuClockSpeed > 100;
+	bool overclockEnabled = config.PpuExtraScanlinesAfterNmi > 0 || config.PpuExtraScanlinesBeforeNmi > 0 || config.
+		GsuClockSpeed > 100;
 	_emulation = config;
 
-	if(prevOverclockEnabled != overclockEnabled) {
-		if(overclockEnabled) {
+	if (prevOverclockEnabled != overclockEnabled)
+	{
+		if (overclockEnabled)
+		{
 			MessageManager::DisplayMessage("Overclock", "OverclockEnabled");
-		} else {
+		}
+		else
+		{
 			MessageManager::DisplayMessage("Overclock", "OverclockDisabled");
 		}
 
@@ -177,11 +191,16 @@ void EmuSettings::SetShortcutKey(EmulatorShortcut shortcut, KeyCombination keyCo
 {
 	_emulatorKeys[keySetIndex][(uint32_t)shortcut] = keyCombination;
 
-	for(int i = 0; i < 3; i++) {
-		for(std::pair<const uint32_t, KeyCombination> &kvp : _emulatorKeys[i]) {
-			if(keyCombination.IsSubsetOf(kvp.second)) {
+	for (int i = 0; i < 3; i++)
+	{
+		for (std::pair<const uint32_t, KeyCombination>& kvp : _emulatorKeys[i])
+		{
+			if (keyCombination.IsSubsetOf(kvp.second))
+			{
 				_shortcutSupersets[keySetIndex][(uint32_t)shortcut].push_back(kvp.second);
-			} else if(kvp.second.IsSubsetOf(keyCombination)) {
+			}
+			else if (kvp.second.IsSubsetOf(keyCombination))
+			{
 				_shortcutSupersets[i][kvp.first].push_back(keyCombination);
 			}
 		}
@@ -192,10 +211,14 @@ void EmuSettings::SetShortcutKeys(vector<ShortcutKeyInfo> shortcuts)
 {
 	ClearShortcutKeys();
 
-	for(ShortcutKeyInfo &shortcut : shortcuts) {
-		if(_emulatorKeys[0][(uint32_t)shortcut.Shortcut].GetKeys().empty()) {
+	for (ShortcutKeyInfo& shortcut : shortcuts)
+	{
+		if (_emulatorKeys[0][(uint32_t)shortcut.Shortcut].GetKeys().empty())
+		{
 			SetShortcutKey(shortcut.Shortcut, shortcut.Keys, 0);
-		} else {
+		}
+		else
+		{
 			SetShortcutKey(shortcut.Shortcut, shortcut.Keys, 1);
 		}
 	}
@@ -204,7 +227,8 @@ void EmuSettings::SetShortcutKeys(vector<ShortcutKeyInfo> shortcuts)
 KeyCombination EmuSettings::GetShortcutKey(EmulatorShortcut shortcut, int keySetIndex)
 {
 	auto result = _emulatorKeys[keySetIndex].find((int)shortcut);
-	if(result != _emulatorKeys[keySetIndex].end()) {
+	if (result != _emulatorKeys[keySetIndex].end())
+	{
 		return result->second;
 	}
 	return {};
@@ -218,13 +242,16 @@ vector<KeyCombination> EmuSettings::GetShortcutSupersets(EmulatorShortcut shortc
 OverscanDimensions EmuSettings::GetOverscan()
 {
 	OverscanDimensions overscan;
-	if(CheckFlag(EmulationFlags::GameboyMode)) {
+	if (CheckFlag(EmulationFlags::GameboyMode))
+	{
 		//Force overscan values for gameboy-only mode (not SGB)
 		overscan.Left = 0;
 		overscan.Right = 256 - 160;
 		overscan.Top = 0;
 		overscan.Bottom = 239 - 144;
-	} else {
+	}
+	else
+	{
 		overscan.Left = _video.OverscanLeft;
 		overscan.Right = _video.OverscanRight;
 		overscan.Top = _video.OverscanTop;
@@ -240,50 +267,63 @@ uint32_t EmuSettings::GetRewindBufferSize()
 
 uint32_t EmuSettings::GetEmulationSpeed()
 {
-	if(CheckFlag(EmulationFlags::MaximumSpeed)) {
+	if (CheckFlag(EmulationFlags::MaximumSpeed))
+	{
 		return 0;
-	} else if(CheckFlag(EmulationFlags::Turbo)) {
+	}
+	else if (CheckFlag(EmulationFlags::Turbo))
+	{
 		return _emulation.TurboSpeed;
-	} else if(CheckFlag(EmulationFlags::Rewind)) {
+	}
+	else if (CheckFlag(EmulationFlags::Rewind))
+	{
 		return _emulation.RewindSpeed;
-	} else {
+	}
+	else
+	{
 		return _emulation.EmulationSpeed;
 	}
 }
 
 double EmuSettings::GetAspectRatio(ConsoleRegion region)
 {
-	switch(_video.AspectRatio) {
-		case VideoAspectRatio::NoStretching: return 0.0;
-		case VideoAspectRatio::Auto: return region == ConsoleRegion::Pal ? (11.0 / 8.0) : (8.0 / 7.0);
-		case VideoAspectRatio::NTSC: return 8.0 / 7.0;
-		case VideoAspectRatio::PAL: return 11.0 / 8.0;
-		case VideoAspectRatio::Standard: return 4.0 / 3.0;
-		case VideoAspectRatio::Widescreen: return 16.0 / 9.0;
-		case VideoAspectRatio::Custom: return _video.CustomAspectRatio;
+	switch (_video.AspectRatio)
+	{
+	case VideoAspectRatio::NoStretching: return 0.0;
+	case VideoAspectRatio::Auto: return region == ConsoleRegion::Pal ? (11.0 / 8.0) : (8.0 / 7.0);
+	case VideoAspectRatio::NTSC: return 8.0 / 7.0;
+	case VideoAspectRatio::PAL: return 11.0 / 8.0;
+	case VideoAspectRatio::Standard: return 4.0 / 3.0;
+	case VideoAspectRatio::Widescreen: return 16.0 / 9.0;
+	case VideoAspectRatio::Custom: return _video.CustomAspectRatio;
 	}
 	return 0.0;
 }
 
 void EmuSettings::SetFlag(EmulationFlags flag)
 {
-	if((_flags & (int)flag) == 0) {
+	if ((_flags & (int)flag) == 0)
+	{
 		_flags |= (int)flag;
 	}
 }
 
 void EmuSettings::SetFlagState(EmulationFlags flag, bool enabled)
 {
-	if(enabled) {
+	if (enabled)
+	{
 		SetFlag(flag);
-	} else {
+	}
+	else
+	{
 		ClearFlag(flag);
 	}
 }
 
 void EmuSettings::ClearFlag(EmulationFlags flag)
 {
-	if((_flags & (int)flag) != 0) {
+	if ((_flags & (int)flag) != 0)
+	{
 		_flags &= ~(int)flag;
 	}
 }
@@ -295,12 +335,17 @@ bool EmuSettings::CheckFlag(EmulationFlags flag)
 
 void EmuSettings::SetDebuggerFlag(DebuggerFlags flag, bool enabled)
 {
-	if(enabled) {
-		if((_debuggerFlags & (int)flag) == 0) {
+	if (enabled)
+	{
+		if ((_debuggerFlags & (int)flag) == 0)
+		{
 			_debuggerFlags |= (int)flag;
 		}
-	} else {
-		if((_debuggerFlags & (int)flag) != 0) {
+	}
+	else
+	{
+		if ((_debuggerFlags & (int)flag) != 0)
+		{
 			_debuggerFlags &= ~(int)flag;
 		}
 	}
@@ -313,16 +358,20 @@ bool EmuSettings::CheckDebuggerFlag(DebuggerFlags flag)
 
 void EmuSettings::InitializeRam(void* data, uint32_t length)
 {
-	switch(_emulation.RamPowerOnState) {
-		default:
-		case RamState::AllZeros: memset(data, 0, length); break;
-		case RamState::AllOnes: memset(data, 0xFF, length); break;
-		case RamState::Random:
-			std::uniform_int_distribution<> dist(0, 255);
-			for(uint32_t i = 0; i < length; i++) {
-				((uint8_t*)data)[i] = dist(_mt);
-			}
-			break;
+	switch (_emulation.RamPowerOnState)
+	{
+	default:
+	case RamState::AllZeros: memset(data, 0, length);
+		break;
+	case RamState::AllOnes: memset(data, 0xFF, length);
+		break;
+	case RamState::Random:
+		std::uniform_int_distribution<> dist(0, 255);
+		for (uint32_t i = 0; i < length; i++)
+		{
+			((uint8_t*)data)[i] = dist(_mt);
+		}
+		break;
 	}
 }
 
@@ -333,8 +382,8 @@ int EmuSettings::GetRandomValue(int maxValue)
 }
 
 bool EmuSettings::GetRandomBool()
-{ 
-	return GetRandomValue(1) == 1; 
+{
+	return GetRandomValue(1) == 1;
 }
 
 bool EmuSettings::IsInputEnabled()
@@ -344,12 +393,13 @@ bool EmuSettings::IsInputEnabled()
 
 double EmuSettings::GetControllerDeadzoneRatio()
 {
-	switch(_input.ControllerDeadzoneSize) {
-		case 0: return 0.5;
-		case 1: return 0.75;
-		case 2: return 1;
-		case 3: return 1.25;
-		case 4: return 1.5;
+	switch (_input.ControllerDeadzoneSize)
+	{
+	case 0: return 0.5;
+	case 1: return 0.75;
+	case 2: return 1;
+	case 3: return 1.25;
+	case 4: return 1.5;
 	}
 	return 1;
 }

@@ -15,7 +15,7 @@ protected:
 	{
 		return "RP";
 	}
-	
+
 public:
 	enum Buttons { ResetButton = 0, PowerButton = 1 };
 
@@ -39,19 +39,23 @@ public:
 
 	void OnAfterSetState() override
 	{
-		if(_needReset) {
+		if (_needReset)
+		{
 			SetBit(SystemActionManager::Buttons::ResetButton);
 		}
-		if(_needPowerCycle) {
+		if (_needPowerCycle)
+		{
 			SetBit(SystemActionManager::Buttons::PowerButton);
 		}
 	}
 
 	bool Reset()
 	{
-		if(!_needReset) {
+		if (!_needReset)
+		{
 			shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-			if(debugger) {
+			if (debugger)
+			{
 				debugger->SuspendDebugger(false);
 				debugger->Run();
 			}
@@ -64,9 +68,11 @@ public:
 
 	bool PowerCycle()
 	{
-		if(!_needPowerCycle) {
+		if (!_needPowerCycle)
+		{
 			shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-			if(debugger) {
+			if (debugger)
+			{
 				debugger->SuspendDebugger(false);
 				debugger->Run();
 			}

@@ -25,10 +25,13 @@ public:
 		Map(0x0000, 0x3FFF, GbMemoryType::PrgRom, 0, true);
 		Map(0x4000, 0x7FFF, GbMemoryType::PrgRom, _prgBank * prgBankSize, true);
 
-		if(_ramEnabled) {
+		if (_ramEnabled)
+		{
 			Map(0xA000, 0xBFFF, GbMemoryType::CartRam, _ramBank * ramBankSize, false);
 			_memoryManager->MapRegisters(0xA000, 0xBFFF, RegisterAccess::None);
-		} else {
+		}
+		else
+		{
 			Unmap(0xA000, 0xBFFF);
 			_memoryManager->MapRegisters(0xA000, 0xBFFF, RegisterAccess::Read);
 		}
@@ -42,24 +45,25 @@ public:
 
 	void WriteRegister(uint16_t addr, uint8_t value) override
 	{
-		switch(addr & 0x7000) {
-			case 0x0000:
-			case 0x1000:
-				_ramEnabled = (value == 0x0A);
-				break;
-			
-			case 0x2000: 
-				_prgBank = (value & 0xFF) | (_prgBank & 0x100);
-				break;
+		switch (addr & 0x7000)
+		{
+		case 0x0000:
+		case 0x1000:
+			_ramEnabled = (value == 0x0A);
+			break;
 
-			case 0x3000:
-				_prgBank = (_prgBank & 0xFF) | ((value & 0x01) << 8);
-				break;
+		case 0x2000:
+			_prgBank = (value & 0xFF) | (_prgBank & 0x100);
+			break;
 
-			case 0x4000:
-			case 0x5000:
-				_ramBank = value & 0x0F;
-				break;
+		case 0x3000:
+			_prgBank = (_prgBank & 0xFF) | ((value & 0x01) << 8);
+			break;
+
+		case 0x4000:
+		case 0x5000:
+			_ramBank = value & 0x0F;
+			break;
 		}
 		RefreshMappings();
 	}

@@ -16,18 +16,24 @@ protected:
 		int dy = abs(_y2 - y), sy = y < _y2 ? 1 : -1;
 		int err = (dx > dy ? dx : -dy) / 2, e2;
 
-		while(true) {
+		while (true)
+		{
 			DrawPixel(x, y, _color);
-			if(x == _x2 && y == _y2) {
+			if (x == _x2 && y == _y2)
+			{
 				break;
 			}
 
 			e2 = err;
-			if(e2 > -dx) {
-				err -= dy; x += sx;
+			if (e2 > -dx)
+			{
+				err -= dy;
+				x += sx;
 			}
-			if(e2 < dy) {
-				err += dx; y += sy;
+			if (e2 < dy)
+			{
+				err += dx;
+				y += sy;
 			}
 		}
 	}

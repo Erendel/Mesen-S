@@ -12,14 +12,14 @@ class AviRecorder : public IVideoRecorder
 {
 private:
 	std::thread _aviWriterThread;
-	
+
 	unique_ptr<AviWriter> _aviWriter;
 
 	string _outputFile;
 	SimpleLock _lock;
 	AutoResetEvent _waitFrame;
 
-	atomic<bool> _stopFlag;	
+	atomic<bool> _stopFlag;
 	bool _recording;
 	uint8_t* _frameBuffer;
 	uint32_t _frameBufferLength;
@@ -36,7 +36,8 @@ public:
 	AviRecorder(VideoCodec codec, uint32_t compressionLevel);
 	virtual ~AviRecorder();
 
-	bool StartRecording(string filename, uint32_t width, uint32_t height, uint32_t bpp, uint32_t audioSampleRate, double fps) override;
+	bool StartRecording(string filename, uint32_t width, uint32_t height, uint32_t bpp, uint32_t audioSampleRate,
+	                    double fps) override;
 	void StopRecording() override;
 
 	void AddFrame(void* frameBuffer, uint32_t width, uint32_t height, double fps) override;

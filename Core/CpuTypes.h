@@ -15,7 +15,7 @@ struct CpuState
 	uint16_t A;
 	uint16_t X;
 	uint16_t Y;
-	
+
 	/* 16-bit stack pointer */
 	uint16_t SP;
 
@@ -88,4 +88,3 @@ enum class IrqSource
 	Ppu = 1,
 	Coprocessor = 2
 };
-

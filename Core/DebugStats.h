@@ -12,5 +12,5 @@ private:
 	double _lastFrameMax = 0;
 
 public:
-	void DisplayStats(Console *console, double lastFrameTime);
+	void DisplayStats(Console* console, double lastFrameTime);
 };

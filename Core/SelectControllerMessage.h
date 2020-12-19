@@ -8,13 +8,15 @@ private:
 	uint8_t _portNumber;
 
 protected:
-	void Serialize(Serializer &s) override
+	void Serialize(Serializer& s) override
 	{
 		s.Stream(_portNumber);
 	}
 
 public:
-	SelectControllerMessage(void* buffer, uint32_t length) : NetMessage(buffer, length) { }
+	SelectControllerMessage(void* buffer, uint32_t length) : NetMessage(buffer, length)
+	{
+	}
 
 	SelectControllerMessage(uint8_t port) : NetMessage(MessageType::SelectController)
 	{

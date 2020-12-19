@@ -24,15 +24,17 @@ public:
 		return true;
 	}
 
-	virtual int CompressFrame(bool isKeyFrame, uint8_t *frameData, uint8_t** compressedData) override
+	virtual int CompressFrame(bool isKeyFrame, uint8_t* frameData, uint8_t** compressedData) override
 	{
 		*compressedData = _buffer;
 
 		//Convert raw frame to BMP/DIB format (row order is reversed)
 		uint8_t* buffer = _buffer;
 		frameData += (_height - 1) * _width * 4;
-		for(int y = 0; y < _height; y++) {
-			for(int x = 0; x < _width; x++) {
+		for (int y = 0; y < _height; y++)
+		{
+			for (int x = 0; x < _width; x++)
+			{
 				buffer[0] = frameData[0];
 				buffer[1] = frameData[1];
 				buffer[2] = frameData[2];

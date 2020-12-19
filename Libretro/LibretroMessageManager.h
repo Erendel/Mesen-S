@@ -25,13 +25,17 @@ public:
 	// Inherited via IMessageManager
 	virtual void DisplayMessage(string title, string message) override
 	{
-		if(title.empty()) {
-			if(_log) {
+		if (title.empty())
+		{
+			if (_log)
+			{
 				_log(RETRO_LOG_INFO, message.c_str());
 			}
-		} else {
+		}
+		else
+		{
 			string osdMessage = "[" + title + "] " + message;
-			retro_message msg = { osdMessage.c_str(), 180 };
+			retro_message msg = {osdMessage.c_str(), 180};
 			_retroEnv(RETRO_ENVIRONMENT_SET_MESSAGE, &msg);
 		}
 	}

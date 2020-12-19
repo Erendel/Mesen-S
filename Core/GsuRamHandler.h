@@ -6,11 +6,11 @@
 class GsuRamHandler : public IMemoryHandler
 {
 private:
-	GsuState *_state;
-	IMemoryHandler *_handler;
+	GsuState* _state;
+	IMemoryHandler* _handler;
 
 public:
-	GsuRamHandler(GsuState &state, IMemoryHandler *handler) : IMemoryHandler(SnesMemoryType::GsuWorkRam)
+	GsuRamHandler(GsuState& state, IMemoryHandler* handler) : IMemoryHandler(SnesMemoryType::GsuWorkRam)
 	{
 		_handler = handler;
 		_state = &state;
@@ -18,7 +18,8 @@ public:
 
 	uint8_t Read(uint32_t addr) override
 	{
-		if(!_state->SFR.Running || !_state->GsuRamAccess) {
+		if (!_state->SFR.Running || !_state->GsuRamAccess)
+		{
 			return _handler->Read(addr);
 		}
 
@@ -31,26 +32,31 @@ public:
 		return Read(addr);
 	}
 
-	void PeekBlock(uint32_t addr, uint8_t *output) override
+	void PeekBlock(uint32_t addr, uint8_t* output) override
 	{
-		for(int i = 0; i < 0x1000; i++) {
+		for (int i = 0; i < 0x1000; i++)
+		{
 			output[i] = Read(i);
 		}
 	}
 
 	void Write(uint32_t addr, uint8_t value) override
 	{
-		if(!_state->SFR.Running || !_state->GsuRamAccess) {
+		if (!_state->SFR.Running || !_state->GsuRamAccess)
+		{
 			_handler->Write(addr, value);
 		}
 	}
 
 	AddressInfo GetAbsoluteAddress(uint32_t address) override
 	{
-		if(!_state->SFR.Running || !_state->GsuRamAccess) {
+		if (!_state->SFR.Running || !_state->GsuRamAccess)
+		{
 			return _handler->GetAbsoluteAddress(address);
-		} else {
-			return { -1, SnesMemoryType::Register };
+		}
+		else
+		{
+			return {-1, SnesMemoryType::Register};
 		}
 	}
 };

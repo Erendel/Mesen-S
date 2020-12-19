@@ -38,29 +38,37 @@ bool MovieRecorder::Record(RecordMovieOptions options)
 	_saveStateData = stringstream();
 	_hasSaveState = false;
 
-	if(!_writer->Initialize(_filename)) {
+	if (!_writer->Initialize(_filename))
+	{
 		MessageManager::DisplayMessage("Movies", "CouldNotWriteToFile", FolderUtilities::GetFilename(_filename, true));
 		_writer.reset();
 		return false;
-	} else {
+	}
+	else
+	{
 		_console->Lock();
 		_console->GetNotificationManager()->RegisterNotificationListener(shared_from_this());
 
-		if(options.RecordFrom == RecordMovieFrom::StartWithoutSaveData) {
+		if (options.RecordFrom == RecordMovieFrom::StartWithoutSaveData)
+		{
 			//Power cycle and ignore save data that exists on the disk
 			_console->GetBatteryManager()->SetBatteryProvider(shared_from_this());
 			_console->PowerCycle();
-		} else if(options.RecordFrom == RecordMovieFrom::StartWithSaveData) {
+		}
+		else if (options.RecordFrom == RecordMovieFrom::StartWithSaveData)
+		{
 			//Power cycle and save existing battery files into the movie file
 			_console->GetBatteryManager()->SetBatteryRecorder(shared_from_this());
 			_console->PowerCycle();
-		} else if(options.RecordFrom == RecordMovieFrom::CurrentState) {
+		}
+		else if (options.RecordFrom == RecordMovieFrom::CurrentState)
+		{
 			//Record from current state, store a save state in the movie file
 			_console->GetControlManager()->RegisterInputRecorder(this);
 			_console->GetSaveStateManager()->SaveState(_saveStateData);
 			_hasSaveState = true;
 		}
-		
+
 		_console->GetBatteryManager()->SetBatteryRecorder(nullptr);
 		_console->Unlock();
 
@@ -70,12 +78,12 @@ bool MovieRecorder::Record(RecordMovieOptions options)
 	}
 }
 
-void MovieRecorder::GetGameSettings(stringstream &out)
+void MovieRecorder::GetGameSettings(stringstream& out)
 {
 	EmuSettings* settings = _console->GetSettings().get();
 	EmulationConfig emuConfig = settings->GetEmulationConfig();
 	InputConfig inputConfig = settings->GetInputConfig();
-	
+
 	WriteString(out, MovieKeys::MesenVersion, settings->GetVersionString());
 	WriteInt(out, MovieKeys::MovieFormatVersion, MovieRecorder::MovieFormatVersion);
 
@@ -84,20 +92,24 @@ void MovieRecorder::GetGameSettings(stringstream &out)
 	WriteString(out, MovieKeys::Sha1, _console->GetCartridge()->GetSha1Hash());
 
 	VirtualFile patchFile = _console->GetRomInfo().PatchFile;
-	if(patchFile.IsValid()) {
+	if (patchFile.IsValid())
+	{
 		WriteString(out, MovieKeys::PatchFile, patchFile.GetFileName());
 		WriteString(out, MovieKeys::PatchFileSha1, patchFile.GetSha1Hash());
-	
+
 		romFile.ApplyPatch(patchFile);
 		WriteString(out, MovieKeys::PatchedRomSha1, romFile.GetSha1Hash());
 	}
 
 	ConsoleRegion region = _console->GetRegion();
-	switch(region) {
-		case ConsoleRegion::Auto:
-		case ConsoleRegion::Ntsc: WriteString(out, MovieKeys::Region, "NTSC"); break;
+	switch (region)
+	{
+	case ConsoleRegion::Auto:
+	case ConsoleRegion::Ntsc: WriteString(out, MovieKeys::Region, "NTSC");
+		break;
 
-		case ConsoleRegion::Pal: WriteString(out, MovieKeys::Region, "PAL"); break;
+	case ConsoleRegion::Pal: WriteString(out, MovieKeys::Region, "PAL");
+		break;
 	}
 
 	WriteString(out, MovieKeys::Controller1, ControllerTypeNames[(int)inputConfig.Controllers[0].Type]);
@@ -109,36 +121,42 @@ void MovieRecorder::GetGameSettings(stringstream &out)
 	WriteInt(out, MovieKeys::ExtraScanlinesBeforeNmi, emuConfig.PpuExtraScanlinesBeforeNmi);
 	WriteInt(out, MovieKeys::ExtraScanlinesAfterNmi, emuConfig.PpuExtraScanlinesAfterNmi);
 	WriteInt(out, MovieKeys::GsuClockSpeed, emuConfig.GsuClockSpeed);
-	
-	switch(emuConfig.RamPowerOnState) {
-		case RamState::AllZeros: WriteString(out, MovieKeys::RamPowerOnState, "AllZeros"); break;
-		case RamState::AllOnes: WriteString(out, MovieKeys::RamPowerOnState, "AllOnes"); break;
-		case RamState::Random: WriteString(out, MovieKeys::RamPowerOnState, "AllOnes"); break; //TODO: Random memory isn't supported for movies yet
+
+	switch (emuConfig.RamPowerOnState)
+	{
+	case RamState::AllZeros: WriteString(out, MovieKeys::RamPowerOnState, "AllZeros");
+		break;
+	case RamState::AllOnes: WriteString(out, MovieKeys::RamPowerOnState, "AllOnes");
+		break;
+	case RamState::Random: WriteString(out, MovieKeys::RamPowerOnState, "AllOnes");
+		break; //TODO: Random memory isn't supported for movies yet
 	}
 
-	for(CheatCode &code : _console->GetCheatManager()->GetCheats()) {
+	for (CheatCode& code : _console->GetCheatManager()->GetCheats())
+	{
 		out << "Cheat " << HexUtilities::ToHex24(code.Address) << " " << HexUtilities::ToHex(code.Value) << "\n";
 	}
 }
 
-void MovieRecorder::WriteString(stringstream &out, string name, string value)
+void MovieRecorder::WriteString(stringstream& out, string name, string value)
 {
 	out << name << " " << value << "\n";
 }
 
-void MovieRecorder::WriteInt(stringstream &out, string name, uint32_t value)
+void MovieRecorder::WriteInt(stringstream& out, string name, uint32_t value)
 {
 	out << name << " " << std::to_string(value) << "\n";
 }
 
-void MovieRecorder::WriteBool(stringstream &out, string name, bool enabled)
+void MovieRecorder::WriteBool(stringstream& out, string name, bool enabled)
 {
 	out << name << " " << (enabled ? "true" : "false") << "\n";
 }
 
 bool MovieRecorder::Stop()
 {
-	if(_writer) {
+	if (_writer)
+	{
 		_console->GetControlManager()->UnregisterInputRecorder(this);
 
 		_writer->AddFile(_inputData, "Input.txt");
@@ -147,7 +165,8 @@ bool MovieRecorder::Stop()
 		GetGameSettings(out);
 		_writer->AddFile(out, "GameSettings.txt");
 
-		if(!_author.empty() || !_description.empty()) {
+		if (!_author.empty() || !_description.empty())
+		{
 			stringstream movieInfo;
 			WriteString(movieInfo, "Author", _author);
 			movieInfo << "Description\n" << _description;
@@ -156,20 +175,24 @@ bool MovieRecorder::Stop()
 
 		VirtualFile patchFile = _console->GetRomInfo().PatchFile;
 		vector<uint8_t> patchData;
-		if(patchFile.IsValid() && patchFile.ReadFile(patchData)) {
+		if (patchFile.IsValid() && patchFile.ReadFile(patchData))
+		{
 			_writer->AddFile(patchData, "PatchData.dat");
 		}
 
-		if(_hasSaveState) {
+		if (_hasSaveState)
+		{
 			_writer->AddFile(_saveStateData, "SaveState.mss");
 		}
 
-		for(auto kvp : _batteryData) {
+		for (auto kvp : _batteryData)
+		{
 			_writer->AddFile(kvp.second, "Battery" + kvp.first);
 		}
 
 		bool result = _writer->Save();
-		if(result) {
+		if (result)
+		{
 			MessageManager::DisplayMessage("Movies", "MovieSaved", FolderUtilities::GetFilename(_filename, true));
 		}
 		return result;
@@ -178,30 +201,36 @@ bool MovieRecorder::Stop()
 	return false;
 }
 
-bool MovieRecorder::CreateMovie(string movieFile, std::deque<RewindData>& data, uint32_t startPosition, uint32_t endPosition)
+bool MovieRecorder::CreateMovie(string movieFile, std::deque<RewindData>& data, uint32_t startPosition,
+                                uint32_t endPosition)
 {
 	_filename = movieFile;
 	_writer.reset(new ZipWriter());
 
-	if (startPosition < data.size() && endPosition <= data.size() && _writer->Initialize(_filename)) {
+	if (startPosition < data.size() && endPosition <= data.size() && _writer->Initialize(_filename))
+	{
 		vector<shared_ptr<BaseControlDevice>> devices = _console->GetControlManager()->GetControlDevices();
 
-//		if (startPosition > 0 || _console->GetRomInfo().Header.SramSize || _console->GetSettings()->GetRamPowerOnState() == RamPowerOnState::Random) { // TODO?
-			//Create a movie from a savestate if we don't start from the beginning (or if the game has save ram, or if the power on ram state is random)
-			_hasSaveState = true;
-			_saveStateData = stringstream();
-			_console->GetSaveStateManager()->GetSaveStateHeader(_saveStateData);
-			data[startPosition].GetStateData(_saveStateData);
-//		}
+		//		if (startPosition > 0 || _console->GetRomInfo().Header.SramSize || _console->GetSettings()->GetRamPowerOnState() == RamPowerOnState::Random) { // TODO?
+		//Create a movie from a savestate if we don't start from the beginning (or if the game has save ram, or if the power on ram state is random)
+		_hasSaveState = true;
+		_saveStateData = stringstream();
+		_console->GetSaveStateManager()->GetSaveStateHeader(_saveStateData);
+		data[startPosition].GetStateData(_saveStateData);
+		//		}
 
 		_inputData = stringstream();
 
-		for (uint32_t i = startPosition; i < endPosition; i++) {
+		for (uint32_t i = startPosition; i < endPosition; i++)
+		{
 			RewindData rewindData = data[i];
-			for (uint32_t i = 0; i < 60; i++) {
-				for (shared_ptr<BaseControlDevice>& device : devices) {
+			for (uint32_t i = 0; i < 60; i++)
+			{
+				for (shared_ptr<BaseControlDevice>& device : devices)
+				{
 					uint8_t port = device->GetPort();
-					if (i < rewindData.InputLogs[port].size()) {
+					if (i < rewindData.InputLogs[port].size())
+					{
 						device->SetRawState(rewindData.InputLogs[port][i]);
 						_inputData << ("|" + device->GetTextState());
 					}
@@ -219,7 +248,8 @@ bool MovieRecorder::CreateMovie(string movieFile, std::deque<RewindData>& data, 
 
 void MovieRecorder::RecordInput(vector<shared_ptr<BaseControlDevice>> devices)
 {
-	for(shared_ptr<BaseControlDevice> &device : devices) {
+	for (shared_ptr<BaseControlDevice>& device : devices)
+	{
 		_inputData << ("|" + device->GetTextState());
 	}
 	_inputData << "\n";
@@ -235,9 +265,10 @@ vector<uint8_t> MovieRecorder::LoadBattery(string extension)
 	return vector<uint8_t>();
 }
 
-void MovieRecorder::ProcessNotification(ConsoleNotificationType type, void *parameter)
+void MovieRecorder::ProcessNotification(ConsoleNotificationType type, void* parameter)
 {
-	if(type == ConsoleNotificationType::GameLoaded) {
+	if (type == ConsoleNotificationType::GameLoaded)
+	{
 		_console->GetControlManager()->RegisterInputRecorder(this);
 	}
 }

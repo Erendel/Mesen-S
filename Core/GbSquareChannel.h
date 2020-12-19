@@ -10,10 +10,10 @@ class GbSquareChannel final : public ISerializable
 {
 private:
 	const uint8_t _dutySequences[4][8] = {
-		{ 0, 1, 1, 1, 1, 1, 1, 1 },
-		{ 0, 0, 1, 1, 1, 1, 1, 1 },
-		{ 0, 0, 0, 0, 1, 1, 1, 1 },
-		{ 0, 0, 0, 0, 0, 0, 1, 1 }
+		{0, 1, 1, 1, 1, 1, 1, 1},
+		{0, 0, 1, 1, 1, 1, 1, 1},
+		{0, 0, 0, 0, 1, 1, 1, 1},
+		{0, 0, 0, 0, 0, 0, 1, 1}
 	};
 
 	GbSquareState _state = {};
@@ -27,7 +27,7 @@ public:
 	bool Enabled();
 	void Disable();
 
-	void ClockSweepUnit();	
+	void ClockSweepUnit();
 	uint16_t GetSweepTargetFrequency();
 
 	void ClockLengthCounter();

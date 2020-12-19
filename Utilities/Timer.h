@@ -5,12 +5,12 @@ using namespace std::chrono;
 
 class Timer
 {
-	private:
-		high_resolution_clock::time_point _start;
+private:
+	high_resolution_clock::time_point _start;
 
 public:
-		Timer();
-		void Reset();
-		double GetElapsedMS();
-		void WaitUntil(double targetMillisecond);
+	Timer();
+	void Reset();
+	double GetElapsedMS();
+	void WaitUntil(double targetMillisecond);
 };

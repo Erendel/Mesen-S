@@ -11,7 +11,7 @@
 class Sa1BwRamHandler : public IMemoryHandler
 {
 private:
-	uint8_t * _ram;
+	uint8_t* _ram;
 	uint32_t _mask;
 	Sa1State* _state;
 
@@ -22,14 +22,20 @@ private:
 
 	__forceinline uint8_t InternalRead(uint32_t addr)
 	{
-		if((addr & 0x600000) == 0x600000) {
+		if ((addr & 0x600000) == 0x600000)
+		{
 			return ReadBitmapMode(addr - 0x600000);
-		} else {
+		}
+		else
+		{
 			addr = GetBwRamAddress(addr);
-			if(_state->Sa1BwMode) {
+			if (_state->Sa1BwMode)
+			{
 				//Bitmap mode is enabled
 				return ReadBitmapMode(addr);
-			} else {
+			}
+			else
+			{
 				//Return regular memory content
 				return _ram[addr & _mask];
 			}
@@ -54,22 +60,29 @@ public:
 		return InternalRead(addr);
 	}
 
-	void PeekBlock(uint32_t addr, uint8_t *output) override
+	void PeekBlock(uint32_t addr, uint8_t* output) override
 	{
-		for(int i = 0; i < 0x1000; i++) {
+		for (int i = 0; i < 0x1000; i++)
+		{
 			output[i] = InternalRead(addr + i);
 		}
 	}
 
 	void Write(uint32_t addr, uint8_t value) override
 	{
-		if((addr & 0x600000) == 0x600000) {
+		if ((addr & 0x600000) == 0x600000)
+		{
 			WriteBitmapMode(addr - 0x600000, value);
-		} else {
+		}
+		else
+		{
 			addr = GetBwRamAddress(addr);
-			if(_state->Sa1BwMode) {
+			if (_state->Sa1BwMode)
+			{
 				WriteBitmapMode(addr, value);
-			} else {
+			}
+			else
+			{
 				_ram[addr & _mask] = value;
 			}
 		}
@@ -77,20 +90,26 @@ public:
 
 	uint8_t ReadBitmapMode(uint32_t addr)
 	{
-		if(_state->BwRam2BppMode) {
+		if (_state->BwRam2BppMode)
+		{
 			return (_ram[(addr >> 2) & _mask] >> ((addr & 0x03) * 2)) & 0x03;
-		} else {
+		}
+		else
+		{
 			return (_ram[(addr >> 1) & _mask] >> ((addr & 0x01) * 4)) & 0x0F;
 		}
 	}
 
 	void WriteBitmapMode(uint32_t addr, uint8_t value)
 	{
-		if(_state->BwRam2BppMode) {
+		if (_state->BwRam2BppMode)
+		{
 			uint8_t shift = (addr & 0x03) * 2;
 			addr = (addr >> 2) & _mask;
 			_ram[addr] = (_ram[addr] & ~(0x03 << shift)) | ((value & 0x03) << shift);
-		} else {
+		}
+		else
+		{
 			uint8_t shift = (addr & 0x01) * 4;
 			addr = (addr >> 1) & _mask;
 			_ram[addr] = (_ram[addr] & ~(0x0F << shift)) | ((value & 0x0F) << shift);
@@ -100,9 +119,12 @@ public:
 	AddressInfo GetAbsoluteAddress(uint32_t addr) override
 	{
 		AddressInfo info;
-		if((addr & 0x600000) == 0x600000) {
+		if ((addr & 0x600000) == 0x600000)
+		{
 			info.Address = ((addr - 0x600000) >> (_state->BwRam2BppMode ? 2 : 1)) & _mask;
-		} else {
+		}
+		else
+		{
 			info.Address = GetBwRamAddress(addr) & _mask;
 		}
 		info.Type = SnesMemoryType::SaveRam;

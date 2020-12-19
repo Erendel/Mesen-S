@@ -7,7 +7,7 @@
 #include "snes_ntsc_config.h"
 
 #ifdef __cplusplus
-	extern "C" {
+extern "C" {
 #endif
 
 /* Image parameters, ranging from -1.0 to 1.0. Actual internal values shown
@@ -15,46 +15,46 @@ in parenthesis and should remain fairly stable in future versions. */
 typedef struct snes_ntsc_setup_t
 {
 	/* Basic parameters */
-	double hue;        /* -1 = -180 degrees     +1 = +180 degrees */
+	double hue; /* -1 = -180 degrees     +1 = +180 degrees */
 	double saturation; /* -1 = grayscale (0.0)  +1 = oversaturated colors (2.0) */
-	double contrast;   /* -1 = dark (0.5)       +1 = light (1.5) */
+	double contrast; /* -1 = dark (0.5)       +1 = light (1.5) */
 	double brightness; /* -1 = dark (0.5)       +1 = light (1.5) */
-	double sharpness;  /* edge contrast enhancement/blurring */
-	
+	double sharpness; /* edge contrast enhancement/blurring */
+
 	/* Advanced parameters */
-	double gamma;      /* -1 = dark (1.5)       +1 = light (0.5) */
+	double gamma; /* -1 = dark (1.5)       +1 = light (0.5) */
 	double resolution; /* image resolution */
-	double artifacts;  /* artifacts caused by color changes */
-	double fringing;   /* color artifacts caused by brightness changes */
-	double bleed;      /* color bleed (color resolution reduction) */
-	int merge_fields;  /* if 1, merges even and odd fields together to reduce flicker */
+	double artifacts; /* artifacts caused by color changes */
+	double fringing; /* color artifacts caused by brightness changes */
+	double bleed; /* color bleed (color resolution reduction) */
+	int merge_fields; /* if 1, merges even and odd fields together to reduce flicker */
 	float const* decoder_matrix; /* optional RGB decoder matrix, 6 elements */
-	
+
 	unsigned long const* bsnes_colortbl; /* undocumented; set to 0 */
 } snes_ntsc_setup_t;
 
 /* Video format presets */
 extern snes_ntsc_setup_t const snes_ntsc_composite; /* color bleeding + artifacts */
-extern snes_ntsc_setup_t const snes_ntsc_svideo;    /* color bleeding only */
-extern snes_ntsc_setup_t const snes_ntsc_rgb;       /* crisp image */
-extern snes_ntsc_setup_t const snes_ntsc_monochrome;/* desaturated + artifacts */
+extern snes_ntsc_setup_t const snes_ntsc_svideo; /* color bleeding only */
+extern snes_ntsc_setup_t const snes_ntsc_rgb; /* crisp image */
+extern snes_ntsc_setup_t const snes_ntsc_monochrome; /* desaturated + artifacts */
 
 /* Initializes and adjusts parameters. Can be called multiple times on the same
 snes_ntsc_t object. Can pass NULL for either parameter. */
 typedef struct snes_ntsc_t snes_ntsc_t;
-void snes_ntsc_init( snes_ntsc_t* ntsc, snes_ntsc_setup_t const* setup );
+void snes_ntsc_init(snes_ntsc_t* ntsc, snes_ntsc_setup_t const* setup);
 
 /* Filters one or more rows of pixels. Input pixel format is set by SNES_NTSC_IN_FORMAT
 and output RGB depth is set by SNES_NTSC_OUT_DEPTH. Both default to 16-bit RGB.
 In_row_width is the number of pixels to get to the next input row. Out_pitch
 is the number of *bytes* to get to the next output row. */
-void snes_ntsc_blit( snes_ntsc_t const* ntsc, SNES_NTSC_IN_T const* input,
-		long in_row_width, int burst_phase, int in_width, int in_height,
-		void* rgb_out, long out_pitch );
+void snes_ntsc_blit(snes_ntsc_t const* ntsc, SNES_NTSC_IN_T const* input,
+                    long in_row_width, int burst_phase, int in_width, int in_height,
+                    void* rgb_out, long out_pitch);
 
-void snes_ntsc_blit_hires( snes_ntsc_t const* ntsc, SNES_NTSC_IN_T const* input,
-		long in_row_width, int burst_phase, int in_width, int in_height,
-		void* rgb_out, long out_pitch );
+void snes_ntsc_blit_hires(snes_ntsc_t const* ntsc, SNES_NTSC_IN_T const* input,
+                          long in_row_width, int burst_phase, int in_width, int in_height,
+                          void* rgb_out, long out_pitch);
 
 /* Number of output pixels written by low-res blitter for given input width. Width
 might be rounded down slightly; use SNES_NTSC_IN_WIDTH() on result to find rounded
@@ -71,10 +71,10 @@ value. */
 
 /* Interface for user-defined custom blitters */
 
-enum { snes_ntsc_in_chunk    = 3  }; /* number of input pixels read per chunk */
-enum { snes_ntsc_out_chunk   = 7  }; /* number of output pixels generated per chunk */
-enum { snes_ntsc_black       = 0  }; /* palette index for black */
-enum { snes_ntsc_burst_count = 3  }; /* burst phase cycles through 0, 1, and 2 */
+enum { snes_ntsc_in_chunk = 3 }; /* number of input pixels read per chunk */
+enum { snes_ntsc_out_chunk = 7 }; /* number of output pixels generated per chunk */
+enum { snes_ntsc_black = 0 }; /* palette index for black */
+enum { snes_ntsc_burst_count = 3 }; /* burst phase cycles through 0, 1, and 2 */
 
 /* Begins outputting row and starts three pixels. First pixel will be cut off a bit.
 Use snes_ntsc_black for unused pixels. Declares variables, so must be before first
@@ -132,11 +132,16 @@ statement in a block (unless you're using C++). */
 
 /* private */
 enum { snes_ntsc_entry_size = 128 };
+
 enum { snes_ntsc_palette_size = 0x2000 };
+
 typedef unsigned long snes_ntsc_rgb_t;
-struct snes_ntsc_t {
-	snes_ntsc_rgb_t table [snes_ntsc_palette_size] [snes_ntsc_entry_size];
+
+struct snes_ntsc_t
+{
+	snes_ntsc_rgb_t table[snes_ntsc_palette_size][snes_ntsc_entry_size];
 };
+
 enum { snes_ntsc_burst_size = snes_ntsc_entry_size / snes_ntsc_burst_count };
 
 #define SNES_NTSC_RGB16( ktable, n ) \
@@ -200,7 +205,7 @@ enum { snes_ntsc_burst_size = snes_ntsc_entry_size / snes_ntsc_burst_count };
 }
 
 #ifdef __cplusplus
-	}
+}
 #endif
 
 #endif

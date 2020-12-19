@@ -29,19 +29,21 @@ bool ZipWriter::Save()
 
 void ZipWriter::AddFile(string filepath, string zipFilename)
 {
-	if(!mz_zip_writer_add_file(&_zipArchive, zipFilename.c_str(), filepath.c_str(), "", 0, MZ_BEST_COMPRESSION)) {
+	if (!mz_zip_writer_add_file(&_zipArchive, zipFilename.c_str(), filepath.c_str(), "", 0, MZ_BEST_COMPRESSION))
+	{
 		std::cout << "mz_zip_writer_add_file() failed!" << std::endl;
 	}
 }
 
-void ZipWriter::AddFile(vector<uint8_t> &fileData, string zipFilename)
+void ZipWriter::AddFile(vector<uint8_t>& fileData, string zipFilename)
 {
-	if(!mz_zip_writer_add_mem(&_zipArchive, zipFilename.c_str(), fileData.data(), fileData.size(), MZ_BEST_COMPRESSION)) {
+	if (!mz_zip_writer_add_mem(&_zipArchive, zipFilename.c_str(), fileData.data(), fileData.size(), MZ_BEST_COMPRESSION))
+	{
 		std::cout << "mz_zip_writer_add_file() failed!" << std::endl;
 	}
 }
 
-void ZipWriter::AddFile(std::stringstream &filestream, string zipFilename)
+void ZipWriter::AddFile(std::stringstream& filestream, string zipFilename)
 {
 	filestream.seekg(0, std::ios::end);
 	size_t bufferSize = (size_t)filestream.tellg();

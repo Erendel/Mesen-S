@@ -11,7 +11,7 @@ class SaveStateMessage : public NetMessage
 private:
 	vector<CheatCode> _activeCheats;
 	vector<uint8_t> _stateData;
-	
+
 	ControllerType _controllerTypes[5];
 	ConsoleRegion _region;
 	uint32_t _ppuExtraScanlinesAfterNmi;
@@ -19,7 +19,7 @@ private:
 	uint32_t _gsuClockSpeed;
 
 protected:
-	void Serialize(Serializer &s) override
+	void Serialize(Serializer& s) override
 	{
 		s.StreamVector(_stateData);
 		s.Stream(_region, _ppuExtraScanlinesAfterNmi, _ppuExtraScanlinesBeforeNmi, _gsuClockSpeed);
@@ -28,8 +28,10 @@ protected:
 	}
 
 public:
-	SaveStateMessage(void* buffer, uint32_t length) : NetMessage(buffer, length) { }
-	
+	SaveStateMessage(void* buffer, uint32_t length) : NetMessage(buffer, length)
+	{
+	}
+
 	SaveStateMessage(shared_ptr<Console> console) : NetMessage(MessageType::SaveState)
 	{
 		//Used when sending state to clients
@@ -45,7 +47,8 @@ public:
 		_gsuClockSpeed = emuCfg.GsuClockSpeed;
 
 		InputConfig inputCfg = console->GetSettings()->GetInputConfig();
-		for(int i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++)
+		{
 			_controllerTypes[i] = inputCfg.Controllers[i].Type;
 		}
 
@@ -55,7 +58,7 @@ public:
 		_stateData.resize(dataSize);
 		state.read((char*)_stateData.data(), dataSize);
 	}
-	
+
 	void LoadState(shared_ptr<Console> console)
 	{
 		std::stringstream ss;
@@ -71,7 +74,8 @@ public:
 		emuCfg.GsuClockSpeed = _gsuClockSpeed;
 
 		InputConfig inputCfg = console->GetSettings()->GetInputConfig();
-		for(int i = 0; i < 5; i++) {
+		for (int i = 0; i < 5; i++)
+		{
 			inputCfg.Controllers[i].Type = _controllerTypes[i];
 		}
 

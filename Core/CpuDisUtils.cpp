@@ -10,7 +10,8 @@
 #include "../Utilities/HexUtilities.h"
 #include "../Utilities/FastString.h"
 
-void CpuDisUtils::GetDisassembly(DisassemblyInfo &info, string &out, uint32_t memoryAddr, LabelManager* labelManager, EmuSettings* settings)
+void CpuDisUtils::GetDisassembly(DisassemblyInfo& info, string& out, uint32_t memoryAddr, LabelManager* labelManager,
+                                 EmuSettings* settings)
 {
 	FastString str(settings->CheckDebuggerFlag(DebuggerFlags::UseLowerCaseDisassembly));
 
@@ -23,80 +24,127 @@ void CpuDisUtils::GetDisassembly(DisassemblyInfo &info, string &out, uint32_t me
 	uint32_t opSize = info.GetOpSize();
 
 	FastString operand(settings->CheckDebuggerFlag(DebuggerFlags::UseLowerCaseDisassembly));
-	if(opSize > 1) {
-		if(addrMode == AddrMode::Rel || addrMode == AddrMode::RelLng || opSize == 4) {
-			AddressInfo address { (int32_t)opAddr, SnesMemoryType::CpuMemory };
+	if (opSize > 1)
+	{
+		if (addrMode == AddrMode::Rel || addrMode == AddrMode::RelLng || opSize == 4)
+		{
+			AddressInfo address{(int32_t)opAddr, SnesMemoryType::CpuMemory};
 			string label = labelManager ? labelManager->GetLabel(address) : "";
-			if(label.size()) {
+			if (label.size())
+			{
 				operand.Write(label, true);
-			} else {
+			}
+			else
+			{
 				operand.WriteAll('$', HexUtilities::ToHex24(opAddr));
 			}
-		} else if(opSize == 2) {
+		}
+		else if (opSize == 2)
+		{
 			operand.WriteAll('$', HexUtilities::ToHex((uint8_t)opAddr));
-		} else if(opSize == 3) {
+		}
+		else if (opSize == 3)
+		{
 			operand.WriteAll('$', HexUtilities::ToHex((uint16_t)opAddr));
 		}
 	}
 
-	switch(addrMode) {
-		case AddrMode::Abs: str.Write(operand); break;
-		case AddrMode::AbsJmp: str.Write(operand); break;
-		case AddrMode::AbsIdxXInd: str.WriteAll('(', operand, ",X)"); break;
-		case AddrMode::AbsIdxX: str.WriteAll(operand, ",X"); break;
-		case AddrMode::AbsIdxY: str.WriteAll(operand, ",Y"); break;
-		case AddrMode::AbsInd:  str.WriteAll('(', operand, ')'); break;
-		case AddrMode::AbsIndLng:  str.WriteAll('[', operand, ']'); break;
-		case AddrMode::AbsLngIdxX: str.WriteAll(operand, ",X"); break;
-		case AddrMode::AbsLng: str.Write(operand); break;
-		case AddrMode::AbsLngJmp: str.Write(operand); break;
-		case AddrMode::Acc: break;
-		case AddrMode::BlkMov: str.WriteAll('$', operand[1], operand[2], ','); str.WriteAll('$', operand[3], operand[4]); break;
-		case AddrMode::DirIdxIndX: str.WriteAll('(', operand, ",X)"); break;
-		case AddrMode::DirIdxX: str.WriteAll(operand, ",X"); break;
-		case AddrMode::DirIdxY: str.WriteAll(operand, ",Y"); break;
-		case AddrMode::DirIndIdxY: str.WriteAll("(", operand, "),Y"); break;
-		case AddrMode::DirIndLngIdxY: str.WriteAll("[", operand, "],Y"); break;
-		case AddrMode::DirIndLng: str.WriteAll("[", operand, "]"); break;
-		case AddrMode::DirInd: str.WriteAll("(", operand, ")"); break;
-		case AddrMode::Dir: str.Write(operand); break;
+	switch (addrMode)
+	{
+	case AddrMode::Abs: str.Write(operand);
+		break;
+	case AddrMode::AbsJmp: str.Write(operand);
+		break;
+	case AddrMode::AbsIdxXInd: str.WriteAll('(', operand, ",X)");
+		break;
+	case AddrMode::AbsIdxX: str.WriteAll(operand, ",X");
+		break;
+	case AddrMode::AbsIdxY: str.WriteAll(operand, ",Y");
+		break;
+	case AddrMode::AbsInd: str.WriteAll('(', operand, ')');
+		break;
+	case AddrMode::AbsIndLng: str.WriteAll('[', operand, ']');
+		break;
+	case AddrMode::AbsLngIdxX: str.WriteAll(operand, ",X");
+		break;
+	case AddrMode::AbsLng: str.Write(operand);
+		break;
+	case AddrMode::AbsLngJmp: str.Write(operand);
+		break;
+	case AddrMode::Acc: break;
+	case AddrMode::BlkMov: str.WriteAll('$', operand[1], operand[2], ',');
+		str.WriteAll('$', operand[3], operand[4]);
+		break;
+	case AddrMode::DirIdxIndX: str.WriteAll('(', operand, ",X)");
+		break;
+	case AddrMode::DirIdxX: str.WriteAll(operand, ",X");
+		break;
+	case AddrMode::DirIdxY: str.WriteAll(operand, ",Y");
+		break;
+	case AddrMode::DirIndIdxY: str.WriteAll("(", operand, "),Y");
+		break;
+	case AddrMode::DirIndLngIdxY: str.WriteAll("[", operand, "],Y");
+		break;
+	case AddrMode::DirIndLng: str.WriteAll("[", operand, "]");
+		break;
+	case AddrMode::DirInd: str.WriteAll("(", operand, ")");
+		break;
+	case AddrMode::Dir: str.Write(operand);
+		break;
 
-		case AddrMode::Imm8: case AddrMode::Imm16: case AddrMode::ImmX: case AddrMode::ImmM:
-			str.WriteAll('#', operand);
-			break;
+	case AddrMode::Imm8:
+	case AddrMode::Imm16:
+	case AddrMode::ImmX:
+	case AddrMode::ImmM:
+		str.WriteAll('#', operand);
+		break;
 
-		case AddrMode::Sig8: str.WriteAll('#', operand); break; //BRK/COP signature
-		case AddrMode::Imp: break;
-		case AddrMode::RelLng: str.Write(operand); break;
-		case AddrMode::Rel: str.Write(operand); break;
-		case AddrMode::Stk: break;
-		case AddrMode::StkRel: str.WriteAll(operand, ",S"); break;
-		case AddrMode::StkRelIndIdxY: str.WriteAll('(', operand, ",S),Y"); break;
+	case AddrMode::Sig8: str.WriteAll('#', operand);
+		break; //BRK/COP signature
+	case AddrMode::Imp: break;
+	case AddrMode::RelLng: str.Write(operand);
+		break;
+	case AddrMode::Rel: str.Write(operand);
+		break;
+	case AddrMode::Stk: break;
+	case AddrMode::StkRel: str.WriteAll(operand, ",S");
+		break;
+	case AddrMode::StkRelIndIdxY: str.WriteAll('(', operand, ",S),Y");
+		break;
 
-		default: throw std::runtime_error("invalid address mode");
+	default: throw std::runtime_error("invalid address mode");
 	}
 
 	out += str.ToString();
 }
 
-uint32_t CpuDisUtils::GetOperandAddress(DisassemblyInfo &info, uint32_t memoryAddr)
+uint32_t CpuDisUtils::GetOperandAddress(DisassemblyInfo& info, uint32_t memoryAddr)
 {
 	uint32_t opSize = info.GetOpSize();
 	uint32_t opAddr = 0;
 	uint8_t* byteCode = info.GetByteCode();
-	if(opSize == 2) {
+	if (opSize == 2)
+	{
 		opAddr = byteCode[1];
-	} else if(opSize == 3) {
+	}
+	else if (opSize == 3)
+	{
 		opAddr = byteCode[1] | (byteCode[2] << 8);
-	} else if(opSize == 4) {
+	}
+	else if (opSize == 4)
+	{
 		opAddr = byteCode[1] | (byteCode[2] << 8) | (byteCode[3] << 16);
 	}
 
 	AddrMode addrMode = CpuDisUtils::OpMode[byteCode[0]];
-	if(addrMode == AddrMode::Rel || addrMode == AddrMode::RelLng) {
-		if(opSize == 2) {
+	if (addrMode == AddrMode::Rel || addrMode == AddrMode::RelLng)
+	{
+		if (opSize == 2)
+		{
 			opAddr = (memoryAddr & 0xFF0000) | (((int8_t)opAddr + memoryAddr + 2) & 0xFFFF);
-		} else {
+		}
+		else
+		{
 			opAddr = (memoryAddr & 0xFF0000) | (((int16_t)opAddr + memoryAddr + 3) & 0xFFFF);
 		}
 	}
@@ -104,9 +152,10 @@ uint32_t CpuDisUtils::GetOperandAddress(DisassemblyInfo &info, uint32_t memoryAd
 	return opAddr;
 }
 
-int32_t CpuDisUtils::GetEffectiveAddress(DisassemblyInfo &info, Console *console, CpuState &state, CpuType type)
+int32_t CpuDisUtils::GetEffectiveAddress(DisassemblyInfo& info, Console* console, CpuState& state, CpuType type)
 {
-	if(HasEffectiveAddress(CpuDisUtils::OpMode[info.GetOpCode()])) {
+	if (HasEffectiveAddress(CpuDisUtils::OpMode[info.GetOpCode()]))
+	{
 		DummyCpu cpu(console, type);
 		state.PS &= ~(ProcFlags::IndexMode8 | ProcFlags::MemoryMode8);
 		state.PS |= info.GetFlags();
@@ -119,41 +168,42 @@ int32_t CpuDisUtils::GetEffectiveAddress(DisassemblyInfo &info, Console *console
 
 bool CpuDisUtils::HasEffectiveAddress(AddrMode addrMode)
 {
-	switch(addrMode) {
-		case AddrMode::Acc:
-		case AddrMode::Imp:
-		case AddrMode::Stk:
-		case AddrMode::Sig8:
-		case AddrMode::Imm8:
-		case AddrMode::Rel:
-		case AddrMode::RelLng:
-		case AddrMode::Imm16:
-		case AddrMode::BlkMov:
-		case AddrMode::AbsLngJmp:
-		case AddrMode::AbsLng:
-		case AddrMode::ImmX:
-		case AddrMode::ImmM:
-		case AddrMode::AbsJmp:
-			return false;
+	switch (addrMode)
+	{
+	case AddrMode::Acc:
+	case AddrMode::Imp:
+	case AddrMode::Stk:
+	case AddrMode::Sig8:
+	case AddrMode::Imm8:
+	case AddrMode::Rel:
+	case AddrMode::RelLng:
+	case AddrMode::Imm16:
+	case AddrMode::BlkMov:
+	case AddrMode::AbsLngJmp:
+	case AddrMode::AbsLng:
+	case AddrMode::ImmX:
+	case AddrMode::ImmM:
+	case AddrMode::AbsJmp:
+		return false;
 
-		case AddrMode::DirIdxIndX:
-		case AddrMode::DirIdxX:
-		case AddrMode::DirIdxY:
-		case AddrMode::DirIndIdxY:
-		case AddrMode::DirIndLngIdxY:
-		case AddrMode::DirIndLng:
-		case AddrMode::DirInd:
-		case AddrMode::Dir:
-		case AddrMode::StkRel:
-		case AddrMode::StkRelIndIdxY:
-		case AddrMode::Abs:
-		case AddrMode::AbsIdxXInd:
-		case AddrMode::AbsIdxX:
-		case AddrMode::AbsIdxY:
-		case AddrMode::AbsLngIdxX:
-		case AddrMode::AbsInd:
-		case AddrMode::AbsIndLng:
-			return true;
+	case AddrMode::DirIdxIndX:
+	case AddrMode::DirIdxX:
+	case AddrMode::DirIdxY:
+	case AddrMode::DirIndIdxY:
+	case AddrMode::DirIndLngIdxY:
+	case AddrMode::DirIndLng:
+	case AddrMode::DirInd:
+	case AddrMode::Dir:
+	case AddrMode::StkRel:
+	case AddrMode::StkRelIndIdxY:
+	case AddrMode::Abs:
+	case AddrMode::AbsIdxXInd:
+	case AddrMode::AbsIdxX:
+	case AddrMode::AbsIdxY:
+	case AddrMode::AbsLngIdxX:
+	case AddrMode::AbsInd:
+	case AddrMode::AbsIndLng:
+		return true;
 	}
 
 	throw std::runtime_error("Invalid mode");
@@ -161,9 +211,12 @@ bool CpuDisUtils::HasEffectiveAddress(AddrMode addrMode)
 
 uint8_t CpuDisUtils::GetOpSize(AddrMode addrMode, uint8_t flags)
 {
-	if(addrMode == AddrMode::ImmX) {
+	if (addrMode == AddrMode::ImmX)
+	{
 		return (flags & ProcFlags::IndexMode8) ? 2 : 3;
-	} else if(addrMode == AddrMode::ImmM) {
+	}
+	else if (addrMode == AddrMode::ImmM)
+	{
 		return (flags & ProcFlags::MemoryMode8) ? 2 : 3;
 	}
 
@@ -199,26 +252,42 @@ string CpuDisUtils::OpName[256] = {
 	"CPY", "CMP", "REP", "CMP", "CPY", "CMP", "DEC", "CMP", "INY", "CMP", "DEX", "WAI", "CPY", "CMP", "DEC", "CMP", // C
 	"BNE", "CMP", "CMP", "CMP", "PEI", "CMP", "DEC", "CMP", "CLD", "CMP", "PHX", "STP", "JML", "CMP", "DEC", "CMP", // D
 	"CPX", "SBC", "SEP", "SBC", "CPX", "SBC", "INC", "SBC", "INX", "SBC", "NOP", "XBA", "CPX", "SBC", "INC", "SBC", // E
-	"BEQ", "SBC", "SBC", "SBC", "PEA", "SBC", "INC", "SBC", "SED", "SBC", "PLX", "XCE", "JSR", "SBC", "INC", "SBC"  // F
+	"BEQ", "SBC", "SBC", "SBC", "PEA", "SBC", "INC", "SBC", "SED", "SBC", "PLX", "XCE", "JSR", "SBC", "INC", "SBC" // F
 };
 
 typedef AddrMode M;
 AddrMode CpuDisUtils::OpMode[256] = {
 	//0       1              2            3                 4           5           6           7                 8       9           A       B       C              D           E           F           
-	M::Sig8,  M::DirIdxIndX, M::Sig8,     M::StkRel,        M::Dir,     M::Dir,     M::Dir,     M::DirIndLng,     M::Stk, M::ImmM,    M::Acc, M::Stk, M::Abs,        M::Abs,     M::Abs,     M::AbsLng,     // 0
-	M::Rel,   M::DirIndIdxY, M::DirInd,   M::StkRelIndIdxY, M::Dir,     M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp, M::AbsIdxY, M::Acc, M::Imp, M::Abs,        M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 1
-	M::Abs,   M::DirIdxIndX, M::AbsLng,   M::StkRel,        M::Dir,     M::Dir,     M::Dir,     M::DirIndLng,     M::Stk, M::ImmM,    M::Acc, M::Stk, M::Abs,        M::Abs,     M::Abs,     M::AbsLng,     // 2
-	M::Rel,   M::DirIndIdxY, M::DirInd,   M::StkRelIndIdxY, M::DirIdxX, M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp, M::AbsIdxY, M::Acc, M::Imp, M::AbsIdxX,    M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 3
-	M::Stk,   M::DirIdxIndX, M::Imm8,     M::StkRel,        M::BlkMov,  M::Dir,     M::Dir,     M::DirIndLng,     M::Stk, M::ImmM,    M::Acc, M::Stk, M::Abs,        M::Abs,     M::Abs,     M::AbsLng,     // 4
-	M::Rel,   M::DirIndIdxY, M::DirInd,   M::StkRelIndIdxY, M::BlkMov,  M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp, M::AbsIdxY, M::Stk, M::Imp, M::AbsLng,     M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 5
-	M::Stk,   M::DirIdxIndX, M::RelLng,   M::StkRel,        M::Dir,     M::Dir,     M::Dir,     M::DirIndLng,     M::Stk, M::ImmM,    M::Acc, M::Stk, M::AbsInd,     M::Abs,     M::Abs,     M::AbsLng,     // 6
-	M::Rel,   M::DirIndIdxY, M::DirInd,   M::StkRelIndIdxY, M::DirIdxX, M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp, M::AbsIdxY, M::Stk, M::Imp, M::AbsIdxXInd, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 7
-	M::Rel,   M::DirIdxIndX, M::RelLng,   M::StkRel,        M::Dir,     M::Dir,     M::Dir,     M::DirIndLng,     M::Imp, M::ImmM,    M::Imp, M::Stk, M::Abs,        M::Abs,     M::Abs,     M::AbsLng,     // 8
-	M::Rel,   M::DirIndIdxY, M::DirInd,   M::StkRelIndIdxY, M::DirIdxX, M::DirIdxX, M::DirIdxY, M::DirIndLngIdxY, M::Imp, M::AbsIdxY, M::Imp, M::Imp, M::Abs,        M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 9
-	M::ImmX,  M::DirIdxIndX, M::ImmX,     M::StkRel,        M::Dir,     M::Dir,     M::Dir,     M::DirIndLng,     M::Imp, M::ImmM,    M::Imp, M::Stk, M::Abs,        M::Abs,     M::Abs,     M::AbsLng,     // A
-	M::Rel,   M::DirIndIdxY, M::DirInd,   M::StkRelIndIdxY, M::DirIdxX, M::DirIdxX, M::DirIdxY, M::DirIndLngIdxY, M::Imp, M::AbsIdxY, M::Imp, M::Imp, M::AbsIdxX,    M::AbsIdxX, M::AbsIdxY, M::AbsLngIdxX, // B
-	M::ImmX,  M::DirIdxIndX, M::Imm8,     M::StkRel,        M::Dir,     M::Dir,     M::Dir,     M::DirIndLng,     M::Imp, M::ImmM,    M::Imp, M::Imp, M::Abs,        M::Abs,     M::Abs,     M::AbsLng,     // C
-	M::Rel,   M::DirIndIdxY, M::DirInd,   M::StkRelIndIdxY, M::Dir,     M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp, M::AbsIdxY, M::Stk, M::Imp, M::AbsIndLng,  M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // D
-	M::ImmX,  M::DirIdxIndX, M::Imm8,     M::StkRel,        M::Dir,     M::Dir,     M::Dir,     M::DirIndLng,     M::Imp, M::ImmM,    M::Imp, M::Imp, M::Abs,        M::Abs,     M::Abs,     M::AbsLng,     // E
-	M::Rel,   M::DirIndIdxY, M::DirInd,   M::StkRelIndIdxY, M::Imm16,   M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp, M::AbsIdxY, M::Stk, M::Imp, M::AbsIdxXInd, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX  // F
+	M::Sig8, M::DirIdxIndX, M::Sig8, M::StkRel, M::Dir, M::Dir, M::Dir, M::DirIndLng, M::Stk, M::ImmM, M::Acc, M::Stk,
+	M::Abs, M::Abs, M::Abs, M::AbsLng, // 0
+	M::Rel, M::DirIndIdxY, M::DirInd, M::StkRelIndIdxY, M::Dir, M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp,
+	M::AbsIdxY, M::Acc, M::Imp, M::Abs, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 1
+	M::Abs, M::DirIdxIndX, M::AbsLng, M::StkRel, M::Dir, M::Dir, M::Dir, M::DirIndLng, M::Stk, M::ImmM, M::Acc, M::Stk,
+	M::Abs, M::Abs, M::Abs, M::AbsLng, // 2
+	M::Rel, M::DirIndIdxY, M::DirInd, M::StkRelIndIdxY, M::DirIdxX, M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp,
+	M::AbsIdxY, M::Acc, M::Imp, M::AbsIdxX, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 3
+	M::Stk, M::DirIdxIndX, M::Imm8, M::StkRel, M::BlkMov, M::Dir, M::Dir, M::DirIndLng, M::Stk, M::ImmM, M::Acc, M::Stk,
+	M::Abs, M::Abs, M::Abs, M::AbsLng, // 4
+	M::Rel, M::DirIndIdxY, M::DirInd, M::StkRelIndIdxY, M::BlkMov, M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp,
+	M::AbsIdxY, M::Stk, M::Imp, M::AbsLng, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 5
+	M::Stk, M::DirIdxIndX, M::RelLng, M::StkRel, M::Dir, M::Dir, M::Dir, M::DirIndLng, M::Stk, M::ImmM, M::Acc, M::Stk,
+	M::AbsInd, M::Abs, M::Abs, M::AbsLng, // 6
+	M::Rel, M::DirIndIdxY, M::DirInd, M::StkRelIndIdxY, M::DirIdxX, M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp,
+	M::AbsIdxY, M::Stk, M::Imp, M::AbsIdxXInd, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 7
+	M::Rel, M::DirIdxIndX, M::RelLng, M::StkRel, M::Dir, M::Dir, M::Dir, M::DirIndLng, M::Imp, M::ImmM, M::Imp, M::Stk,
+	M::Abs, M::Abs, M::Abs, M::AbsLng, // 8
+	M::Rel, M::DirIndIdxY, M::DirInd, M::StkRelIndIdxY, M::DirIdxX, M::DirIdxX, M::DirIdxY, M::DirIndLngIdxY, M::Imp,
+	M::AbsIdxY, M::Imp, M::Imp, M::Abs, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // 9
+	M::ImmX, M::DirIdxIndX, M::ImmX, M::StkRel, M::Dir, M::Dir, M::Dir, M::DirIndLng, M::Imp, M::ImmM, M::Imp, M::Stk,
+	M::Abs, M::Abs, M::Abs, M::AbsLng, // A
+	M::Rel, M::DirIndIdxY, M::DirInd, M::StkRelIndIdxY, M::DirIdxX, M::DirIdxX, M::DirIdxY, M::DirIndLngIdxY, M::Imp,
+	M::AbsIdxY, M::Imp, M::Imp, M::AbsIdxX, M::AbsIdxX, M::AbsIdxY, M::AbsLngIdxX, // B
+	M::ImmX, M::DirIdxIndX, M::Imm8, M::StkRel, M::Dir, M::Dir, M::Dir, M::DirIndLng, M::Imp, M::ImmM, M::Imp, M::Imp,
+	M::Abs, M::Abs, M::Abs, M::AbsLng, // C
+	M::Rel, M::DirIndIdxY, M::DirInd, M::StkRelIndIdxY, M::Dir, M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp,
+	M::AbsIdxY, M::Stk, M::Imp, M::AbsIndLng, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX, // D
+	M::ImmX, M::DirIdxIndX, M::Imm8, M::StkRel, M::Dir, M::Dir, M::Dir, M::DirIndLng, M::Imp, M::ImmM, M::Imp, M::Imp,
+	M::Abs, M::Abs, M::Abs, M::AbsLng, // E
+	M::Rel, M::DirIndIdxY, M::DirInd, M::StkRelIndIdxY, M::Imm16, M::DirIdxX, M::DirIdxX, M::DirIndLngIdxY, M::Imp,
+	M::AbsIdxY, M::Stk, M::Imp, M::AbsIdxXInd, M::AbsIdxX, M::AbsIdxX, M::AbsLngIdxX // F
 };

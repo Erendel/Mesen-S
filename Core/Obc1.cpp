@@ -6,7 +6,7 @@
 
 Obc1::Obc1(Console* console, uint8_t* saveRam, uint32_t saveRamSize) : BaseCoprocessor(SnesMemoryType::Register)
 {
-	MemoryMappings *mappings = console->GetMemoryManager()->GetMemoryMappings();	
+	MemoryMappings* mappings = console->GetMemoryManager()->GetMemoryMappings();
 	mappings->RegisterHandler(0x00, 0x3F, 0x6000, 0x7FFF, this);
 	mappings->RegisterHandler(0x80, 0xBF, 0x6000, 0x7FFF, this);
 
@@ -32,12 +32,13 @@ uint8_t Obc1::Read(uint32_t addr)
 {
 	addr &= 0x1FFF;
 
-	switch(addr) {
-		case 0x1FF0: return ReadRam(GetLowAddress());
-		case 0x1FF1: return ReadRam(GetLowAddress() + 1);
-		case 0x1FF2: return ReadRam(GetLowAddress() + 2);
-		case 0x1FF3: return ReadRam(GetLowAddress() + 3);
-		case 0x1FF4: return ReadRam(GetHighAddress());
+	switch (addr)
+	{
+	case 0x1FF0: return ReadRam(GetLowAddress());
+	case 0x1FF1: return ReadRam(GetLowAddress() + 1);
+	case 0x1FF2: return ReadRam(GetLowAddress() + 2);
+	case 0x1FF3: return ReadRam(GetLowAddress() + 3);
+	case 0x1FF4: return ReadRam(GetHighAddress());
 	}
 	return ReadRam(addr);
 }
@@ -46,18 +47,25 @@ void Obc1::Write(uint32_t addr, uint8_t value)
 {
 	addr &= 0x1FFF;
 
-	switch(addr) {
-		case 0x1FF0: WriteRam(GetLowAddress(), value); break;
-		case 0x1FF1: WriteRam(GetLowAddress() + 1, value); break;
-		case 0x1FF2: WriteRam(GetLowAddress() + 2, value); break;
-		case 0x1FF3: WriteRam(GetLowAddress() + 3, value); break;
-		case 0x1FF4: {
+	switch (addr)
+	{
+	case 0x1FF0: WriteRam(GetLowAddress(), value);
+		break;
+	case 0x1FF1: WriteRam(GetLowAddress() + 1, value);
+		break;
+	case 0x1FF2: WriteRam(GetLowAddress() + 2, value);
+		break;
+	case 0x1FF3: WriteRam(GetLowAddress() + 3, value);
+		break;
+	case 0x1FF4:
+		{
 			uint8_t shift = (ReadRam(0x1FF6) & 0x03) << 1;
 			WriteRam(GetHighAddress(), ((value & 0x03) << shift) | (ReadRam(GetHighAddress()) & ~(0x03 << shift)));
 			break;
 		}
 
-		default: WriteRam(addr, value); break;
+	default: WriteRam(addr, value);
+		break;
 	}
 }
 
@@ -78,7 +86,7 @@ uint16_t Obc1::GetHighAddress()
 	return (GetBaseAddress() | ((ReadRam(0x1FF6) & 0x7F) >> 2)) + 0x200;
 }
 
-void Obc1::Serialize(Serializer &s)
+void Obc1::Serialize(Serializer& s)
 {
 }
 
@@ -87,12 +95,12 @@ uint8_t Obc1::Peek(uint32_t addr)
 	return 0;
 }
 
-void Obc1::PeekBlock(uint32_t addr, uint8_t *output)
+void Obc1::PeekBlock(uint32_t addr, uint8_t* output)
 {
 	memset(output, 0, 0x1000);
 }
 
 AddressInfo Obc1::GetAbsoluteAddress(uint32_t address)
 {
-	return { -1, SnesMemoryType::Register };
+	return {-1, SnesMemoryType::Register};
 }

@@ -10,14 +10,16 @@ ZipReader::ZipReader()
 
 ZipReader::~ZipReader()
 {
-	if(_initialized) {
+	if (_initialized)
+	{
 		mz_zip_reader_end(&_zipArchive);
 	}
 }
 
 bool ZipReader::InternalLoadArchive(void* buffer, size_t size)
 {
-	if(_initialized) {
+	if (_initialized)
+	{
 		mz_zip_reader_end(&_zipArchive);
 		memset(&_zipArchive, 0, sizeof(mz_zip_archive));
 		_initialized = false;
@@ -29,10 +31,13 @@ bool ZipReader::InternalLoadArchive(void* buffer, size_t size)
 vector<string> ZipReader::InternalGetFileList()
 {
 	vector<string> fileList;
-	if(_initialized) {
-		for(int i = 0, len = (int)mz_zip_reader_get_num_files(&_zipArchive); i < len; i++) {
+	if (_initialized)
+	{
+		for (int i = 0, len = (int)mz_zip_reader_get_num_files(&_zipArchive); i < len; i++)
+		{
 			mz_zip_archive_file_stat file_stat;
-			if(!mz_zip_reader_file_stat(&_zipArchive, i, &file_stat)) {
+			if (!mz_zip_reader_file_stat(&_zipArchive, i, &file_stat))
+			{
 				std::cout << "mz_zip_reader_file_stat() failed!" << std::endl;
 			}
 
@@ -42,12 +47,14 @@ vector<string> ZipReader::InternalGetFileList()
 	return fileList;
 }
 
-bool ZipReader::ExtractFile(string filename, vector<uint8_t> &output)
+bool ZipReader::ExtractFile(string filename, vector<uint8_t>& output)
 {
-	if(_initialized) {
+	if (_initialized)
+	{
 		size_t uncompSize;
-		void *p = mz_zip_reader_extract_file_to_heap(&_zipArchive, filename.c_str(), &uncompSize, 0);
-		if(!p) {
+		void* p = mz_zip_reader_extract_file_to_heap(&_zipArchive, filename.c_str(), &uncompSize, 0);
+		if (!p)
+		{
 #ifdef _DEBUG
 			std::cout << "mz_zip_reader_extract_file_to_heap() failed!" << std::endl;
 #endif

@@ -35,12 +35,12 @@ private:
 	shared_ptr<RegisterHandlerA> _registerHandlerA;
 	shared_ptr<RegisterHandlerB> _registerHandlerB;
 
-	InternalRegisters *_regs;
+	InternalRegisters* _regs;
 	Ppu* _ppu;
 	Cpu* _cpu;
 	BaseCartridge* _cart;
 	CheatManager* _cheatManager;
-	uint8_t *_workRam;
+	uint8_t* _workRam;
 
 	uint64_t _masterClock = 0;
 	uint16_t _hClock = 0;
@@ -80,7 +80,7 @@ public:
 
 	uint8_t Peek(uint32_t addr);
 	uint16_t PeekWord(uint32_t addr);
-	void PeekBlock(uint32_t addr, uint8_t * dest);
+	void PeekBlock(uint32_t addr, uint8_t* dest);
 
 	void Write(uint32_t addr, uint8_t value, MemoryOperationType type);
 	void WriteDma(uint32_t addr, uint8_t value, bool forBusA);
@@ -100,5 +100,5 @@ public:
 	bool IsRegister(uint32_t cpuAddress);
 	bool IsWorkRam(uint32_t cpuAddress);
 
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 };

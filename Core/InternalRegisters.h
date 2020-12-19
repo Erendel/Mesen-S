@@ -24,7 +24,7 @@ private:
 	bool _irqLevel = false;
 	uint8_t _needIrq = 0;
 	bool _irqFlag = false;
-	
+
 	void SetIrqFlag(bool irqFlag);
 
 public:
@@ -46,7 +46,7 @@ public:
 	bool IsFastRomEnabled() { return _state.EnableFastRom; }
 	uint16_t GetHorizontalTimer() { return _state.HorizontalTimer; }
 	uint16_t GetVerticalTimer() { return _state.VerticalTimer; }
-	
+
 	uint8_t Peek(uint16_t addr);
 	uint8_t Read(uint16_t addr);
 	void Write(uint16_t addr, uint8_t value);
@@ -54,25 +54,29 @@ public:
 	InternalRegisterState GetState();
 	AluState GetAluState();
 
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 };
 
 void InternalRegisters::ProcessIrqCounters()
 {
-	if(_needIrq > 0) {
+	if (_needIrq > 0)
+	{
 		_needIrq--;
-		if(_needIrq == 0) {
+		if (_needIrq == 0)
+		{
 			SetIrqFlag(true);
 		}
 	}
 
 	bool irqLevel = (
 		(_state.EnableHorizontalIrq || _state.EnableVerticalIrq) &&
-		(!_state.EnableHorizontalIrq || (_state.HorizontalTimer <= 339 && (_ppu->GetCycle() == _state.HorizontalTimer) && (_ppu->GetLastScanline() != _ppu->GetRealScanline() || _state.HorizontalTimer < 339))) &&
+		(!_state.EnableHorizontalIrq || (_state.HorizontalTimer <= 339 && (_ppu->GetCycle() == _state.HorizontalTimer) &&
+			(_ppu->GetLastScanline() != _ppu->GetRealScanline() || _state.HorizontalTimer < 339))) &&
 		(!_state.EnableVerticalIrq || _ppu->GetRealScanline() == _state.VerticalTimer)
 	);
 
-	if(!_irqLevel && irqLevel) {
+	if (!_irqLevel && irqLevel)
+	{
 		//Trigger IRQ signal 16 master clocks later
 		_needIrq = 4;
 	}

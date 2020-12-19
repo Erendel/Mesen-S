@@ -23,7 +23,7 @@ private:
 	uint8_t _control = 0;
 	uint64_t _resetClock = 0;
 	double _clockRatio = 0;
-	
+
 	uint8_t _input[4] = {};
 	uint8_t _inputIndex = 0;
 
@@ -31,7 +31,7 @@ private:
 	bool _waitForHigh = true;
 	bool _packetReady = false;
 	uint64_t _inputWriteClock = 0;
-	uint8_t _inputValue = 0;	
+	uint8_t _inputValue = 0;
 	uint8_t _packetData[16] = {};
 	uint8_t _packetByte = 0;
 	uint8_t _packetBit = 0;
@@ -39,7 +39,7 @@ private:
 	uint8_t _lcdRowSelect = 0;
 	uint16_t _readPosition = 0;
 	uint8_t _lcdBuffer[4][1280] = {};
-	
+
 	HermiteResampler _resampler;
 	int16_t* _mixBuffer = nullptr;
 	uint32_t _mixSampleCount = 0;
@@ -53,7 +53,7 @@ public:
 	~SuperGameboy();
 
 	void Reset() override;
-	
+
 	uint8_t Read(uint32_t addr) override;
 	void Write(uint32_t addr, uint8_t value) override;
 

@@ -50,9 +50,9 @@ public:
 
 	static list<shared_ptr<GameServerConnection>> GetConnectionList();
 
-	bool SetInput(BaseControlDevice *device) override;
+	bool SetInput(BaseControlDevice* device) override;
 	void RecordInput(vector<shared_ptr<BaseControlDevice>> devices) override;
 
 	// Inherited via INotificationListener
-	virtual void ProcessNotification(ConsoleNotificationType type, void * parameter) override;
+	virtual void ProcessNotification(ConsoleNotificationType type, void* parameter) override;
 };

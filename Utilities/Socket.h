@@ -6,10 +6,10 @@ class Socket
 {
 private:
 #ifndef LIBRETRO
-	#ifdef _WIN32
+#ifdef _WIN32
 	bool _cleanupWSA = false;
-	#endif
-	
+#endif
+
 	uintptr_t _socket = ~0;
 	bool _connectionError = false;
 	int32_t _UPnPPort = -1;
@@ -31,8 +31,8 @@ public:
 	void Listen(int backlog);
 	shared_ptr<Socket> Accept();
 
-	int Send(char *buf, int len, int flags);
-	void BufferedSend(char *buf, int len);
+	int Send(char* buf, int len, int flags);
+	void BufferedSend(char* buf, int len);
 	void SendBuffer();
-	int Recv(char *buf, int len, int flags);
+	int Recv(char* buf, int len, int flags);
 };

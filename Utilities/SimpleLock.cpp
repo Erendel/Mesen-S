@@ -22,11 +22,14 @@ LockHandler SimpleLock::AcquireSafe()
 
 void SimpleLock::Acquire()
 {
-	if(_lockCount == 0 || _holderThreadID != _threadID) {
-		while(_lock.test_and_set());
+	if (_lockCount == 0 || _holderThreadID != _threadID)
+	{
+		while (_lock.test_and_set());
 		_holderThreadID = _threadID;
 		_lockCount = 1;
-	} else {
+	}
+	else
+	{
 		//Same thread can acquire the same lock multiple times
 		_lockCount++;
 	}
@@ -46,19 +49,23 @@ void SimpleLock::WaitForRelease()
 
 void SimpleLock::Release()
 {
-	if(_lockCount > 0 && _holderThreadID == _threadID) {
+	if (_lockCount > 0 && _holderThreadID == _threadID)
+	{
 		_lockCount--;
-		if(_lockCount == 0) {
+		if (_lockCount == 0)
+		{
 			_holderThreadID = std::thread::id();
 			_lock.clear();
 		}
-	} else {
+	}
+	else
+	{
 		assert(false);
 	}
 }
 
 
-LockHandler::LockHandler(SimpleLock *lock)
+LockHandler::LockHandler(SimpleLock* lock)
 {
 	_lock = lock;
 	_lock->Acquire();

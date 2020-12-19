@@ -20,7 +20,7 @@
 #include "../Utilities/Serializer.h"
 #include "../Utilities/HexUtilities.h"
 
-void MemoryManager::Initialize(Console *console)
+void MemoryManager::Initialize(Console* console)
 {
 	_masterClock = 0;
 	_openBus = 0;
@@ -48,8 +48,10 @@ void MemoryManager::Initialize(Console *console)
 		_workRam
 	));
 
-	for(uint32_t i = 0; i < 128 * 1024; i += 0x1000) {
-		_workRamHandlers.push_back(unique_ptr<RamHandler>(new RamHandler(_workRam, i, MemoryManager::WorkRamSize, SnesMemoryType::WorkRam)));
+	for (uint32_t i = 0; i < 128 * 1024; i += 0x1000)
+	{
+		_workRamHandlers.push_back(
+			unique_ptr<RamHandler>(new RamHandler(_workRam, i, MemoryManager::WorkRamSize, SnesMemoryType::WorkRam)));
 	}
 
 	_mappings.RegisterHandler(0x7E, 0x7F, 0x0000, 0xFFFF, _workRamHandlers);
@@ -87,37 +89,56 @@ void MemoryManager::Reset()
 
 void MemoryManager::GenerateMasterClockTable()
 {
-	for(int i = 0; i < 0x800; i++) {
+	for (int i = 0; i < 0x800; i++)
+	{
 		uint8_t bank = (i & 0x300) >> 8;
-		if(bank == 1) {
+		if (bank == 1)
+		{
 			//Banks $40-$7F - Slow
 			_masterClockTable[i] = 8;
-		} else if(bank == 3) {
+		}
+		else if (bank == 3)
+		{
 			//Banks $C0-$FF
 			//Slow or fast (depending on register)
 			_masterClockTable[i] = (i >= 0x400) ? 6 : 8;
-		} else {
+		}
+		else
+		{
 			//Banks $00-$3F and $80-$BF
 			uint8_t page = (i & 0xFF);
-			if(page <= 0x1F) {
+			if (page <= 0x1F)
+			{
 				//Slow
 				_masterClockTable[i] = 8;
-			} else if(page >= 0x20 && page <= 0x3F) {
+			}
+			else if (page >= 0x20 && page <= 0x3F)
+			{
 				//Fast
 				_masterClockTable[i] = 6;
-			} else if(page == 0x40 || page == 0x41) {
+			}
+			else if (page == 0x40 || page == 0x41)
+			{
 				//Extra slow
 				_masterClockTable[i] = 12;
-			} else if(page >= 0x42 && page <= 0x5F) {
+			}
+			else if (page >= 0x42 && page <= 0x5F)
+			{
 				//Fast
 				_masterClockTable[i] = 6;
-			} else if(page >= 0x60 && page <= 0x7F) {
+			}
+			else if (page >= 0x60 && page <= 0x7F)
+			{
 				//Slow
 				_masterClockTable[i] = 8;
-			} else if(bank == 0) {
+			}
+			else if (bank == 0)
+			{
 				//Slow
 				_masterClockTable[i] = 8;
-			} else {
+			}
+			else
+			{
 				//page >= $80
 				//Slow or fast (depending on register)
 				_masterClockTable[i] = (i >= 0x400) ? 6 : 8;
@@ -149,28 +170,46 @@ void MemoryManager::IncMasterClock8()
 
 void MemoryManager::IncMasterClock40()
 {
-	Exec(); Exec(); Exec(); Exec(); Exec();
-	Exec(); Exec(); Exec(); Exec(); Exec();
-	Exec(); Exec(); Exec(); Exec(); Exec();
-	Exec(); Exec(); Exec(); Exec(); Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
+	Exec();
 }
 
 void MemoryManager::IncMasterClockStartup()
 {
-	for(int i = 0; i < 182 / 2; i++) {
+	for (int i = 0; i < 182 / 2; i++)
+	{
 		Exec();
 	}
 }
 
 void MemoryManager::IncrementMasterClockValue(uint16_t cyclesToRun)
 {
-	switch(cyclesToRun) {
-		case 12: Exec();
-		case 10: Exec();
-		case 8: Exec();
-		case 6: Exec();
-		case 4: Exec();
-		case 2: Exec();
+	switch (cyclesToRun)
+	{
+	case 12: Exec();
+	case 10: Exec();
+	case 8: Exec();
+	case 6: Exec();
+	case 4: Exec();
+	case 2: Exec();
 	}
 }
 
@@ -179,11 +218,13 @@ void MemoryManager::Exec()
 	_masterClock += 2;
 	_hClock += 2;
 
-	if(_hClock == _nextEventClock) {
+	if (_hClock == _nextEventClock)
+	{
 		ProcessEvent();
-	} 
-	
-	if((_hClock & 0x03) == 0) {
+	}
+
+	if ((_hClock & 0x03) == 0)
+	{
 		_console->ProcessPpuCycle<CpuType::Cpu>();
 		_regs->ProcessIrqCounters();
 	}
@@ -193,48 +234,58 @@ void MemoryManager::Exec()
 
 void MemoryManager::ProcessEvent()
 {
-	switch(_nextEvent) {
-		case SnesEventType::HdmaInit:
-			_console->GetDmaController()->BeginHdmaInit();
-			_nextEvent = SnesEventType::DramRefresh;
-			_nextEventClock = _dramRefreshPosition;
-			break;
+	switch (_nextEvent)
+	{
+	case SnesEventType::HdmaInit:
+		_console->GetDmaController()->BeginHdmaInit();
+		_nextEvent = SnesEventType::DramRefresh;
+		_nextEventClock = _dramRefreshPosition;
+		break;
 
-		case SnesEventType::DramRefresh:
-			IncMasterClock40();
-			_cpu->IncreaseCycleCount<5>();
+	case SnesEventType::DramRefresh:
+		IncMasterClock40();
+		_cpu->IncreaseCycleCount<5>();
 
-			if(_ppu->GetScanline() < _ppu->GetVblankStart()) {
-				_nextEvent = SnesEventType::HdmaStart;
-				_nextEventClock = 276 * 4;
-			} else {
-				_nextEvent = SnesEventType::EndOfScanline;
-				_nextEventClock = 1360;
-			}
-			break;
-
-		case SnesEventType::HdmaStart:
-			_console->GetDmaController()->BeginHdmaTransfer();
+		if (_ppu->GetScanline() < _ppu->GetVblankStart())
+		{
+			_nextEvent = SnesEventType::HdmaStart;
+			_nextEventClock = 276 * 4;
+		}
+		else
+		{
 			_nextEvent = SnesEventType::EndOfScanline;
 			_nextEventClock = 1360;
-			break;
+		}
+		break;
 
-		case SnesEventType::EndOfScanline:
-			if(_ppu->ProcessEndOfScanline(_hClock)) {
-				_hClock = 0;
+	case SnesEventType::HdmaStart:
+		_console->GetDmaController()->BeginHdmaTransfer();
+		_nextEvent = SnesEventType::EndOfScanline;
+		_nextEventClock = 1360;
+		break;
 
-				if(_ppu->GetScanline() == 0) {
-					_nextEvent = SnesEventType::HdmaInit;
-					_nextEventClock = 12 + (_masterClock & 0x07);
-				} else {
-					_dramRefreshPosition = 538 - (_masterClock & 0x07);
-					_nextEvent = SnesEventType::DramRefresh;
-					_nextEventClock = _dramRefreshPosition;
-				}
-			} else {
-				_nextEventClock += 2;
+	case SnesEventType::EndOfScanline:
+		if (_ppu->ProcessEndOfScanline(_hClock))
+		{
+			_hClock = 0;
+
+			if (_ppu->GetScanline() == 0)
+			{
+				_nextEvent = SnesEventType::HdmaInit;
+				_nextEventClock = 12 + (_masterClock & 0x07);
 			}
-			break;
+			else
+			{
+				_dramRefreshPosition = 538 - (_masterClock & 0x07);
+				_nextEvent = SnesEventType::DramRefresh;
+				_nextEventClock = _dramRefreshPosition;
+			}
+		}
+		else
+		{
+			_nextEventClock += 2;
+		}
+		break;
 	}
 }
 
@@ -243,12 +294,15 @@ uint8_t MemoryManager::Read(uint32_t addr, MemoryOperationType type)
 	IncrementMasterClockValue(_cpuSpeed - 4);
 
 	uint8_t value;
-	IMemoryHandler *handler = _mappings.GetHandler(addr);
-	if(handler) {
+	IMemoryHandler* handler = _mappings.GetHandler(addr);
+	if (handler)
+	{
 		value = handler->Read(addr);
 		_memTypeBusA = handler->GetMemoryType();
 		_openBus = value;
-	} else {
+	}
+	else
+	{
 		//open bus
 		value = _openBus;
 		LogDebug("[Debug] Read - missing handler: $" + HexUtilities::ToHex(addr));
@@ -267,26 +321,38 @@ uint8_t MemoryManager::ReadDma(uint32_t addr, bool forBusA)
 
 	uint8_t value;
 	IMemoryHandler* handler = _mappings.GetHandler(addr);
-	if(handler) {
-		if(forBusA && handler == _registerHandlerB.get() && (addr & 0xFF00) == 0x2100) {
+	if (handler)
+	{
+		if (forBusA && handler == _registerHandlerB.get() && (addr & 0xFF00) == 0x2100)
+		{
 			//Trying to read from bus B using bus A returns open bus
 			value = _openBus;
-		} else if(handler == _registerHandlerA.get()) {
+		}
+		else if (handler == _registerHandlerA.get())
+		{
 			uint16_t regAddr = addr & 0xFFFF;
-			if(regAddr == 0x420B || regAddr == 0x420C || (regAddr >= 0x4300 && regAddr <= 0x437F)) {
+			if (regAddr == 0x420B || regAddr == 0x420C || (regAddr >= 0x4300 && regAddr <= 0x437F))
+			{
 				//Trying to read the DMA controller with DMA returns open bus
 				value = _openBus;
-			} else {
+			}
+			else
+			{
 				value = handler->Read(addr);
 			}
-		} else {
+		}
+		else
+		{
 			value = handler->Read(addr);
-			if(handler != _registerHandlerB.get()) {
+			if (handler != _registerHandlerB.get())
+			{
 				_memTypeBusA = handler->GetMemoryType();
 			}
 		}
 		_openBus = value;
-	} else {
+	}
+	else
+	{
 		//open bus
 		value = _openBus;
 		LogDebug("[Debug] Read - missing handler: $" + HexUtilities::ToHex(addr));
@@ -306,7 +372,7 @@ uint16_t MemoryManager::PeekWord(uint32_t addr)
 	return _mappings.PeekWord(addr);
 }
 
-void MemoryManager::PeekBlock(uint32_t addr, uint8_t *dest)
+void MemoryManager::PeekBlock(uint32_t addr, uint8_t* dest)
 {
 	_mappings.PeekBlock(addr, dest);
 }
@@ -317,10 +383,13 @@ void MemoryManager::Write(uint32_t addr, uint8_t value, MemoryOperationType type
 
 	_console->ProcessMemoryWrite<CpuType::Cpu>(addr, value, type);
 	IMemoryHandler* handler = _mappings.GetHandler(addr);
-	if(handler) {
+	if (handler)
+	{
 		handler->Write(addr, value);
 		_memTypeBusA = handler->GetMemoryType();
-	} else {
+	}
+	else
+	{
 		LogDebug("[Debug] Write - missing handler: $" + HexUtilities::ToHex(addr) + " = " + HexUtilities::ToHex(value));
 	}
 }
@@ -332,23 +401,35 @@ void MemoryManager::WriteDma(uint32_t addr, uint8_t value, bool forBusA)
 	_console->ProcessMemoryWrite<CpuType::Cpu>(addr, value, MemoryOperationType::DmaWrite);
 
 	IMemoryHandler* handler = _mappings.GetHandler(addr);
-	if(handler) {
-		if(forBusA && handler == _registerHandlerB.get() && (addr & 0xFF00) == 0x2100) {
+	if (handler)
+	{
+		if (forBusA && handler == _registerHandlerB.get() && (addr & 0xFF00) == 0x2100)
+		{
 			//Trying to write to bus B using bus A does nothing
-		} else if(handler == _registerHandlerA.get()) {
+		}
+		else if (handler == _registerHandlerA.get())
+		{
 			uint16_t regAddr = addr & 0xFFFF;
-			if(regAddr == 0x420B || regAddr == 0x420C || (regAddr >= 0x4300 && regAddr <= 0x437F)) {
+			if (regAddr == 0x420B || regAddr == 0x420C || (regAddr >= 0x4300 && regAddr <= 0x437F))
+			{
 				//Trying to write to the DMA controller with DMA does nothing
-			} else {
+			}
+			else
+			{
 				handler->Write(addr, value);
 			}
-		} else {
+		}
+		else
+		{
 			handler->Write(addr, value);
-			if(handler != _registerHandlerB.get()) {
+			if (handler != _registerHandlerB.get())
+			{
 				_memTypeBusA = handler->GetMemoryType();
 			}
 		}
-	} else {
+	}
+	else
+	{
 		LogDebug("[Debug] Write - missing handler: $" + HexUtilities::ToHex(addr) + " = " + HexUtilities::ToHex(value));
 	}
 }
@@ -368,7 +449,7 @@ uint16_t MemoryManager::GetHClock()
 	return _hClock;
 }
 
-uint8_t * MemoryManager::DebugGetWorkRam()
+uint8_t* MemoryManager::DebugGetWorkRam()
 {
 	return _workRam;
 }
@@ -410,12 +491,13 @@ bool MemoryManager::IsWorkRam(uint32_t cpuAddress)
 	return handler && handler->GetMemoryType() == SnesMemoryType::WorkRam;
 }
 
-void MemoryManager::Serialize(Serializer &s)
+void MemoryManager::Serialize(Serializer& s)
 {
 	s.Stream(_masterClock, _openBus, _cpuSpeed, _hClock, _dramRefreshPosition);
 	s.StreamArray(_workRam, MemoryManager::WorkRamSize);
 
-	if(s.GetVersion() < 8) {
+	if (s.GetVersion() < 8)
+	{
 		bool unusedHasEvent[1369];
 		s.StreamArray(unusedHasEvent, sizeof(unusedHasEvent));
 	}

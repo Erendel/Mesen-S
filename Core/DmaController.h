@@ -18,17 +18,17 @@ private:
 	uint8_t _hdmaChannels = 0;
 	bool _dmaPending = false;
 	uint64_t _dmaStartClock = 0;
-	
+
 	uint8_t _activeChannel = 0; //Used by debugger's event viewer
 
 	DmaChannelConfig _channel[8] = {};
-	MemoryManager *_memoryManager;
-	
+	MemoryManager* _memoryManager;
+
 	void CopyDmaByte(uint32_t addressBusA, uint16_t addressBusB, bool fromBtoA);
 
-	void RunDma(DmaChannelConfig &channel);
-	
-	void RunHdmaTransfer(DmaChannelConfig &channel);
+	void RunDma(DmaChannelConfig& channel);
+
+	void RunHdmaTransfer(DmaChannelConfig& channel);
 	bool ProcessHdmaChannels();
 	bool IsLastActiveHdmaChannel(uint8_t channel);
 	bool InitHdmaChannels();
@@ -40,7 +40,7 @@ private:
 	bool HasActiveDmaChannel();
 
 public:
-	DmaController(MemoryManager *memoryManager);
+	DmaController(MemoryManager* memoryManager);
 
 	void Reset();
 
@@ -55,5 +55,5 @@ public:
 	uint8_t GetActiveChannel();
 	DmaChannelConfig GetChannelConfig(uint8_t channel);
 
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 };

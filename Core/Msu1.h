@@ -9,7 +9,7 @@ class Spc;
 class Msu1 final : public ISerializable
 {
 private:
-	Spc * _spc;
+	Spc* _spc;
 	PcmReader _pcmReader;
 	uint8_t _volume = 100;
 	uint16_t _trackSelect = 0;
@@ -27,18 +27,18 @@ private:
 
 	ifstream _dataFile;
 	uint32_t _dataSize;
-	
+
 	void LoadTrack(uint32_t startOffset = 8);
 
 public:
 	Msu1(VirtualFile romFile, Spc* spc);
-	
+
 	static Msu1* Init(VirtualFile romFile, Spc* spc);
 
 	void Write(uint16_t addr, uint8_t value);
 	uint8_t Read(uint16_t addr);
-	
-	void MixAudio(int16_t *buffer, size_t sampleCount, uint32_t sampleRate);
-	
-	void Serialize(Serializer &s);
+
+	void MixAudio(int16_t* buffer, size_t sampleCount, uint32_t sampleRate);
+
+	void Serialize(Serializer& s);
 };

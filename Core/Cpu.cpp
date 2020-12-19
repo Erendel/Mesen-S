@@ -26,24 +26,27 @@ void Cpu::Exec()
 {
 	_immediateMode = false;
 
-	switch(_state.StopState) {
-		case CpuStopState::Running: RunOp(); break;
-		case CpuStopState::Stopped:
-			//STP was executed, CPU no longer executes any code
-		#ifndef DUMMYCPU
+	switch (_state.StopState)
+	{
+	case CpuStopState::Running: RunOp();
+		break;
+	case CpuStopState::Stopped:
+		//STP was executed, CPU no longer executes any code
+#ifndef DUMMYCPU
 			_memoryManager->IncMasterClock4();
-		#endif
-			return;
+#endif
+		return;
 
-		case CpuStopState::WaitingForIrq:
-			//WAI
+	case CpuStopState::WaitingForIrq:
+		//WAI
+		Idle();
+		if (_state.IrqSource || _state.NeedNmi)
+		{
 			Idle();
-			if(_state.IrqSource || _state.NeedNmi) {
-				Idle();
-				Idle();
-				_state.StopState = CpuStopState::Running;
-			}
-			break;
+			Idle();
+			_state.StopState = CpuStopState::Running;
+		}
+		break;
 	}
 
 #ifndef DUMMYCPU
@@ -120,21 +123,33 @@ void Cpu::Write(uint32_t addr, uint8_t value, MemoryOperationType type)
 
 void Cpu::SetReg(CpuRegister reg, uint16_t value)
 {
-	switch (reg) {
-	case CpuRegister::CpuRegA:	{	_state.A = value;	} break;
-	case CpuRegister::CpuRegX:	{	_state.X = value;	} break;
-	case CpuRegister::CpuRegY:	{	_state.Y = value;	} break;
-	case CpuRegister::CpuRegSP:	{	_state.SP = value;	} break;
-	case CpuRegister::CpuRegD:	{	_state.D = value;	} break;
-	case CpuRegister::CpuRegPC:	{	_state.PC = value;	} break;
-	case CpuRegister::CpuRegK:	{	_state.K = value & 0xFF;	} break;
-	case CpuRegister::CpuRegDBR:	{	_state.DBR = value & 0xFF;	} break;
-	case CpuRegister::CpuRegPS:	{	_state.PS = value & 0xFF;	} break;
-	case CpuRegister::CpuFlagNmi:	{	_state.NmiFlag = value != 0;	} break;
+	switch (reg)
+	{
+	case CpuRegister::CpuRegA: { _state.A = value; }
+		break;
+	case CpuRegister::CpuRegX: { _state.X = value; }
+		break;
+	case CpuRegister::CpuRegY: { _state.Y = value; }
+		break;
+	case CpuRegister::CpuRegSP: { _state.SP = value; }
+		break;
+	case CpuRegister::CpuRegD: { _state.D = value; }
+		break;
+	case CpuRegister::CpuRegPC: { _state.PC = value; }
+		break;
+	case CpuRegister::CpuRegK: { _state.K = value & 0xFF; }
+		break;
+	case CpuRegister::CpuRegDBR: { _state.DBR = value & 0xFF; }
+		break;
+	case CpuRegister::CpuRegPS: { _state.PS = value & 0xFF; }
+		break;
+	case CpuRegister::CpuFlagNmi: { _state.NmiFlag = value != 0; }
+		break;
 	}
 }
 
-bool Cpu::GetCpuProcFlag(ProcFlags::ProcFlags flag) {
+bool Cpu::GetCpuProcFlag(ProcFlags::ProcFlags flag)
+{
 	return _state.PS & static_cast<uint8_t>(flag);
 }
 

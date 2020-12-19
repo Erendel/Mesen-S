@@ -11,9 +11,11 @@ string Multitap::GetKeyNames()
 
 void Multitap::InternalSetStateFromInput()
 {
-	for(int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++)
+	{
 		int offset = Multitap::ButtonCount * i;
-		for(KeyMapping keyMapping : _mappings[i]) {
+		for (KeyMapping keyMapping : _mappings[i])
+		{
 			SetPressedState(Buttons::A + offset, keyMapping.A);
 			SetPressedState(Buttons::B + offset, keyMapping.B);
 			SetPressedState(Buttons::X + offset, keyMapping.X);
@@ -29,7 +31,8 @@ void Multitap::InternalSetStateFromInput()
 
 			uint8_t turboFreq = 1 << (4 - _turboSpeed[i]);
 			bool turboOn = (uint8_t)(_console->GetFrameCount() % turboFreq) < turboFreq / 2;
-			if(turboOn) {
+			if (turboOn)
+			{
 				SetPressedState(Buttons::A + offset, keyMapping.TurboA);
 				SetPressedState(Buttons::B + offset, keyMapping.TurboB);
 				SetPressedState(Buttons::X + offset, keyMapping.TurboX);
@@ -41,7 +44,7 @@ void Multitap::InternalSetStateFromInput()
 	}
 }
 
-void Multitap::UpdateControllerState(uint8_t controllerNumber, SnesController &controller)
+void Multitap::UpdateControllerState(uint8_t controllerNumber, SnesController& controller)
 {
 	int offset = Multitap::ButtonCount * controllerNumber;
 	SetBitValue(Buttons::A + offset, controller.IsPressed(Buttons::A));
@@ -79,7 +82,7 @@ uint16_t Multitap::ToByte(uint8_t port)
 		((uint8_t)IsPressed(Buttons::R + offset) << 11);
 }
 
-void Multitap::Serialize(Serializer & s)
+void Multitap::Serialize(Serializer& s)
 {
 	BaseControlDevice::Serialize(s);
 	s.Stream(_stateBuffer[0], _stateBuffer[1], _stateBuffer[2], _stateBuffer[3]);
@@ -87,12 +90,15 @@ void Multitap::Serialize(Serializer & s)
 
 void Multitap::RefreshStateBuffer()
 {
-	for(int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++)
+	{
 		_stateBuffer[i] = ToByte(i);
 	}
 }
 
-Multitap::Multitap(Console* console, uint8_t port, KeyMappingSet keyMappings1, KeyMappingSet keyMappings2, KeyMappingSet keyMappings3, KeyMappingSet keyMappings4) : BaseControlDevice(console, port, keyMappings1)
+Multitap::Multitap(Console* console, uint8_t port, KeyMappingSet keyMappings1, KeyMappingSet keyMappings2,
+                   KeyMappingSet keyMappings3, KeyMappingSet keyMappings4) : BaseControlDevice(
+	console, port, keyMappings1)
 {
 	_turboSpeed[0] = keyMappings1.TurboSpeed;
 	_turboSpeed[1] = keyMappings2.TurboSpeed;
@@ -124,13 +130,15 @@ uint8_t Multitap::ReadRam(uint16_t addr)
 	uint8_t portSelect = (_internalRegs->GetIoPortOutput() & selectBit) ? 0 : 2;
 	uint8_t output = 0;
 
-	if(IsCurrentPort(addr)) {
+	if (IsCurrentPort(addr))
+	{
 		StrobeProcessRead();
 
 		output = _stateBuffer[portSelect] & 0x01;
-		output |= (_stateBuffer[portSelect + 1] & 0x01) << 1;  //P3 & P5 are reported in bit 1
+		output |= (_stateBuffer[portSelect + 1] & 0x01) << 1; //P3 & P5 are reported in bit 1
 
-		if(_strobe) {
+		if (_strobe)
+		{
 			//Bit 1 is always set when strobe is high
 			output |= 0x02;
 		}
@@ -148,7 +156,8 @@ uint8_t Multitap::ReadRam(uint16_t addr)
 
 void Multitap::WriteRam(uint16_t addr, uint8_t value)
 {
-	if(addr == 0x4016) {
+	if (addr == 0x4016)
+	{
 		StrobeProcessWrite(value);
 	}
 }

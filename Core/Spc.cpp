@@ -24,9 +24,9 @@ Spc::Spc(Console* console)
 	_console->GetSettings()->InitializeRam(_ram, Spc::SpcRamSize);
 
 	_dsp.reset(new SPC_DSP());
-	#ifndef DUMMYSPC
+#ifndef DUMMYSPC
 	_dsp->init(this, _console->GetSettings().get(), _ram);
-	#endif
+#endif
 	_dsp->reset();
 	_dsp->set_output(_soundBuffer, Spc::SampleBufferSize >> 1);
 
@@ -76,7 +76,7 @@ void Spc::Reset()
 	_state.RomEnabled = true;
 	_state.Cycle = 0;
 	_state.PC = ReadWord(Spc::ResetVector);
-	
+
 	_opCode = 0;
 	_opStep = SpcOpStep::ReadOpCode;
 	_opSubStep = 0;
@@ -93,11 +93,15 @@ void Spc::Reset()
 void Spc::SetSpcState(bool enabled)
 {
 	//Used by overclocking logic to disable SPC during the extra scanlines added to the PPU
-	if(_enabled != enabled) {
-		if(enabled) {
+	if (_enabled != enabled)
+	{
+		if (enabled)
+		{
 			//When re-enabling, adjust the cycle counter to prevent running extra cycles
 			UpdateClockRatio();
-		} else {
+		}
+		else
+		{
 			//Catch up SPC before disabling it
 			Run();
 		}
@@ -113,7 +117,8 @@ void Spc::UpdateClockRatio()
 	//This can happen due to overclocking (which disables the SPC for some scanlines) or if the SPC's 
 	//internal sample rate is changed between versions (e.g 32000hz -> 32040hz)
 	uint64_t targetCycle = (uint64_t)(_memoryManager->GetMasterClock() * _clockRatio);
-	if(std::abs((int64_t)targetCycle - (int64_t)_state.Cycle) > 10) {
+	if (std::abs((int64_t)targetCycle - (int64_t)_state.Cycle) > 10)
+	{
 		_state.Cycle = targetCycle;
 	}
 }
@@ -135,14 +140,17 @@ void Spc::DummyRead(uint16_t addr)
 
 void Spc::IncCycleCount(int32_t addr)
 {
-	static constexpr uint8_t cpuWait[4] = { 2, 4, 10, 20 };
-	static constexpr uint8_t timerMultiplier[4] = { 2, 4, 8, 16 };
+	static constexpr uint8_t cpuWait[4] = {2, 4, 10, 20};
+	static constexpr uint8_t timerMultiplier[4] = {2, 4, 8, 16};
 
 	uint8_t speedSelect;
-	if(addr < 0 || ((addr & 0xFFF0) == 0x00F0) || (addr >= 0xFFC0 && _state.RomEnabled)) {
+	if (addr < 0 || ((addr & 0xFFF0) == 0x00F0) || (addr >= 0xFFC0 && _state.RomEnabled))
+	{
 		//Use internal speed (bits 4-5) for idle cycles, register access or IPL rom access
 		speedSelect = _state.InternalSpeed;
-	} else {
+	}
+	else
+	{
 		speedSelect = _state.ExternalSpeed;
 	}
 
@@ -159,34 +167,36 @@ void Spc::IncCycleCount(int32_t addr)
 
 uint8_t Spc::DebugRead(uint16_t addr)
 {
-	if(addr >= 0xFFC0 && _state.RomEnabled) {
+	if (addr >= 0xFFC0 && _state.RomEnabled)
+	{
 		return _spcBios[addr & 0x3F];
 	}
 
-	switch(addr) {
-		case 0xF0: return 0;
-		case 0xF1: return 0;
+	switch (addr)
+	{
+	case 0xF0: return 0;
+	case 0xF1: return 0;
 
-		case 0xF2: return _state.DspReg;
-		case 0xF3: return _dsp->read(_state.DspReg & 0x7F);
+	case 0xF2: return _state.DspReg;
+	case 0xF3: return _dsp->read(_state.DspReg & 0x7F);
 
-		case 0xF4: return _state.CpuRegs[0];
-		case 0xF5: return _state.CpuRegs[1];
-		case 0xF6: return _state.CpuRegs[2];
-		case 0xF7: return _state.CpuRegs[3];
+	case 0xF4: return _state.CpuRegs[0];
+	case 0xF5: return _state.CpuRegs[1];
+	case 0xF6: return _state.CpuRegs[2];
+	case 0xF7: return _state.CpuRegs[3];
 
-		case 0xF8: return _state.RamReg[0];
-		case 0xF9: return _state.RamReg[1];
+	case 0xF8: return _state.RamReg[0];
+	case 0xF9: return _state.RamReg[1];
 
-		case 0xFA: return 0;
-		case 0xFB: return 0;
-		case 0xFC: return 0;
+	case 0xFA: return 0;
+	case 0xFB: return 0;
+	case 0xFC: return 0;
 
-		case 0xFD: return _state.Timer0.DebugRead();
-		case 0xFE: return _state.Timer1.DebugRead();
-		case 0xFF: return _state.Timer2.DebugRead();
+	case 0xFD: return _state.Timer0.DebugRead();
+	case 0xFE: return _state.Timer1.DebugRead();
+	case 0xFF: return _state.Timer2.DebugRead();
 
-		default: return _ram[addr];
+	default: return _ram[addr];
 	}
 }
 
@@ -200,45 +210,65 @@ uint8_t Spc::Read(uint16_t addr, MemoryOperationType type)
 	IncCycleCount(addr);
 
 	uint8_t value;
-	if(addr >= 0xFFC0 && _state.RomEnabled) {
+	if (addr >= 0xFFC0 && _state.RomEnabled)
+	{
 		value = _spcBios[addr & 0x3F];
-	} else {
-		switch(addr) {
-			case 0xF0: value = 0; break;
-			case 0xF1: value = 0; break;
+	}
+	else
+	{
+		switch (addr)
+		{
+		case 0xF0: value = 0;
+			break;
+		case 0xF1: value = 0;
+			break;
 
-			case 0xF2: value = _state.DspReg; break;
-			case 0xF3: 
-				#ifndef DUMMYSPC
+		case 0xF2: value = _state.DspReg;
+			break;
+		case 0xF3:
+#ifndef DUMMYSPC
 				value = _dsp->read(_state.DspReg & 0x7F);
-				#else
-				value = 0;
-				#endif
-				break;
+#else
+			value = 0;
+#endif
+			break;
 
-			case 0xF4: value = _state.CpuRegs[0]; break;
-			case 0xF5: value = _state.CpuRegs[1]; break;
-			case 0xF6: value = _state.CpuRegs[2]; break;
-			case 0xF7: value = _state.CpuRegs[3]; break;
+		case 0xF4: value = _state.CpuRegs[0];
+			break;
+		case 0xF5: value = _state.CpuRegs[1];
+			break;
+		case 0xF6: value = _state.CpuRegs[2];
+			break;
+		case 0xF7: value = _state.CpuRegs[3];
+			break;
 
-			case 0xF8: value = _state.RamReg[0]; break;
-			case 0xF9: value = _state.RamReg[1]; break;
+		case 0xF8: value = _state.RamReg[0];
+			break;
+		case 0xF9: value = _state.RamReg[1];
+			break;
 
-			case 0xFA: value = 0; break;
-			case 0xFB: value = 0; break;
-			case 0xFC: value = 0; break;
+		case 0xFA: value = 0;
+			break;
+		case 0xFB: value = 0;
+			break;
+		case 0xFC: value = 0;
+			break;
 
-			case 0xFD: value = _state.Timer0.GetOutput(); break;
-			case 0xFE: value = _state.Timer1.GetOutput(); break;
-			case 0xFF: value = _state.Timer2.GetOutput(); break;
+		case 0xFD: value = _state.Timer0.GetOutput();
+			break;
+		case 0xFE: value = _state.Timer1.GetOutput();
+			break;
+		case 0xFF: value = _state.Timer2.GetOutput();
+			break;
 
-			default: value = _ram[addr]; break;
+		default: value = _ram[addr];
+			break;
 		}
 	}
 
 #ifndef DUMMYSPC
 	_console->ProcessMemoryRead<CpuType::Spc>(addr, value, type);
-#else 
+#else
 	LogRead(addr, value);
 #endif
 
@@ -346,24 +376,29 @@ void Spc::DspWriteRam(uint16_t addr, uint8_t value)
 
 void Spc::Run()
 {
-	if(!_enabled || _state.StopState != CpuStopState::Running) {
+	if (!_enabled || _state.StopState != CpuStopState::Running)
+	{
 		//STOP or SLEEP were executed - execution is stopped forever.
 		return;
 	}
 
 	uint64_t targetCycle = (uint64_t)(_memoryManager->GetMasterClock() * _clockRatio);
-	while(_state.Cycle < targetCycle) {
+	while (_state.Cycle < targetCycle)
+	{
 		ProcessCycle();
 	}
 }
 
 void Spc::ProcessCycle()
 {
-	if(_opStep == SpcOpStep::ReadOpCode) {
+	if (_opStep == SpcOpStep::ReadOpCode)
+	{
 		_opCode = GetOpCode();
 		_opStep = SpcOpStep::Addressing;
 		_opSubStep = 0;
-	} else {
+	}
+	else
+	{
 		Exec();
 	}
 }
@@ -375,7 +410,8 @@ void Spc::ProcessEndFrame()
 	UpdateClockRatio();
 
 	int sampleCount = _dsp->sample_count();
-	if(sampleCount != 0) {
+	if (sampleCount != 0)
+	{
 		_console->GetSoundMixer()->PlayAudioBuffer(_soundBuffer, sampleCount / 2, Spc::SpcSampleRate);
 	}
 	_dsp->set_output(_soundBuffer, Spc::SampleBufferSize >> 1);
@@ -400,20 +436,26 @@ bool Spc::IsMuted()
 
 AddressInfo Spc::GetAbsoluteAddress(uint16_t addr)
 {
-	if(addr < 0xFFC0 || !_state.RomEnabled) {
-		return AddressInfo { addr, SnesMemoryType::SpcRam };
+	if (addr < 0xFFC0 || !_state.RomEnabled)
+	{
+		return AddressInfo{addr, SnesMemoryType::SpcRam};
 	}
-	return AddressInfo { addr & 0x3F, SnesMemoryType::SpcRom };
+	return AddressInfo{addr & 0x3F, SnesMemoryType::SpcRom};
 }
 
-int Spc::GetRelativeAddress(AddressInfo &absAddress)
+int Spc::GetRelativeAddress(AddressInfo& absAddress)
 {
-	if(absAddress.Type == SnesMemoryType::SpcRom) {
-		if(_state.RomEnabled) {
+	if (absAddress.Type == SnesMemoryType::SpcRom)
+	{
+		if (_state.RomEnabled)
+		{
 			return 0xFFC0 | (absAddress.Address & 0x3F);
 		}
-	} else {
-		if(absAddress.Address < 0xFFC0 || !_state.RomEnabled) {
+	}
+	else
+	{
+		if (absAddress.Address < 0xFFC0 || !_state.RomEnabled)
+		{
 			return absAddress.Address;
 		}
 	}
@@ -430,7 +472,7 @@ uint8_t* Spc::GetSpcRom()
 	return _spcBios;
 }
 
-void Spc::Serialize(Serializer &s)
+void Spc::Serialize(Serializer& s)
 {
 	s.Stream(_state.A, _state.Cycle, _state.PC, _state.PS, _state.SP, _state.X, _state.Y);
 	s.Stream(_state.CpuRegs[0], _state.CpuRegs[1], _state.CpuRegs[2], _state.CpuRegs[3]);
@@ -443,26 +485,31 @@ void Spc::Serialize(Serializer &s)
 	_state.Timer1.Serialize(s);
 	_state.Timer2.Serialize(s);
 
-	ArrayInfo<uint8_t> ram { _ram, Spc::SpcRamSize };
+	ArrayInfo<uint8_t> ram{_ram, Spc::SpcRamSize};
 	s.Stream(ram);
 
 	uint8_t dspState[SPC_DSP::state_size];
 	memset(dspState, 0, SPC_DSP::state_size);
-	if(s.IsSaving()) {
-		uint8_t *out = dspState;
-		_dsp->copy_state(&out, [](uint8_t** output, void* in, size_t size) {
+	if (s.IsSaving())
+	{
+		uint8_t* out = dspState;
+		_dsp->copy_state(&out, [](uint8_t** output, void* in, size_t size)
+		{
 			memcpy(*output, in, size);
 			*output += size;
 		});
 
 		s.StreamArray(dspState, SPC_DSP::state_size);
-	} else {
+	}
+	else
+	{
 		s.StreamArray(dspState, SPC_DSP::state_size);
 
 		UpdateClockRatio();
 
-		uint8_t *in = dspState;
-		_dsp->copy_state(&in, [](uint8_t** input, void* output, size_t size) {
+		uint8_t* in = dspState;
+		_dsp->copy_state(&in, [](uint8_t** input, void* output, size_t size)
+		{
 			memcpy(output, *input, size);
 			*input += size;
 		});
@@ -512,9 +559,12 @@ bool Spc::CheckFlag(uint8_t flag)
 void Spc::SetZeroNegativeFlags(uint8_t value)
 {
 	ClearFlags(SpcFlags::Zero | SpcFlags::Negative);
-	if(value == 0) {
+	if (value == 0)
+	{
 		SetFlags(SpcFlags::Zero);
-	} else if(value & 0x80) {
+	}
+	else if (value & 0x80)
+	{
 		SetFlags(SpcFlags::Negative);
 	}
 }
@@ -522,9 +572,12 @@ void Spc::SetZeroNegativeFlags(uint8_t value)
 void Spc::SetZeroNegativeFlags16(uint16_t value)
 {
 	ClearFlags(SpcFlags::Zero | SpcFlags::Negative);
-	if(value == 0) {
+	if (value == 0)
+	{
 		SetFlags(SpcFlags::Zero);
-	} else if(value & 0x8000) {
+	}
+	else if (value & 0x8000)
+	{
 		SetFlags(SpcFlags::Negative);
 	}
 }
@@ -571,7 +624,7 @@ void Spc::LoadSpcFile(SpcFileData* data)
 	_state.CpuRegs[1] = data->CpuRegs[1];
 	_state.CpuRegs[2] = data->CpuRegs[2];
 	_state.CpuRegs[3] = data->CpuRegs[3];
-	
+
 	_state.RamReg[0] = data->RamRegs[0];
 	_state.RamReg[1] = data->RamRegs[1];
 
@@ -589,28 +642,34 @@ void Spc::SetReg(SpcRegister reg, uint16_t value)
 	switch (reg)
 	{
 	case SpcRegister::SpcRegPC:
-	{
-		_state.PC = value;
-	} break;
+		{
+			_state.PC = value;
+		}
+		break;
 	case SpcRegister::SpcRegA:
-	{
-		_state.A = value & 0xFF;
-	} break;
+		{
+			_state.A = value & 0xFF;
+		}
+		break;
 	case SpcRegister::SpcRegX:
-	{
-		_state.X = value & 0xFF;
-	} break;
+		{
+			_state.X = value & 0xFF;
+		}
+		break;
 	case SpcRegister::SpcRegY:
-	{
-		_state.Y = value & 0xFF;
-	} break;
+		{
+			_state.Y = value & 0xFF;
+		}
+		break;
 	case SpcRegister::SpcRegSP:
-	{
-		_state.SP = value & 0xFF;
-	} break;
+		{
+			_state.SP = value & 0xFF;
+		}
+		break;
 	case SpcRegister::SpcRegPS:
-	{
-		_state.PS = value & 0xFF;
-	} break;
+		{
+			_state.PS = value & 0xFF;
+		}
+		break;
 	}
 }

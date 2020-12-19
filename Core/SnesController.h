@@ -13,7 +13,7 @@ protected:
 	string GetKeyNames() override;
 	void InternalSetStateFromInput() override;
 	uint16_t ToByte();
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 	void RefreshStateBuffer() override;
 
 public:

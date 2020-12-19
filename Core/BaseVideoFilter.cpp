@@ -36,8 +36,9 @@ FrameInfo BaseVideoFilter::GetFrameInfo()
 
 void BaseVideoFilter::UpdateBufferSize()
 {
-	uint32_t newBufferSize = GetFrameInfo().Width*GetFrameInfo().Height;
-	if(_bufferSize != newBufferSize) {
+	uint32_t newBufferSize = GetFrameInfo().Width * GetFrameInfo().Height;
+	if (_bufferSize != newBufferSize)
+	{
 		_frameLock.Acquire();
 		delete[] _outputBuffer;
 		_bufferSize = newBufferSize;
@@ -65,7 +66,7 @@ uint32_t BaseVideoFilter::GetBufferSize()
 	return _bufferSize * sizeof(uint32_t);
 }
 
-void BaseVideoFilter::SendFrame(uint16_t *ppuOutputBuffer, uint32_t frameNumber)
+void BaseVideoFilter::SendFrame(uint16_t* ppuOutputBuffer, uint32_t frameNumber)
 {
 	_frameLock.Acquire();
 	_overscan = _console->GetSettings()->GetOverscan();
@@ -91,14 +92,15 @@ uint32_t BaseVideoFilter::ApplyScanlineEffect(uint32_t argb, uint8_t scanlineInt
 	return 0xFF000000 | (r << 16) | (g << 8) | b;
 }
 
-void BaseVideoFilter::TakeScreenshot(VideoFilterType filterType, string filename, std::stringstream *stream)
+void BaseVideoFilter::TakeScreenshot(VideoFilterType filterType, string filename, std::stringstream* stream)
 {
 	uint32_t* pngBuffer;
 	FrameInfo frameInfo;
 	uint32_t* frameBuffer = nullptr;
 	{
 		auto lock = _frameLock.AcquireSafe();
-		if(_bufferSize == 0 || !GetOutputBuffer()) {
+		if (_bufferSize == 0 || !GetOutputBuffer())
+		{
 			return;
 		}
 
@@ -110,14 +112,19 @@ void BaseVideoFilter::TakeScreenshot(VideoFilterType filterType, string filename
 	pngBuffer = frameBuffer;
 
 	shared_ptr<ScaleFilter> scaleFilter = ScaleFilter::GetScaleFilter(filterType);
-	if(scaleFilter) {
-		pngBuffer = scaleFilter->ApplyFilter(pngBuffer, frameInfo.Width, frameInfo.Height, _console->GetSettings()->GetVideoConfig().ScanlineIntensity);
+	if (scaleFilter)
+	{
+		pngBuffer = scaleFilter->ApplyFilter(pngBuffer, frameInfo.Width, frameInfo.Height,
+		                                     _console->GetSettings()->GetVideoConfig().ScanlineIntensity);
 		frameInfo = scaleFilter->GetFrameInfo(frameInfo);
 	}
-	
-	if(!filename.empty()) {
+
+	if (!filename.empty())
+	{
 		PNGHelper::WritePNG(filename, pngBuffer, frameInfo.Width, frameInfo.Height);
-	} else {
+	}
+	else
+	{
 		PNGHelper::WritePNG(*stream, pngBuffer, frameInfo.Width, frameInfo.Height);
 	}
 
@@ -131,16 +138,21 @@ void BaseVideoFilter::TakeScreenshot(string romName, VideoFilterType filterType)
 	int counter = 0;
 	string baseFilename = FolderUtilities::CombinePath(FolderUtilities::GetScreenshotFolder(), romFilename);
 	string ssFilename;
-	while(true) {
+	while (true)
+	{
 		string counterStr = std::to_string(counter);
-		while(counterStr.length() < 3) {
+		while (counterStr.length() < 3)
+		{
 			counterStr = "0" + counterStr;
 		}
 		ssFilename = baseFilename + "_" + counterStr + ".png";
 		ifstream file(ssFilename, ios::in);
-		if(file) {
+		if (file)
+		{
 			file.close();
-		} else {
+		}
+		else
+		{
 			break;
 		}
 		counter++;
@@ -150,4 +162,3 @@ void BaseVideoFilter::TakeScreenshot(string romName, VideoFilterType filterType)
 
 	MessageManager::DisplayMessage("ScreenshotSaved", FolderUtilities::GetFilename(ssFilename, true));
 }
-

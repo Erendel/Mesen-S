@@ -15,16 +15,20 @@ SoundManager::SoundManager(shared_ptr<Console> console, HWND hwnd)
 
 	memset(&_audioDeviceID, 0, sizeof(_audioDeviceID));
 
-	if(InitializeDirectSound(44100, true)) {
+	if (InitializeDirectSound(44100, true))
+	{
 		_console->GetSoundMixer()->RegisterAudioDevice(this);
-	} else {
+	}
+	else
+	{
 		MessageManager::DisplayMessage("Error", "CouldNotInitializeAudioSystem");
 	}
 }
 
 SoundManager::~SoundManager()
 {
-	if(_console && _console->GetSoundMixer()) {
+	if (_console && _console->GetSoundMixer())
+	{
 		_console->GetSoundMixer()->RegisterAudioDevice(nullptr);
 	}
 	Release();
@@ -32,13 +36,16 @@ SoundManager::~SoundManager()
 
 bool CALLBACK SoundManager::DirectSoundEnumProc(LPGUID lpGUID, LPCWSTR lpszDesc, LPCSTR lpszDrvName, LPVOID lpContext)
 {
-	vector<SoundDeviceInfo> *devices = (vector<SoundDeviceInfo>*)lpContext;
+	vector<SoundDeviceInfo>* devices = (vector<SoundDeviceInfo>*)lpContext;
 
 	SoundDeviceInfo deviceInfo;
 	deviceInfo.description = utf8::utf8::encode(lpszDesc);
-	if(lpGUID != nullptr) {
+	if (lpGUID != nullptr)
+	{
 		memcpy((void*)&deviceInfo.guid, lpGUID, 16);
-	} else {
+	}
+	else
+	{
 		memset((void*)&deviceInfo.guid, 0, 16);
 	}
 	devices->push_back(deviceInfo);
@@ -56,7 +63,8 @@ vector<SoundDeviceInfo> SoundManager::GetAvailableDeviceInfo()
 string SoundManager::GetAvailableDevices()
 {
 	string deviceString;
-	for(SoundDeviceInfo device : GetAvailableDeviceInfo()) {
+	for (SoundDeviceInfo device : GetAvailableDeviceInfo())
+	{
 		deviceString += device.description + "||"s;
 	}
 	return deviceString;
@@ -64,11 +72,15 @@ string SoundManager::GetAvailableDevices()
 
 void SoundManager::SetAudioDevice(string deviceName)
 {
-	if(_audioDeviceName != deviceName) {
-		for(SoundDeviceInfo device : GetAvailableDeviceInfo()) {
-			if(device.description.compare(deviceName) == 0) {
+	if (_audioDeviceName != deviceName)
+	{
+		for (SoundDeviceInfo device : GetAvailableDeviceInfo())
+		{
+			if (device.description.compare(deviceName) == 0)
+			{
 				_audioDeviceName = deviceName;
-				if(memcmp(&_audioDeviceID, &device.guid, 16) != 0) {
+				if (memcmp(&_audioDeviceID, &device.guid, 16) != 0)
+				{
 					memcpy(&_audioDeviceID, &device.guid, 16);
 					_needReset = true;
 				}
@@ -83,17 +95,19 @@ bool SoundManager::InitializeDirectSound(uint32_t sampleRate, bool isStereo)
 	HRESULT result;
 	DSBUFFERDESC bufferDesc;
 	WAVEFORMATEX waveFormat;
-	
+
 	// Initialize the direct sound interface pointer for the default sound device.
 	result = DirectSoundCreate8(&_audioDeviceID, &_directSound, NULL);
-	if(FAILED(result)) {
+	if (FAILED(result))
+	{
 		MessageManager::Log("[Audio] Failed to create direct sound device.");
 		return false;
 	}
 
 	// Set the cooperative level to priority so the format of the primary sound buffer can be modified.
 	result = _directSound->SetCooperativeLevel(_hWnd, DSSCL_PRIORITY);
-	if(FAILED(result)) {
+	if (FAILED(result))
+	{
 		MessageManager::Log("[Audio] Failed to set cooperative level.");
 		return false;
 	}
@@ -108,7 +122,8 @@ bool SoundManager::InitializeDirectSound(uint32_t sampleRate, bool isStereo)
 
 	// Get control of the primary sound buffer on the default sound device.
 	result = _directSound->CreateSoundBuffer(&bufferDesc, &_primaryBuffer, NULL);
-	if(FAILED(result)) {
+	if (FAILED(result))
+	{
 		MessageManager::Log("[Audio] Failed to create primary sound buffer.");
 		return false;
 	}
@@ -127,7 +142,8 @@ bool SoundManager::InitializeDirectSound(uint32_t sampleRate, bool isStereo)
 
 	// Set the primary buffer to be the wave format specified.
 	result = _primaryBuffer->SetFormat(&waveFormat);
-	if(FAILED(result)) {
+	if (FAILED(result))
+	{
 		MessageManager::Log("[Audio] Failed to set the sound format.");
 		return false;
 	}
@@ -138,7 +154,8 @@ bool SoundManager::InitializeDirectSound(uint32_t sampleRate, bool isStereo)
 
 	// Set the buffer description of the secondary sound buffer that the wave file will be loaded onto.
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
-	bufferDesc.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
+	bufferDesc.dwFlags = DSBCAPS_CTRLPOSITIONNOTIFY | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_GLOBALFOCUS |
+		DSBCAPS_LOCSOFTWARE | DSBCAPS_CTRLVOLUME | DSBCAPS_CTRLFREQUENCY;
 	bufferDesc.dwBufferBytes = _bufferSize;
 	bufferDesc.dwReserved = 0;
 	bufferDesc.lpwfxFormat = &waveFormat;
@@ -147,21 +164,24 @@ bool SoundManager::InitializeDirectSound(uint32_t sampleRate, bool isStereo)
 	// Create a temporary sound buffer with the specific buffer settings.
 	IDirectSoundBuffer* tempBuffer;
 	result = _directSound->CreateSoundBuffer(&bufferDesc, &tempBuffer, NULL);
-	if(FAILED(result)) {
+	if (FAILED(result))
+	{
 		MessageManager::Log("[Audio] Failed to create temporary sound buffer.");
 		return false;
 	}
 
 	// Test the buffer format against the direct sound 8 interface and create the secondary buffer.
 	result = tempBuffer->QueryInterface(IID_IDirectSoundBuffer8, (LPVOID*)&_secondaryBuffer);
-	if(FAILED(result)) {
+	if (FAILED(result))
+	{
 		MessageManager::Log("[Audio] Failed to obtain secondary sound buffer.");
 		return false;
 	}
 
 	// Set volume of the buffer to 100%.
 	result = _secondaryBuffer->SetVolume(DSBVOLUME_MAX);
-	if(FAILED(result)) {
+	if (FAILED(result))
+	{
 		MessageManager::Log("[Audio] Failed to set volume of the secondary sound buffer.");
 		return false;
 	}
@@ -180,17 +200,20 @@ void SoundManager::Release()
 	_needReset = false;
 	_lastWriteOffset = 0;
 
-	if(_secondaryBuffer) {
+	if (_secondaryBuffer)
+	{
 		_secondaryBuffer->Release();
 		_secondaryBuffer = nullptr;
 	}
 
-	if(_primaryBuffer) {
+	if (_primaryBuffer)
+	{
 		_primaryBuffer->Release();
 		_primaryBuffer = nullptr;
 	}
-	
-	if(_directSound) {
+
+	if (_directSound)
+	{
 		_directSound->Release();
 		_directSound = nullptr;
 	}
@@ -208,18 +231,20 @@ void SoundManager::ClearSecondaryBuffer()
 	_lastWriteOffset = 0;
 }
 
-void SoundManager::CopyToSecondaryBuffer(uint8_t *data, uint32_t size)
+void SoundManager::CopyToSecondaryBuffer(uint8_t* data, uint32_t size)
 {
 	uint8_t* bufferPtrA;
 	uint8_t* bufferPtrB;
 	DWORD bufferASize;
 	DWORD bufferBSize;
 
-	_secondaryBuffer->Lock(_lastWriteOffset, size, (void**)&bufferPtrA, (DWORD*)&bufferASize, (void**)&bufferPtrB, (DWORD*)&bufferBSize, 0);
+	_secondaryBuffer->Lock(_lastWriteOffset, size, (void**)&bufferPtrA, (DWORD*)&bufferASize, (void**)&bufferPtrB,
+	                       (DWORD*)&bufferBSize, 0);
 	_lastWriteOffset = (_lastWriteOffset + size) % _bufferSize;
 
 	memcpy(bufferPtrA, data, bufferASize);
-	if(bufferPtrB && bufferBSize > 0) {
+	if (bufferPtrB && bufferBSize > 0)
+	{
 		memcpy(bufferPtrB, data + bufferASize, bufferBSize);
 	}
 
@@ -228,7 +253,8 @@ void SoundManager::CopyToSecondaryBuffer(uint8_t *data, uint32_t size)
 
 void SoundManager::Pause()
 {
-	if(_secondaryBuffer) {
+	if (_secondaryBuffer)
+	{
 		_secondaryBuffer->Stop();
 	}
 	_playing = false;
@@ -236,7 +262,8 @@ void SoundManager::Pause()
 
 void SoundManager::Stop()
 {
-	if(_secondaryBuffer) {
+	if (_secondaryBuffer)
+	{
 		_secondaryBuffer->Stop();
 		ClearSecondaryBuffer();
 	}
@@ -247,7 +274,8 @@ void SoundManager::Stop()
 
 void SoundManager::Play()
 {
-	if(_secondaryBuffer) {
+	if (_secondaryBuffer)
+	{
 		_secondaryBuffer->Play(0, 0, DSBPLAY_LOOPING);
 		_playing = true;
 	}
@@ -256,9 +284,12 @@ void SoundManager::Play()
 void SoundManager::ValidateWriteCursor(DWORD safeWriteCursor)
 {
 	int32_t writeGap = _lastWriteOffset - safeWriteCursor;
-	if(writeGap < -10000) {
+	if (writeGap < -10000)
+	{
 		writeGap += _bufferSize;
-	} else if(writeGap < 0) {
+	}
+	else if (writeGap < 0)
+	{
 		_bufferUnderrunEventCount++;
 		_lastWriteOffset = safeWriteCursor;
 	}
@@ -273,7 +304,8 @@ void SoundManager::ProcessEndOfFrame()
 
 	uint32_t emulationSpeed = _console->GetSettings()->GetEmulationSpeed();
 	uint32_t targetRate = _sampleRate;
-	if(emulationSpeed > 0 && emulationSpeed < 100) {
+	if (emulationSpeed > 0 && emulationSpeed < 100)
+	{
 		//Slow down playback when playing at less than 100%
 		targetRate = (uint32_t)(targetRate * ((double)emulationSpeed / 100.0));
 	}
@@ -284,17 +316,20 @@ void SoundManager::ProcessEndOfFrame()
 	AudioConfig cfg = _console->GetSettings()->GetAudioConfig();
 	SetAudioDevice(cfg.AudioDevice);
 
-	if(_averageLatency > 0 && emulationSpeed <= 100 && emulationSpeed > 0 && std::abs(_averageLatency - cfg.AudioLatency) > 50) {
+	if (_averageLatency > 0 && emulationSpeed <= 100 && emulationSpeed > 0 && std::abs(
+		_averageLatency - cfg.AudioLatency) > 50)
+	{
 		//Latency is way off (over 50ms gap), stop audio & start again
 		Stop();
 	}
 }
 
-void SoundManager::PlayBuffer(int16_t *soundBuffer, uint32_t sampleCount, uint32_t sampleRate, bool isStereo)
+void SoundManager::PlayBuffer(int16_t* soundBuffer, uint32_t sampleCount, uint32_t sampleRate, bool isStereo)
 {
 	uint32_t bytesPerSample = 2 * (isStereo ? 2 : 1);
 	uint32_t latency = _console->GetSettings()->GetAudioConfig().AudioLatency;
-	if(_sampleRate != sampleRate || _isStereo != isStereo || _needReset || latency != _previousLatency) {
+	if (_sampleRate != sampleRate || _isStereo != isStereo || _needReset || latency != _previousLatency)
+	{
 		_previousLatency = latency;
 		Release();
 		InitializeDirectSound(sampleRate, isStereo);
@@ -307,10 +342,12 @@ void SoundManager::PlayBuffer(int16_t *soundBuffer, uint32_t sampleCount, uint32
 
 	uint32_t soundBufferSize = sampleCount * bytesPerSample;
 	CopyToSecondaryBuffer((uint8_t*)soundBuffer, soundBufferSize);
-	
-	if(!_playing) {
+
+	if (!_playing)
+	{
 		DWORD byteLatency = (int32_t)((float)(sampleRate * latency) / 1000.0f * bytesPerSample);
-		if(_lastWriteOffset >= byteLatency / 2) {
+		if (_lastWriteOffset >= byteLatency / 2)
+		{
 			Play();
 		}
 	}

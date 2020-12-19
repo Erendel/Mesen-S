@@ -5,7 +5,8 @@
 
 void Gsu::STOP()
 {
-	if(!_state.IrqDisabled) {
+	if (!_state.IrqDisabled)
+	{
 		_state.SFR.Irq = true;
 		_cpu->SetIrqSource(IrqSource::Coprocessor);
 	}
@@ -23,7 +24,8 @@ void Gsu::NOP()
 
 void Gsu::CACHE()
 {
-	if(_state.CacheBase != (_state.R[15] & 0xFFF0)) {
+	if (_state.CacheBase != (_state.R[15] & 0xFFF0))
+	{
 		_state.CacheBase = _state.R[15] & 0xFFF0;
 		InvalidateCache();
 	}
@@ -33,7 +35,8 @@ void Gsu::CACHE()
 void Gsu::Branch(bool branch)
 {
 	int8_t offset = (int8_t)ReadOperand();
-	if(branch) {
+	if (branch)
+	{
 		WriteRegister(15, _state.R[15] + offset);
 	}
 }
@@ -95,14 +98,17 @@ void Gsu::BVS()
 
 void Gsu::JMP(uint8_t reg)
 {
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//LJMP
 		_state.ProgramBank = _state.R[reg] & 0x7F;
 		WriteRegister(15, ReadSrcReg());
-		
+
 		_state.CacheBase = _state.R[15] & 0xFFF0;
 		InvalidateCache();
-	} else {
+	}
+	else
+	{
 		//JMP
 		WriteRegister(15, _state.R[reg]);
 	}
@@ -111,11 +117,14 @@ void Gsu::JMP(uint8_t reg)
 
 void Gsu::TO(uint8_t reg)
 {
-	if(_state.SFR.Prefix) {
+	if (_state.SFR.Prefix)
+	{
 		//MOVE
 		WriteRegister(reg, ReadSrcReg());
 		ResetFlags();
-	} else {
+	}
+	else
+	{
 		//TO
 		_state.DestReg = reg;
 	}
@@ -123,14 +132,17 @@ void Gsu::TO(uint8_t reg)
 
 void Gsu::FROM(uint8_t reg)
 {
-	if(_state.SFR.Prefix) {
+	if (_state.SFR.Prefix)
+	{
 		//MOVES
 		WriteDestReg(_state.R[reg]);
 		_state.SFR.Overflow = (_state.R[reg] & 0x80) != 0;
 		_state.SFR.Sign = (_state.R[reg] & 0x8000) != 0;
 		_state.SFR.Zero = (_state.R[reg] == 0);
 		ResetFlags();
-	} else {
+	}
+	else
+	{
 		//FROM
 		_state.SrcReg = reg;
 	}
@@ -147,7 +159,8 @@ void Gsu::STORE(uint8_t reg)
 {
 	_state.RamAddress = _state.R[reg];
 	WriteRam(_state.RamAddress, (uint8_t)ReadSrcReg());
-	if(!_state.SFR.Alt1) {
+	if (!_state.SFR.Alt1)
+	{
 		WriteRam(_state.RamAddress ^ 0x01, ReadSrcReg() >> 8);
 	}
 	ResetFlags();
@@ -157,7 +170,8 @@ void Gsu::LOAD(uint8_t reg)
 {
 	_state.RamAddress = _state.R[reg];
 	uint16_t value = ReadRamBuffer(_state.RamAddress);
-	if(!_state.SFR.Alt1) {
+	if (!_state.SFR.Alt1)
+	{
 		value |= ReadRamBuffer(_state.RamAddress ^ 0x01) << 8;
 	}
 	WriteDestReg(value);
@@ -169,9 +183,10 @@ void Gsu::LOOP()
 	_state.R[12]--;
 	_state.SFR.Zero = (_state.R[12] == 0);
 	_state.SFR.Sign = (_state.R[12] & 0x8000) != 0;
-	
+
 	//Loop until counter hits zero
-	if(!_state.SFR.Zero) {
+	if (!_state.SFR.Zero)
+	{
 		WriteRegister(15, _state.R[13]);
 	}
 
@@ -220,15 +235,19 @@ void Gsu::SWAP()
 void Gsu::Add(uint8_t reg)
 {
 	uint16_t operand;
-	if(_state.SFR.Alt2) {
+	if (_state.SFR.Alt2)
+	{
 		//Immediate value
 		operand = reg;
-	} else {
+	}
+	else
+	{
 		operand = _state.R[reg];
 	}
 
 	uint32_t result = ReadSrcReg() + operand;
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//ADC - Add with carry
 		result += (uint8_t)_state.SFR.Carry;
 	}
@@ -245,15 +264,19 @@ void Gsu::Add(uint8_t reg)
 void Gsu::SubCompare(uint8_t reg)
 {
 	uint16_t operand;
-	if(_state.SFR.Alt2 && !_state.SFR.Alt1) {
+	if (_state.SFR.Alt2 && !_state.SFR.Alt1)
+	{
 		//Immediate value, SUB #val
 		operand = reg;
-	} else {
+	}
+	else
+	{
 		operand = _state.R[reg];
 	}
 
 	int32_t result = ReadSrcReg() - operand;
-	if(!_state.SFR.Alt2 && _state.SFR.Alt1) {
+	if (!_state.SFR.Alt2 && _state.SFR.Alt1)
+	{
 		//SBC - SUB with carry
 		result -= _state.SFR.Carry ? 0 : 1;
 	}
@@ -263,7 +286,8 @@ void Gsu::SubCompare(uint8_t reg)
 	_state.SFR.Sign = (result & 0x8000) != 0;
 	_state.SFR.Zero = (result & 0xFFFF) == 0;
 
-	if(!_state.SFR.Alt2 || !_state.SFR.Alt1) {
+	if (!_state.SFR.Alt2 || !_state.SFR.Alt1)
+	{
 		//SUB/SBC, other CMP (and no write occurs for CMP)
 		WriteDestReg(result);
 	}
@@ -273,22 +297,28 @@ void Gsu::SubCompare(uint8_t reg)
 void Gsu::MULT(uint8_t reg)
 {
 	uint16_t operand;
-	if(_state.SFR.Alt2) {
+	if (_state.SFR.Alt2)
+	{
 		//Immediate value
 		operand = reg;
-	} else {
+	}
+	else
+	{
 		operand = _state.R[reg];
 	}
 
 	uint16_t value;
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//UMULT - Unsigned multiply
 		value = (uint16_t)((uint8_t)ReadSrcReg() * (uint8_t)operand);
-	} else {
+	}
+	else
+	{
 		//MULT - Signed multiply
 		value = (uint16_t)((int8_t)ReadSrcReg() * (int8_t)operand);
 	}
-	
+
 	WriteDestReg(value);
 	_state.SFR.Sign = (value & 0x8000) != 0;
 	_state.SFR.Zero = value == 0;
@@ -302,7 +332,8 @@ void Gsu::FMultLMult()
 {
 	uint32_t multResult = (int16_t)ReadSrcReg() * (int16_t)_state.R[6];
 
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//LMULT - "16x16 signed multiply", LSB in R4, MSB in DREG
 		_state.R[4] = multResult;
 	}
@@ -321,18 +352,24 @@ void Gsu::FMultLMult()
 void Gsu::AndBitClear(uint8_t reg)
 {
 	uint16_t operand;
-	if(_state.SFR.Alt2) {
+	if (_state.SFR.Alt2)
+	{
 		//Immediate value
 		operand = reg;
-	} else {
+	}
+	else
+	{
 		operand = _state.R[reg];
 	}
 
 	uint16_t value;
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//Bit clear
 		value = ReadSrcReg() & ~operand;
-	} else {
+	}
+	else
+	{
 		//AND
 		value = ReadSrcReg() & operand;
 	}
@@ -380,7 +417,7 @@ void Gsu::LSR()
 {
 	uint16_t src = ReadSrcReg();
 	_state.SFR.Carry = (src & 0x01) != 0;
-	
+
 	uint16_t dst = src >> 1;
 	WriteDestReg(dst);
 	_state.SFR.Zero = dst == 0;
@@ -407,7 +444,8 @@ void Gsu::ASR()
 	_state.SFR.Carry = (src & 0x01) != 0;
 
 	uint16_t dst = (int16_t)src >> 1;
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		dst += (src + 1) >> 16;
 	}
 
@@ -420,7 +458,7 @@ void Gsu::ASR()
 void Gsu::ROR()
 {
 	uint16_t src = ReadSrcReg();
-	
+
 	uint16_t dst = (src >> 1) | ((int)_state.SFR.Carry << 15);
 	_state.SFR.Carry = (src & 0x01) != 0;
 
@@ -452,19 +490,24 @@ void Gsu::HIB()
 
 void Gsu::IbtSmsLms(uint8_t reg)
 {
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//LMS - "Load word data from RAM, short address"
 		_state.RamAddress = ReadOperand() << 1;
 		uint8_t lsb = ReadRamBuffer(_state.RamAddress);
 		uint8_t msb = ReadRamBuffer(_state.RamAddress | 0x01);
 
 		WriteRegister(reg, (msb << 8) | lsb);
-	} else if(_state.SFR.Alt2) {
+	}
+	else if (_state.SFR.Alt2)
+	{
 		//SMS - "Store word data to RAM, short address"
 		_state.RamAddress = ReadOperand() << 1;
 		WriteRam(_state.RamAddress, (uint8_t)_state.R[reg]);
 		WriteRam(_state.RamAddress | 0x01, _state.R[reg] >> 8);
-	} else {
+	}
+	else
+	{
 		//IBT - "Load immediate byte data"
 		WriteRegister(reg, (int8_t)ReadOperand());
 	}
@@ -473,7 +516,8 @@ void Gsu::IbtSmsLms(uint8_t reg)
 
 void Gsu::IwtLmSm(uint8_t reg)
 {
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//LM - Load memory
 		_state.RamAddress = ReadOperand();
 		_state.RamAddress |= ReadOperand() << 8;
@@ -481,14 +525,18 @@ void Gsu::IwtLmSm(uint8_t reg)
 		uint8_t lsb = ReadRamBuffer(_state.RamAddress);
 		uint8_t msb = ReadRamBuffer(_state.RamAddress ^ 0x01);
 		WriteRegister(reg, (msb << 8) | lsb);
-	} else if(_state.SFR.Alt2) {
+	}
+	else if (_state.SFR.Alt2)
+	{
 		//SM - Store Memory
 		_state.RamAddress = ReadOperand();
 		_state.RamAddress |= ReadOperand() << 8;
 
 		WriteRam(_state.RamAddress, (uint8_t)_state.R[reg]);
 		WriteRam(_state.RamAddress ^ 0x01, _state.R[reg] >> 8);
-	} else {
+	}
+	else
+	{
 		//IWT - Load immediate word
 		uint8_t lsb = ReadOperand();
 		uint8_t msb = ReadOperand();
@@ -500,19 +548,25 @@ void Gsu::IwtLmSm(uint8_t reg)
 void Gsu::OrXor(uint8_t operand)
 {
 	uint16_t operandValue;
-	if(_state.SFR.Alt2) {
+	if (_state.SFR.Alt2)
+	{
 		//Immediate value
 		operandValue = operand;
-	} else {
+	}
+	else
+	{
 		//Indirect register value
 		operandValue = _state.R[operand];
 	}
 
 	uint16_t value;
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//XOR
 		value = ReadSrcReg() ^ operandValue;
-	} else {
+	}
+	else
+	{
 		//OR
 		value = ReadSrcReg() | operandValue;
 	}
@@ -540,14 +594,19 @@ void Gsu::DEC(uint8_t reg)
 
 void Gsu::GetCRamBRomB()
 {
-	if(!_state.SFR.Alt2) {
+	if (!_state.SFR.Alt2)
+	{
 		//GETC - "Get byte from ROM to color register"
 		_state.ColorReg = GetColor(ReadRomBuffer());
-	} else if(!_state.SFR.Alt1) {
+	}
+	else if (!_state.SFR.Alt1)
+	{
 		//RAMB - "Set RAM data bank"
 		WaitRamOperation();
 		_state.RamBank = ReadSrcReg() & 0x01;
-	} else {
+	}
+	else
+	{
 		//ROMB - "Set ROM data bank"
 		WaitRomOperation();
 		_state.RomBank = ReadSrcReg() & 0x7F;
@@ -557,16 +616,23 @@ void Gsu::GetCRamBRomB()
 
 void Gsu::GETB()
 {
-	if(_state.SFR.Alt2 && _state.SFR.Alt1) {
+	if (_state.SFR.Alt2 && _state.SFR.Alt1)
+	{
 		//GETBS - "Get signed byte from ROM buffer"
 		WriteDestReg((int8_t)ReadRomBuffer());
-	} else if(_state.SFR.Alt2) {
+	}
+	else if (_state.SFR.Alt2)
+	{
 		//GETBL - "Get low byte from ROM buffer"
 		WriteDestReg((ReadSrcReg() & 0xFF00) | ReadRomBuffer());
-	} else if(_state.SFR.Alt1) {
+	}
+	else if (_state.SFR.Alt1)
+	{
 		//GETBH - "Get high byte from ROM buffer"
 		WriteDestReg((ReadSrcReg() & 0xFF) | (ReadRomBuffer() << 8));
-	} else {
+	}
+	else
+	{
 		//GETB - "Get byte from ROM buffer"
 		WriteDestReg(ReadRomBuffer());
 	}
@@ -575,13 +641,16 @@ void Gsu::GETB()
 
 void Gsu::PlotRpix()
 {
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//RPIX - "Read pixel color"
 		uint8_t value = ReadPixel((uint8_t)_state.R[1], (uint8_t)_state.R[2]);
 		_state.SFR.Zero = (value == 0);
 		_state.SFR.Sign = (value & 0x8000);
 		WriteDestReg(value);
-	} else {
+	}
+	else
+	{
 		//PLOT
 		DrawPixel((uint8_t)_state.R[1], (uint8_t)_state.R[2]);
 		_state.R[1]++;
@@ -591,7 +660,8 @@ void Gsu::PlotRpix()
 
 void Gsu::ColorCMode()
 {
-	if(_state.SFR.Alt1) {
+	if (_state.SFR.Alt1)
+	{
 		//CMODE - "Set plot mode"
 		uint8_t value = (uint8_t)ReadSrcReg();
 		_state.PlotTransparent = (value & 0x01) != 0;
@@ -599,7 +669,9 @@ void Gsu::ColorCMode()
 		_state.ColorHighNibble = (value & 0x04) != 0;
 		_state.ColorFreezeHigh = (value & 0x08) != 0;
 		_state.ObjMode = (value & 0x10) != 0;
-	} else {
+	}
+	else
+	{
 		//COLOR - "Set plot color"
 		_state.ColorReg = GetColor((uint8_t)ReadSrcReg());
 	}
@@ -608,12 +680,17 @@ void Gsu::ColorCMode()
 
 uint16_t Gsu::GetTileIndex(uint8_t x, uint8_t y)
 {
-	switch(_state.ObjMode ? 3 : _state.ScreenHeight) {
-		default:
-		case 0: return ((x & 0xF8) << 1) + ((y & 0xF8) >> 3); break;
-		case 1: return ((x & 0xF8) << 1) + ((x & 0xF8) >> 1) + ((y & 0xF8) >> 3); break;
-		case 2: return ((x & 0xF8) << 1) + ((x & 0xF8) << 0) + ((y & 0xF8) >> 3); break;
-		case 3: return ((y & 0x80) << 2) + ((x & 0x80) << 1) + ((y & 0x78) << 1) + ((x & 0x78) >> 3); break;
+	switch (_state.ObjMode ? 3 : _state.ScreenHeight)
+	{
+	default:
+	case 0: return ((x & 0xF8) << 1) + ((y & 0xF8) >> 3);
+		break;
+	case 1: return ((x & 0xF8) << 1) + ((x & 0xF8) >> 1) + ((y & 0xF8) >> 3);
+		break;
+	case 2: return ((x & 0xF8) << 1) + ((x & 0xF8) << 0) + ((y & 0xF8) >> 3);
+		break;
+	case 3: return ((y & 0x80) << 2) + ((x & 0x80) << 1) + ((y & 0x78) << 1) + ((x & 0x78) >> 3);
+		break;
 	}
 }
 
@@ -629,11 +706,12 @@ uint8_t Gsu::ReadPixel(uint8_t x, uint8_t y)
 	WritePixelCache(_state.PrimaryCache);
 
 	uint32_t tileAddress = GetTileAddress(x, y);
-	
+
 	x = (x & 7) ^ 7;
 
 	uint8_t data = 0;
-	for(int i = 0; i < _state.PlotBpp; i++) {
+	for (int i = 0; i < _state.PlotBpp; i++)
+	{
 		//Select which byte to read/write based on the current bit (0/1, 16/17, 32/33, 48/49)
 		uint8_t byteOffset = ((i >> 1) << 4) + (i & 0x01);
 		data |= ((ReadGsu(tileAddress + byteOffset, MemoryOperationType::Read) >> x) & 1) << i;
@@ -647,36 +725,42 @@ bool Gsu::IsTransparentPixel()
 {
 	uint8_t color = _state.ColorFreezeHigh ? (_state.ColorReg & 0x0F) : _state.ColorReg;
 
-	switch(_state.PlotBpp) {
-		default:
-		case 2: return (color & 0x03) == 0;
-		case 4: return (color & 0x0F) == 0;
-		case 8: return color == 0;
+	switch (_state.PlotBpp)
+	{
+	default:
+	case 2: return (color & 0x03) == 0;
+	case 4: return (color & 0x0F) == 0;
+	case 8: return color == 0;
 	}
 }
 
 void Gsu::DrawPixel(uint8_t x, uint8_t y)
 {
-	if(!_state.PlotTransparent && IsTransparentPixel()) {
+	if (!_state.PlotTransparent && IsTransparentPixel())
+	{
 		return;
 	}
 
 	uint8_t color = _state.ColorReg;
-	if(_state.PlotDither && _state.PlotBpp != 8) {
-		if((x ^ y) & 0x01) {
+	if (_state.PlotDither && _state.PlotBpp != 8)
+	{
+		if ((x ^ y) & 0x01)
+		{
 			color >>= 4;
 		}
 		color &= 0x0F;
 	}
 
-	if(_state.PrimaryCache.X != (x & 0xF8) || _state.PrimaryCache.Y != y) {
+	if (_state.PrimaryCache.X != (x & 0xF8) || _state.PrimaryCache.Y != y)
+	{
 		FlushPrimaryCache(x, y);
 	}
 
 	uint8_t xOffset = (x & 7) ^ 7;
 	_state.PrimaryCache.Pixels[xOffset] = color;
 	_state.PrimaryCache.ValidBits |= (1 << xOffset);
-	if(_state.PrimaryCache.ValidBits == 0xFF) {
+	if (_state.PrimaryCache.ValidBits == 0xFF)
+	{
 		FlushPrimaryCache(x, y);
 	}
 }
@@ -690,24 +774,28 @@ void Gsu::FlushPrimaryCache(uint8_t x, uint8_t y)
 	_state.PrimaryCache.Y = y;
 }
 
-void Gsu::WritePixelCache(GsuPixelCache &cache)
+void Gsu::WritePixelCache(GsuPixelCache& cache)
 {
-	if(cache.ValidBits == 0) {
+	if (cache.ValidBits == 0)
+	{
 		return;
 	}
 
 	uint32_t tileAddress = GetTileAddress(cache.X, cache.Y);
 
-	for(int i = 0; i < _state.PlotBpp; i++) {
+	for (int i = 0; i < _state.PlotBpp; i++)
+	{
 		uint8_t value = 0;
-		for(int x = 0; x < 8; x++) {
+		for (int x = 0; x < 8; x++)
+		{
 			value |= ((cache.Pixels[x] >> i) & 0x01) << x;
 		}
 
 		//Select which byte to read/write based on the current bit (0/1, 16/17, 32/33, 48/49)
 		uint8_t byte = ((i >> 1) << 4) + (i & 0x01);
 
-		if(cache.ValidBits != 0xFF) {
+		if (cache.ValidBits != 0xFF)
+		{
 			//Read the pixels in memory before to merge them before writing the cache's content to memory
 			Step(_state.ClockSelect ? 5 : 6);
 			value &= cache.ValidBits;
@@ -724,10 +812,12 @@ void Gsu::WritePixelCache(GsuPixelCache &cache)
 
 uint8_t Gsu::GetColor(uint8_t value)
 {
-	if(_state.ColorHighNibble) {
+	if (_state.ColorHighNibble)
+	{
 		return (_state.ColorReg & 0xF0) | (value >> 4);
 	}
-	if(_state.ColorFreezeHigh) {
+	if (_state.ColorFreezeHigh)
+	{
 		return (_state.ColorReg & 0xF0) | (value & 0x0F);
 	}
 

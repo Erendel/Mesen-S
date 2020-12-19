@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-enum class CpuType : uint8_t; 
+enum class CpuType : uint8_t;
 enum class SnesMemoryType;
 struct AddressInfo;
 enum class BreakpointType;
@@ -11,7 +11,7 @@ enum class BreakpointCategory;
 class Breakpoint
 {
 public:
-	bool Matches(uint32_t memoryAddr, AddressInfo &info);
+	bool Matches(uint32_t memoryAddr, AddressInfo& info);
 	bool HasBreakpointType(BreakpointType bpType);
 	string GetCondition();
 	bool HasCondition();

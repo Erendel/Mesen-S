@@ -65,8 +65,8 @@ private:
 	void SetSP(uint16_t sp);
 	void SetPS(uint8_t ps);
 
-	void SetRegister(uint8_t &reg, uint8_t value);
-	void SetRegister(uint16_t &reg, uint16_t value, bool eightBitMode);
+	void SetRegister(uint8_t& reg, uint8_t value);
+	void SetRegister(uint16_t& reg, uint16_t value, bool eightBitMode);
 
 	void SetZeroNegativeFlags(uint16_t value);
 	void SetZeroNegativeFlags(uint8_t value);
@@ -140,7 +140,7 @@ private:
 	void DEC_Acc();
 	void INC_Acc();
 
-	void IncDecReg(uint16_t & reg, int8_t offset);
+	void IncDecReg(uint16_t& reg, int8_t offset);
 	void IncDec(int8_t offset);
 
 	//Compare instructions
@@ -168,10 +168,14 @@ private:
 	void EOR();
 	void ORA();
 
-	template<typename T> T ShiftLeft(T value);
-	template<typename T> T RollLeft(T value);
-	template<typename T> T ShiftRight(T value);
-	template<typename T> T RollRight(T value);
+	template <typename T>
+	T ShiftLeft(T value);
+	template <typename T>
+	T RollLeft(T value);
+	template <typename T>
+	T ShiftRight(T value);
+	template <typename T>
+	T RollRight(T value);
 
 	//Shift operations
 	void ASL_Acc();
@@ -207,10 +211,10 @@ private:
 	void PLY();
 
 	void PushRegister(uint16_t reg, bool eightBitMode);
-	void PullRegister(uint16_t &reg, bool eightBitMode);
+	void PullRegister(uint16_t& reg, bool eightBitMode);
 
 	//Store/load instructions
-	void LoadRegister(uint16_t &reg, bool eightBitMode);
+	void LoadRegister(uint16_t& reg, bool eightBitMode);
 	void StoreRegister(uint16_t val, bool eightBitMode);
 
 	void LDA();
@@ -223,7 +227,8 @@ private:
 	void STZ();
 
 	//Test bits
-	template<typename T> void TestBits(T value, bool alterZeroFlagOnly);
+	template <typename T>
+	void TestBits(T value, bool alterZeroFlagOnly);
 	void BIT();
 
 	void TRB();
@@ -311,7 +316,7 @@ private:
 	void RunOp();
 
 public:
-	Sa1Cpu(Sa1 *sa1, Console* console);
+	Sa1Cpu(Sa1* sa1, Console* console);
 	virtual ~Sa1Cpu();
 
 	void PowerOn();
@@ -322,7 +327,7 @@ public:
 	CpuState GetState();
 	uint64_t GetCycleCount();
 
-	template<uint64_t value>
+	template <uint64_t value>
 	void IncreaseCycleCount();
 
 	void SetNmiFlag(bool nmiFlag);
@@ -333,12 +338,12 @@ public:
 	void IncreaseCycleCount(uint64_t cycleCount);
 
 	// Inherited via ISerializable
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 
 	void SetReg(CpuRegister reg, uint16_t value);
 };
 
-template<uint64_t count>
+template <uint64_t count>
 void Sa1Cpu::IncreaseCycleCount()
 {
 	_state.CycleCount += count;

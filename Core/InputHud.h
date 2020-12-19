@@ -13,7 +13,7 @@ private:
 	void DrawController(int port, ControlDeviceState state, int x, int y, int frameNumber);
 
 public:
-	InputHud(Console *console);
+	InputHud(Console* console);
 
 	void DrawControllers(OverscanDimensions overscan, int frameNumber);
 };

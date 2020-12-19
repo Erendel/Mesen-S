@@ -8,7 +8,7 @@
 
 string ScriptingContext::_log = "";
 
-ScriptingContext::ScriptingContext(Debugger *debugger)
+ScriptingContext::ScriptingContext(Debugger* debugger)
 {
 	_debugger = debugger;
 }
@@ -17,7 +17,8 @@ void ScriptingContext::Log(string message)
 {
 	auto lock = _logLock.AcquireSafe();
 	_logRows.push_back(message);
-	if(_logRows.size() > 500) {
+	if (_logRows.size() > 500)
+	{
 		_logRows.pop_front();
 	}
 }
@@ -26,7 +27,8 @@ const char* ScriptingContext::GetLog()
 {
 	auto lock = _logLock.AcquireSafe();
 	stringstream ss;
-	for(string &msg : _logRows) {
+	for (string& msg : _logRows)
+	{
 		ss << msg << "\n";
 	}
 	_log = ss.str();
@@ -43,7 +45,7 @@ string ScriptingContext::GetScriptName()
 	return _scriptName;
 }
 
-void ScriptingContext::CallMemoryCallback(uint32_t addr, uint8_t &value, CallbackType type, CpuType cpuType)
+void ScriptingContext::CallMemoryCallback(uint32_t addr, uint8_t& value, CallbackType type, CpuType cpuType)
 {
 	_inExecOpEvent = type == CallbackType::CpuExec;
 	InternalCallMemoryCallback(addr, value, type, cpuType);
@@ -81,13 +83,16 @@ bool ScriptingContext::CheckStateLoadedFlag()
 	return stateLoaded;
 }
 
-void ScriptingContext::RegisterMemoryCallback(CallbackType type, int startAddr, int endAddr, CpuType cpuType, int reference)
+void ScriptingContext::RegisterMemoryCallback(CallbackType type, int startAddr, int endAddr, CpuType cpuType,
+                                              int reference)
 {
-	if(endAddr < startAddr) {
+	if (endAddr < startAddr)
+	{
 		return;
 	}
 
-	if(startAddr == 0 && endAddr == 0) {
+	if (startAddr == 0 && endAddr == 0)
+	{
 		endAddr = 0xFFFFFF;
 	}
 
@@ -99,19 +104,25 @@ void ScriptingContext::RegisterMemoryCallback(CallbackType type, int startAddr, 
 	_callbacks[(int)type].push_back(callback);
 }
 
-void ScriptingContext::UnregisterMemoryCallback(CallbackType type, int startAddr, int endAddr, CpuType cpuType, int reference)
+void ScriptingContext::UnregisterMemoryCallback(CallbackType type, int startAddr, int endAddr, CpuType cpuType,
+                                                int reference)
 {
-	if(endAddr < startAddr) {
+	if (endAddr < startAddr)
+	{
 		return;
 	}
 
-	if(startAddr == 0 && endAddr == 0) {
+	if (startAddr == 0 && endAddr == 0)
+	{
 		endAddr = 0xFFFFFF;
 	}
 
-	for(size_t i = 0; i < _callbacks[(int)type].size(); i++) {
-		MemoryCallback &callback = _callbacks[(int)type][i];
-		if(callback.Reference == reference && callback.Type == cpuType && (int)callback.StartAddress == startAddr && (int)callback.EndAddress == endAddr) {
+	for (size_t i = 0; i < _callbacks[(int)type].size(); i++)
+	{
+		MemoryCallback& callback = _callbacks[(int)type][i];
+		if (callback.Reference == reference && callback.Type == cpuType && (int)callback.StartAddress == startAddr && (int
+		)callback.EndAddress == endAddr)
+		{
 			_callbacks[(int)type].erase(_callbacks[(int)type].begin() + i);
 			break;
 		}
@@ -125,27 +136,34 @@ void ScriptingContext::RegisterEventCallback(EventType type, int reference)
 
 void ScriptingContext::UnregisterEventCallback(EventType type, int reference)
 {
-	vector<int> &callbacks = _eventCallbacks[(int)type];
+	vector<int>& callbacks = _eventCallbacks[(int)type];
 	callbacks.erase(std::remove(callbacks.begin(), callbacks.end(), reference), callbacks.end());
 }
 
 void ScriptingContext::RequestSaveState(int slot)
 {
 	_saveSlot = slot;
-	if(_inExecOpEvent) {
+	if (_inExecOpEvent)
+	{
 		SaveState();
-	} else {
+	}
+	else
+	{
 		_saveSlotData.erase(slot);
 	}
 }
 
 bool ScriptingContext::RequestLoadState(int slot)
 {
-	if(_saveSlotData.find(slot) != _saveSlotData.end()) {
+	if (_saveSlotData.find(slot) != _saveSlotData.end())
+	{
 		_loadSlot = slot;
-		if(_inExecOpEvent) {
+		if (_inExecOpEvent)
+		{
 			return LoadState();
-		} else {
+		}
+		else
+		{
 			return true;
 		}
 	}
@@ -154,7 +172,8 @@ bool ScriptingContext::RequestLoadState(int slot)
 
 void ScriptingContext::SaveState()
 {
-	if(_saveSlot >= 0) {
+	if (_saveSlot >= 0)
+	{
 		stringstream ss;
 		_debugger->GetConsole()->GetSaveStateManager()->SaveState(ss);
 		_saveSlotData[_saveSlot] = ss.str();
@@ -164,12 +183,14 @@ void ScriptingContext::SaveState()
 
 bool ScriptingContext::LoadState()
 {
-	if(_loadSlot >= 0 && _saveSlotData.find(_loadSlot) != _saveSlotData.end()) {
+	if (_loadSlot >= 0 && _saveSlotData.find(_loadSlot) != _saveSlotData.end())
+	{
 		stringstream ss;
 		ss << _saveSlotData[_loadSlot];
 		bool result = _debugger->GetConsole()->GetSaveStateManager()->LoadState(ss);
 		_loadSlot = -1;
-		if(result) {
+		if (result)
+		{
 			_stateLoaded = true;
 		}
 		return result;
@@ -182,7 +203,8 @@ bool ScriptingContext::LoadState(string stateData)
 	stringstream ss;
 	ss << stateData;
 	bool result = _debugger->GetConsole()->GetSaveStateManager()->LoadState(ss);
-	if(result) {
+	if (result)
+	{
 		_stateLoaded = true;
 	}
 	return result;
@@ -196,9 +218,11 @@ bool ScriptingContext::ProcessSavestate()
 
 string ScriptingContext::GetSavestateData(int slot)
 {
-	if(slot >= 0) {
+	if (slot >= 0)
+	{
 		auto result = _saveSlotData.find(slot);
-		if(result != _saveSlotData.end()) {
+		if (result != _saveSlotData.end())
+		{
 			return result->second;
 		}
 	}
@@ -208,7 +232,8 @@ string ScriptingContext::GetSavestateData(int slot)
 
 void ScriptingContext::ClearSavestateData(int slot)
 {
-	if(slot >= 0) {
+	if (slot >= 0)
+	{
 		_saveSlotData.erase(slot);
 	}
 }

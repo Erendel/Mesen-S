@@ -22,7 +22,7 @@ private:
 	Console* _console;
 
 	unordered_map<int32_t, ProfiledFunction> _functions;
-	
+
 	deque<int32_t> _functionStack;
 	deque<StackFrameFlags> _stackFlags;
 	deque<uint64_t> _cycleCountStack;

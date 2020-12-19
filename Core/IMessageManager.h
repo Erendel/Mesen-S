@@ -21,7 +21,8 @@ private:
 
 	uint64_t GetCurrentTime()
 	{
-		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+		return std::chrono::duration_cast<std::chrono::milliseconds>(
+			std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 	}
 
 public:
@@ -38,7 +39,7 @@ public:
 		return _title;
 	}
 
-	string GetToastMessage() 
+	string GetToastMessage()
 	{
 		return _message;
 	}
@@ -46,13 +47,20 @@ public:
 	float GetOpacity()
 	{
 		uint64_t currentTime = GetCurrentTime();
-		if(currentTime - _startTime < 200) {
+		if (currentTime - _startTime < 200)
+		{
 			return (currentTime - _startTime) * 5.0f / 1000.0f;
-		} else if(_endTime - currentTime < 200) {
+		}
+		else if (_endTime - currentTime < 200)
+		{
 			return (_endTime - currentTime) * 5.0f / 1000.0f;
-		} else if(currentTime >= _endTime) {
+		}
+		else if (currentTime >= _endTime)
+		{
 			return 0.0f;
-		} else {
+		}
+		else
+		{
 			return 1.0f;
 		}
 	}

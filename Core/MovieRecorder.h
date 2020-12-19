@@ -12,7 +12,8 @@ class Console;
 class RewindData;
 //struct CodeInfo;
 
-class MovieRecorder : public INotificationListener, public IInputRecorder, public IBatteryRecorder, public IBatteryProvider, public std::enable_shared_from_this<MovieRecorder>
+class MovieRecorder : public INotificationListener, public IInputRecorder, public IBatteryRecorder,
+                      public IBatteryProvider, public std::enable_shared_from_this<MovieRecorder>
 {
 private:
 	static const uint32_t MovieFormatVersion = 1;
@@ -27,11 +28,11 @@ private:
 	bool _hasSaveState = false;
 	stringstream _saveStateData;
 
-	void GetGameSettings(stringstream &out);
+	void GetGameSettings(stringstream& out);
 	//void WriteCheat(stringstream &out, CodeInfo &code);
-	void WriteString(stringstream &out, string name, string value);
-	void WriteInt(stringstream &out, string name, uint32_t value);
-	void WriteBool(stringstream &out, string name, bool enabled);
+	void WriteString(stringstream& out, string name, string value);
+	void WriteInt(stringstream& out, string name, uint32_t value);
+	void WriteBool(stringstream& out, string name, bool enabled);
 
 public:
 	MovieRecorder(shared_ptr<Console> console);
@@ -50,5 +51,5 @@ public:
 	vector<uint8_t> LoadBattery(string extension) override;
 
 	// Inherited via INotificationListener
-	void ProcessNotification(ConsoleNotificationType type, void *parameter) override;
+	void ProcessNotification(ConsoleNotificationType type, void* parameter) override;
 };

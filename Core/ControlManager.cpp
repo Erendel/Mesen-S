@@ -37,7 +37,7 @@ void ControlManager::RegisterInputProvider(IInputProvider* provider)
 void ControlManager::UnregisterInputProvider(IInputProvider* provider)
 {
 	auto lock = _deviceLock.AcquireSafe();
-	vector<IInputProvider*> &vec = _inputProviders;
+	vector<IInputProvider*>& vec = _inputProviders;
 	vec.erase(std::remove(vec.begin(), vec.end(), provider), vec.end());
 }
 
@@ -50,7 +50,7 @@ void ControlManager::RegisterInputRecorder(IInputRecorder* provider)
 void ControlManager::UnregisterInputRecorder(IInputRecorder* provider)
 {
 	auto lock = _deviceLock.AcquireSafe();
-	vector<IInputRecorder*> &vec = _inputRecorders;
+	vector<IInputRecorder*>& vec = _inputRecorders;
 	vec.erase(std::remove(vec.begin(), vec.end(), provider), vec.end());
 }
 
@@ -59,12 +59,16 @@ vector<ControllerData> ControlManager::GetPortStates()
 	auto lock = _deviceLock.AcquireSafe();
 
 	vector<ControllerData> states;
-	for(int i = 0; i < 2; i++) {
+	for (int i = 0; i < 2; i++)
+	{
 		shared_ptr<BaseControlDevice> device = GetControlDevice(i);
-		if(device) {
-			states.push_back({ device->GetControllerType(), device->GetRawState() });
-		} else {
-			states.push_back({ ControllerType::None, ControlDeviceState()});
+		if (device)
+		{
+			states.push_back({device->GetControllerType(), device->GetRawState()});
+		}
+		else
+		{
+			states.push_back({ControllerType::None, ControlDeviceState()});
 		}
 	}
 	return states;
@@ -79,8 +83,13 @@ shared_ptr<BaseControlDevice> ControlManager::GetControlDevice(uint8_t port)
 {
 	auto lock = _deviceLock.AcquireSafe();
 
-	auto result = std::find_if(_controlDevices.begin(), _controlDevices.end(), [port](const shared_ptr<BaseControlDevice> control) { return control->GetPort() == port; });
-	if(result != _controlDevices.end()) {
+	auto result = std::find_if(_controlDevices.begin(), _controlDevices.end(),
+	                           [port](const shared_ptr<BaseControlDevice> control)
+	                           {
+		                           return control->GetPort() == port;
+	                           });
+	if (result != _controlDevices.end())
+	{
 		return *result;
 	}
 	return nullptr;
@@ -101,35 +110,46 @@ ControllerType ControlManager::GetControllerType(uint8_t port)
 	return _console->GetSettings()->GetInputConfig().Controllers[port].Type;
 }
 
-shared_ptr<BaseControlDevice> ControlManager::CreateControllerDevice(ControllerType type, uint8_t port, Console* console)
+shared_ptr<BaseControlDevice> ControlManager::CreateControllerDevice(ControllerType type, uint8_t port,
+                                                                     Console* console)
 {
 	shared_ptr<BaseControlDevice> device;
-	
+
 	InputConfig cfg = console->GetSettings()->GetInputConfig();
 
-	switch(type) {
-		case ControllerType::None: break;
-		case ControllerType::SnesController: device.reset(new SnesController(console, port, cfg.Controllers[port].Keys)); break;
-		case ControllerType::SnesMouse: device.reset(new SnesMouse(console, port)); break;
-		case ControllerType::SuperScope: device.reset(new SuperScope(console, port, cfg.Controllers[port].Keys)); break;
-		case ControllerType::Multitap: device.reset(new Multitap(console, port, cfg.Controllers[port].Keys, cfg.Controllers[2].Keys, cfg.Controllers[3].Keys, cfg.Controllers[4].Keys)); break;
+	switch (type)
+	{
+	case ControllerType::None: break;
+	case ControllerType::SnesController: device.reset(new SnesController(console, port, cfg.Controllers[port].Keys));
+		break;
+	case ControllerType::SnesMouse: device.reset(new SnesMouse(console, port));
+		break;
+	case ControllerType::SuperScope: device.reset(new SuperScope(console, port, cfg.Controllers[port].Keys));
+		break;
+	case ControllerType::Multitap: device.reset(new Multitap(console, port, cfg.Controllers[port].Keys,
+	                                                         cfg.Controllers[2].Keys, cfg.Controllers[3].Keys,
+	                                                         cfg.Controllers[4].Keys));
+		break;
 	}
-	
+
 	return device;
 }
 
 void ControlManager::UpdateControlDevices()
 {
 	uint32_t version = _console->GetSettings()->GetInputConfigVersion();
-	if(_inputConfigVersion != version) {
+	if (_inputConfigVersion != version)
+	{
 		_inputConfigVersion = version;
 
 		auto lock = _deviceLock.AcquireSafe();
 		_controlDevices.clear();
 		RegisterControlDevice(_systemActionManager);
-		for(int i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; i++)
+		{
 			shared_ptr<BaseControlDevice> device = CreateControllerDevice(GetControllerType(i), i, _console);
-			if(device) {
+			if (device)
+			{
 				RegisterControlDevice(device);
 			}
 		}
@@ -143,13 +163,16 @@ void ControlManager::UpdateInputState()
 	auto lock = _deviceLock.AcquireSafe();
 
 	//string log = "F: " + std::to_string(_console->GetPpu()->GetFrameCount()) + " C:" + std::to_string(_pollCounter) + " ";
-	for(shared_ptr<BaseControlDevice> &device : _controlDevices) {
+	for (shared_ptr<BaseControlDevice>& device : _controlDevices)
+	{
 		device->ClearState();
 		device->SetStateFromInput();
 
-		for(size_t i = 0; i < _inputProviders.size(); i++) {
+		for (size_t i = 0; i < _inputProviders.size(); i++)
+		{
 			IInputProvider* provider = _inputProviders[i];
-			if(provider->SetInput(device.get())) {
+			if (provider->SetInput(device.get()))
+			{
 				break;
 			}
 		}
@@ -159,12 +182,15 @@ void ControlManager::UpdateInputState()
 	}
 
 	shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-	if(debugger) {
+	if (debugger)
+	{
 		debugger->ProcessEvent(EventType::InputPolled);
 	}
 
-	if(!_console->IsRunAheadFrame()) {
-		for(IInputRecorder* recorder : _inputRecorders) {
+	if (!_console->IsRunAheadFrame())
+	{
+		for (IInputRecorder* recorder : _inputRecorders)
+		{
 			recorder->RecordInput(_controlDevices);
 		}
 	}
@@ -187,7 +213,8 @@ void ControlManager::SetPollCounter(uint32_t value)
 uint8_t ControlManager::Read(uint16_t addr)
 {
 	uint8_t value = _console->GetMemoryManager()->GetOpenBus() & (addr == 0x4016 ? 0xFC : 0xE0);
-	for(shared_ptr<BaseControlDevice> &device : _controlDevices) {
+	for (shared_ptr<BaseControlDevice>& device : _controlDevices)
+	{
 		value |= device->ReadRam(addr);
 	}
 
@@ -196,21 +223,25 @@ uint8_t ControlManager::Read(uint16_t addr)
 
 void ControlManager::Write(uint16_t addr, uint8_t value)
 {
-	for(shared_ptr<BaseControlDevice> &device : _controlDevices) {
+	for (shared_ptr<BaseControlDevice>& device : _controlDevices)
+	{
 		device->WriteRam(addr, value);
 	}
 }
 
-void ControlManager::Serialize(Serializer &s)
+void ControlManager::Serialize(Serializer& s)
 {
 	InputConfig cfg = _console->GetSettings()->GetInputConfig();
-	s.Stream(cfg.Controllers[0].Type, cfg.Controllers[1].Type, cfg.Controllers[2].Type, cfg.Controllers[3].Type, cfg.Controllers[4].Type);
-	if(!s.IsSaving()) {
+	s.Stream(cfg.Controllers[0].Type, cfg.Controllers[1].Type, cfg.Controllers[2].Type, cfg.Controllers[3].Type,
+	         cfg.Controllers[4].Type);
+	if (!s.IsSaving())
+	{
 		_console->GetSettings()->SetInputConfig(cfg);
 		UpdateControlDevices();
 	}
 
-	for(shared_ptr<BaseControlDevice> &device : _controlDevices) {
+	for (shared_ptr<BaseControlDevice>& device : _controlDevices)
+	{
 		s.Stream(device.get());
 	}
 }

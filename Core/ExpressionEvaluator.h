@@ -39,8 +39,10 @@ enum EvalOperators : int64_t
 	LogicalNot = 20000000053,
 
 	//Used to read ram address
-	Bracket = 20000000054, //Read byte
-	Braces = 20000000055, //Read word
+	Bracket = 20000000054,
+	//Read byte
+	Braces = 20000000055,
+	//Read word
 
 	//Special value, not used as an operator
 	Parenthesis = 20000000100,
@@ -133,7 +135,7 @@ enum class EvalResultType : int32_t
 class StringHasher
 {
 public:
-	size_t operator()(const std::string& t) const 
+	size_t operator()(const std::string& t) const
 	{
 		//Quick hash for expressions - most are likely to have different lengths, and not expecting dozens of breakpoints, either, so this should be fine.
 		return t.size();
@@ -157,32 +159,36 @@ private:
 
 	std::unordered_map<string, ExpressionData, StringHasher> _cache;
 	SimpleLock _cacheLock;
-	
+
 	int64_t operandStack[1000];
 	Debugger* _debugger;
 	LabelManager* _labelManager;
 	CpuType _cpuType;
 	SnesMemoryType _cpuMemory;
 
-	bool IsOperator(string token, int &precedence, bool unaryOperator);
+	bool IsOperator(string token, int& precedence, bool unaryOperator);
 	EvalOperators GetOperator(string token, bool unaryOperator);
-	bool CheckSpecialTokens(string expression, size_t &pos, string &output, ExpressionData &data);
+	bool CheckSpecialTokens(string expression, size_t& pos, string& output, ExpressionData& data);
 	int64_t ProcessCpuSpcTokens(string token, bool spc);
 	int64_t ProcessSharedTokens(string token);
 	int64_t ProcessGsuTokens(string token);
 	int64_t ProcessGameboyTokens(string token);
-	string GetNextToken(string expression, size_t &pos, ExpressionData &data, bool &success, bool previousTokenIsOp);
-	bool ProcessSpecialOperator(EvalOperators evalOp, std::stack<EvalOperators> &opStack, std::stack<int> &precedenceStack, vector<int64_t> &outputQueue);
-	bool ToRpn(string expression, ExpressionData &data);
-	int32_t PrivateEvaluate(string expression, DebugState &state, EvalResultType &resultType, MemoryOperationInfo &operationInfo, bool &success);
+	string GetNextToken(string expression, size_t& pos, ExpressionData& data, bool& success, bool previousTokenIsOp);
+	bool ProcessSpecialOperator(EvalOperators evalOp, std::stack<EvalOperators>& opStack,
+	                            std::stack<int>& precedenceStack, vector<int64_t>& outputQueue);
+	bool ToRpn(string expression, ExpressionData& data);
+	int32_t PrivateEvaluate(string expression, DebugState& state, EvalResultType& resultType,
+	                        MemoryOperationInfo& operationInfo, bool& success);
 	ExpressionData* PrivateGetRpnList(string expression, bool& success);
 
 public:
 	ExpressionEvaluator(Debugger* debugger, CpuType cpuType);
 
-	int32_t Evaluate(ExpressionData &data, DebugState &state, EvalResultType &resultType, MemoryOperationInfo &operationInfo);
-	int32_t Evaluate(string expression, DebugState &state, EvalResultType &resultType, MemoryOperationInfo &operationInfo);
-	ExpressionData GetRpnList(string expression, bool &success);
+	int32_t Evaluate(ExpressionData& data, DebugState& state, EvalResultType& resultType,
+	                 MemoryOperationInfo& operationInfo);
+	int32_t Evaluate(string expression, DebugState& state, EvalResultType& resultType,
+	                 MemoryOperationInfo& operationInfo);
+	ExpressionData GetRpnList(string expression, bool& success);
 
 	bool Validate(string expression);
 

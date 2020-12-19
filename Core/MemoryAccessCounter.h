@@ -38,10 +38,10 @@ private:
 	Cx4* _cx4;
 	Gameboy* _gameboy;
 
-	bool IsAddressUninitialized(AddressInfo &addressInfo);
+	bool IsAddressUninitialized(AddressInfo& addressInfo);
 
 public:
-	MemoryAccessCounter(Debugger *debugger, Console *console);
+	MemoryAccessCounter(Debugger* debugger, Console* console);
 
 	uint64_t GetReadCount(AddressInfo& addressInfo);
 

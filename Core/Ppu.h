@@ -64,13 +64,13 @@ private:
 
 	uint16_t _drawStartX = 0;
 	uint16_t _drawEndX = 0;
-	
-	uint16_t *_vram = nullptr;
+
+	uint16_t* _vram = nullptr;
 	uint16_t _cgram[Ppu::CgRamSize >> 1] = {};
 	uint8_t _oamRam[Ppu::SpriteRamSize] = {};
 
-	uint16_t *_outputBuffers[2] = {};
-	uint16_t *_currentBuffer = nullptr;
+	uint16_t* _outputBuffers[2] = {};
+	uint16_t* _currentBuffer = nullptr;
 	bool _useHighResOutput = false;
 	bool _interlacedFrame = false;
 	bool _overscanFrame = false;
@@ -84,7 +84,7 @@ private:
 	uint32_t _mosaicColor[4] = {};
 	uint32_t _mosaicPriority[4] = {};
 	uint16_t _mosaicScanlineCounter = 0;
-	
+
 	uint16_t _internalOamAddress = 0;
 	uint8_t _oamWriteBuffer = 0;
 
@@ -116,10 +116,10 @@ private:
 
 	void RenderSprites(const uint8_t priorities[4]);
 
-	template<bool hiResMode>
+	template <bool hiResMode>
 	void GetTilemapData(uint8_t layerIndex, uint8_t columnIndex);
 
-	template<bool hiResMode, uint8_t bpp, bool secondTile = false>
+	template <bool hiResMode, uint8_t bpp, bool secondTile = false>
 	void GetChrData(uint8_t layerIndex, uint8_t column, uint8_t plane);
 
 	void GetHorizontalOffsetByte(uint8_t columnIndex);
@@ -137,48 +137,52 @@ private:
 
 	void RenderBgColor();
 
-	template<uint8_t layerIndex, uint8_t bpp, uint8_t normalPriority, uint8_t highPriority, uint16_t basePaletteOffset = 0>
-	__forceinline void RenderTilemap();
-	
-	template<uint8_t layerIndex, uint8_t bpp, uint8_t normalPriority, uint8_t highPriority, uint16_t basePaletteOffset, bool hiResMode>
+	template <uint8_t layerIndex, uint8_t bpp, uint8_t normalPriority, uint8_t highPriority, uint16_t basePaletteOffset =
+		          0>
 	__forceinline void RenderTilemap();
 
-	template<uint8_t layerIndex, uint8_t bpp, uint8_t normalPriority, uint8_t highPriority, uint16_t basePaletteOffset, bool hiResMode, bool applyMosaic>
+	template <uint8_t layerIndex, uint8_t bpp, uint8_t normalPriority, uint8_t highPriority, uint16_t basePaletteOffset,
+	          bool hiResMode>
 	__forceinline void RenderTilemap();
 
-	template<uint8_t layerIndex, uint8_t bpp, uint8_t normalPriority, uint8_t highPriority, uint16_t basePaletteOffset, bool hiResMode, bool applyMosaic, bool directColorMode>
+	template <uint8_t layerIndex, uint8_t bpp, uint8_t normalPriority, uint8_t highPriority, uint16_t basePaletteOffset,
+	          bool hiResMode, bool applyMosaic>
+	__forceinline void RenderTilemap();
+
+	template <uint8_t layerIndex, uint8_t bpp, uint8_t normalPriority, uint8_t highPriority, uint16_t basePaletteOffset,
+	          bool hiResMode, bool applyMosaic, bool directColorMode>
 	void RenderTilemap();
 
-	template<uint8_t bpp, bool directColorMode, uint8_t basePaletteOffset>
+	template <uint8_t bpp, bool directColorMode, uint8_t basePaletteOffset>
 	__forceinline uint16_t GetRgbColor(uint8_t paletteIndex, uint8_t colorIndex);
 
 	__forceinline bool IsRenderRequired(uint8_t layerIndex);
 
-	template<uint8_t bpp>
+	template <uint8_t bpp>
 	__forceinline uint8_t GetTilePixelColor(const uint16_t chrData[4], const uint8_t shift);
 
-	template<uint8_t layerIndex, uint8_t normalPriority, uint8_t highPriority>
+	template <uint8_t layerIndex, uint8_t normalPriority, uint8_t highPriority>
 	__forceinline void RenderTilemapMode7();
 
-	template<uint8_t layerIndex, uint8_t normalPriority, uint8_t highPriority, bool applyMosaic>
+	template <uint8_t layerIndex, uint8_t normalPriority, uint8_t highPriority, bool applyMosaic>
 	__forceinline void RenderTilemapMode7();
 
-	template<uint8_t layerIndex, uint8_t normalPriority, uint8_t highPriority, bool applyMosaic, bool directColorMode>
+	template <uint8_t layerIndex, uint8_t normalPriority, uint8_t highPriority, bool applyMosaic, bool directColorMode>
 	void RenderTilemapMode7();
 
 	__forceinline void DrawMainPixel(uint8_t x, uint16_t color, uint8_t flags);
 	__forceinline void DrawSubPixel(uint8_t x, uint16_t color, uint8_t priority);
 
 	void ApplyColorMath();
-	void ApplyColorMathToPixel(uint16_t &pixelA, uint16_t pixelB, int x, bool isInsideWindow);
-	
-	template<bool forMainScreen>
+	void ApplyColorMathToPixel(uint16_t& pixelA, uint16_t pixelB, int x, bool isInsideWindow);
+
+	template <bool forMainScreen>
 	void ApplyBrightness();
 
 	void ConvertToHiRes();
 	void ApplyHiResMode();
 
-	template<uint8_t layerIndex>
+	template <uint8_t layerIndex>
 	bool ProcessMaskWindow(uint8_t activeWindowCount, int x);
 
 	void ProcessWindowMaskSettings(uint8_t value, uint8_t offset);
@@ -199,7 +203,7 @@ private:
 
 	void UpdateOamAddress();
 	uint16_t GetOamAddress();
-	
+
 	void RandomizeState();
 
 public:
@@ -220,7 +224,7 @@ public:
 	uint16_t GetVblankStart();
 
 	PpuState GetState();
-	void GetState(PpuState &state, bool returnPartialState);
+	void GetState(PpuState& state, bool returnPartialState);
 
 	bool ProcessEndOfScanline(uint16_t hClock);
 	void UpdateSpcState();
@@ -237,9 +241,9 @@ public:
 	void SetLocationLatchRequest(uint16_t x, uint16_t y);
 	void ProcessLocationLatchRequest();
 	void LatchLocationValues();
-	
+
 	uint8_t Read(uint16_t addr);
 	void Write(uint32_t addr, uint8_t value);
 
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 };

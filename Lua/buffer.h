@@ -24,22 +24,24 @@
 #define BUF_SIZE 8192
 
 /* buffer control structure */
-typedef struct t_buffer_ {
-    double birthday;        /* throttle support info: creation time, */
-    size_t sent, received;  /* bytes sent, and bytes received */
-    p_io io;                /* IO driver used for this buffer */
-    p_timeout tm;           /* timeout management for this buffer */
-    size_t first, last;     /* index of first and last bytes of stored data */
-    char data[BUF_SIZE];    /* storage space for buffer data */
+typedef struct t_buffer_
+{
+	double birthday; /* throttle support info: creation time, */
+	size_t sent, received; /* bytes sent, and bytes received */
+	p_io io; /* IO driver used for this buffer */
+	p_timeout tm; /* timeout management for this buffer */
+	size_t first, last; /* index of first and last bytes of stored data */
+	char data[BUF_SIZE]; /* storage space for buffer data */
 } t_buffer;
-typedef t_buffer *p_buffer;
 
-int buffer_open(lua_State *L);
+typedef t_buffer* p_buffer;
+
+int buffer_open(lua_State* L);
 void buffer_init(p_buffer buf, p_io io, p_timeout tm);
-int buffer_meth_send(lua_State *L, p_buffer buf);
-int buffer_meth_receive(lua_State *L, p_buffer buf);
-int buffer_meth_getstats(lua_State *L, p_buffer buf);
-int buffer_meth_setstats(lua_State *L, p_buffer buf);
+int buffer_meth_send(lua_State* L, p_buffer buf);
+int buffer_meth_receive(lua_State* L, p_buffer buf);
+int buffer_meth_getstats(lua_State* L, p_buffer buf);
+int buffer_meth_setstats(lua_State* L, p_buffer buf);
 int buffer_isempty(p_buffer buf);
 
 #endif /* BUF_H */

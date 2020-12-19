@@ -15,7 +15,7 @@ struct GsuFlags
 	bool ImmHigh;
 	bool Prefix;
 	bool Irq;
-	
+
 	uint8_t GetFlagsLow()
 	{
 		return (
@@ -77,7 +77,7 @@ struct GsuState
 	uint16_t R[16];
 
 	GsuFlags SFR;
-	
+
 	uint8_t RegisterLatch;
 
 	uint8_t ProgramBank;
@@ -89,7 +89,7 @@ struct GsuState
 	bool ClockSelect;
 	bool BackupRamEnabled;
 	uint8_t ScreenBase;
-	
+
 	uint8_t ColorGradient;
 	uint8_t PlotBpp;
 	uint8_t ScreenHeight;
@@ -107,7 +107,7 @@ struct GsuState
 	uint8_t ColorReg;
 	uint8_t SrcReg;
 	uint8_t DestReg;
-	
+
 	uint8_t RomReadBuffer;
 	uint8_t RomDelay;
 
@@ -118,7 +118,7 @@ struct GsuState
 	uint8_t RamDelay;
 
 	uint16_t RamAddress;
-	
+
 	GsuPixelCache PrimaryCache;
 	GsuPixelCache SecondaryCache;
 };

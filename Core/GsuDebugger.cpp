@@ -37,24 +37,29 @@ void GsuDebugger::Reset()
 
 void GsuDebugger::ProcessRead(uint32_t addr, uint8_t value, MemoryOperationType type)
 {
-	if(type == MemoryOperationType::DummyRead) {
+	if (type == MemoryOperationType::DummyRead)
+	{
 		//Ignore all dummy reads for now
 		return;
 	}
 
 	AddressInfo addressInfo = _gsu->GetMemoryMappings()->GetAbsoluteAddress(addr);
-	MemoryOperationInfo operation { addr, value, type };
+	MemoryOperationInfo operation{addr, value, type};
 
-	if(type == MemoryOperationType::ExecOpCode) {
-		if(addressInfo.Type == SnesMemoryType::PrgRom) {
+	if (type == MemoryOperationType::ExecOpCode)
+	{
+		if (addressInfo.Type == SnesMemoryType::PrgRom)
+		{
 			_codeDataLogger->SetFlags(addressInfo.Address, CdlFlags::Code | CdlFlags::Gsu);
 		}
 
-		if(_traceLogger->IsCpuLogged(CpuType::Gsu) || _settings->CheckDebuggerFlag(DebuggerFlags::GsuDebuggerEnabled)) {
+		if (_traceLogger->IsCpuLogged(CpuType::Gsu) || _settings->CheckDebuggerFlag(DebuggerFlags::GsuDebuggerEnabled))
+		{
 			GsuState gsuState = _gsu->GetState();
 			_disassembler->BuildCache(addressInfo, gsuState.SFR.GetFlagsHigh() & 0x13, CpuType::Gsu);
 
-			if(_traceLogger->IsCpuLogged(CpuType::Gsu)) {
+			if (_traceLogger->IsCpuLogged(CpuType::Gsu))
+			{
 				DebugState debugState;
 				_debugger->GetState(debugState, true);
 				debugState.Gsu.R[15] = addr;
@@ -67,12 +72,16 @@ void GsuDebugger::ProcessRead(uint32_t addr, uint8_t value, MemoryOperationType 
 		_prevOpCode = value;
 		_prevProgramCounter = addr;
 
-		if(_step->StepCount > 0) {
+		if (_step->StepCount > 0)
+		{
 			_step->StepCount--;
 		}
 		_memoryAccessCounter->ProcessMemoryExec(addressInfo, _memoryManager->GetMasterClock());
-	} else {
-		if(addressInfo.Type == SnesMemoryType::PrgRom) {
+	}
+	else
+	{
+		if (addressInfo.Type == SnesMemoryType::PrgRom)
+		{
 			_codeDataLogger->SetFlags(addressInfo.Address, CdlFlags::Data | CdlFlags::Gsu);
 		}
 		_memoryAccessCounter->ProcessMemoryRead(addressInfo, _memoryManager->GetMasterClock());
@@ -84,7 +93,7 @@ void GsuDebugger::ProcessRead(uint32_t addr, uint8_t value, MemoryOperationType 
 void GsuDebugger::ProcessWrite(uint32_t addr, uint8_t value, MemoryOperationType type)
 {
 	AddressInfo addressInfo = _gsu->GetMemoryMappings()->GetAbsoluteAddress(addr);
-	MemoryOperationInfo operation { addr, value, type };
+	MemoryOperationInfo operation{addr, value, type};
 	_debugger->ProcessBreakConditions(false, GetBreakpointManager(), operation, addressInfo);
 
 	_disassembler->InvalidateCache(addressInfo, CpuType::Gsu);
@@ -100,14 +109,16 @@ void GsuDebugger::Step(int32_t stepCount, StepType type)
 {
 	StepRequest step;
 
-	switch(type) {
-		case StepType::StepOut:
-		case StepType::StepOver:
-		case StepType::Step: step.StepCount = stepCount; break;
-		
-		case StepType::SpecificScanline:
-		case StepType::PpuStep:
-			break;
+	switch (type)
+	{
+	case StepType::StepOut:
+	case StepType::StepOver:
+	case StepType::Step: step.StepCount = stepCount;
+		break;
+
+	case StepType::SpecificScanline:
+	case StepType::PpuStep:
+		break;
 	}
 
 	_step.reset(new StepRequest(step));

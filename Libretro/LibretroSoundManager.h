@@ -23,11 +23,13 @@ public:
 	}
 
 	// Inherited via IAudioDevice
-	virtual void PlayBuffer(int16_t *soundBuffer, uint32_t sampleCount, uint32_t sampleRate, bool isStereo) override
+	virtual void PlayBuffer(int16_t* soundBuffer, uint32_t sampleCount, uint32_t sampleRate, bool isStereo) override
 	{
-		if(!_skipMode && _sendAudioSample) {
-			for(uint32_t total = 0; total < sampleCount; ) {
-				total += (uint32_t)_sendAudioSample(soundBuffer + total*2, (size_t)(sampleCount - total));
+		if (!_skipMode && _sendAudioSample)
+		{
+			for (uint32_t total = 0; total < sampleCount;)
+			{
+				total += (uint32_t)_sendAudioSample(soundBuffer + total * 2, (size_t)(sampleCount - total));
 			}
 		}
 	}

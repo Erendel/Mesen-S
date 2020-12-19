@@ -6,58 +6,72 @@
 #include <natupnp.h>
 #include <ws2tcpip.h>
 
-bool UPnPPortMapper::AddNATPortMapping(uint16_t internalPort, uint16_t externalPort, IPProtocol protocol) 
+bool UPnPPortMapper::AddNATPortMapping(uint16_t internalPort, uint16_t externalPort, IPProtocol protocol)
 {
 	bool result = false;
-		
+
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
-	IUPnPNAT *nat = nullptr;
+	IUPnPNAT* nat = nullptr;
 	HRESULT hResult = CoCreateInstance(__uuidof(UPnPNAT), nullptr, CLSCTX_ALL, __uuidof(IUPnPNAT), (void**)&nat);
 
 	BSTR proto = SysAllocString((protocol == IPProtocol::TCP) ? L"TCP" : L"UDP");
 
-	if(SUCCEEDED(hResult) && nat) {
-		IStaticPortMappingCollection *spmc = nullptr;
+	if (SUCCEEDED(hResult) && nat)
+	{
+		IStaticPortMappingCollection* spmc = nullptr;
 		hResult = nat->get_StaticPortMappingCollection(&spmc);
-		if(SUCCEEDED(hResult) && spmc) {
-			IStaticPortMapping *spm = nullptr;
+		if (SUCCEEDED(hResult) && spmc)
+		{
+			IStaticPortMapping* spm = nullptr;
 			hResult = spmc->get_Item(externalPort, proto, &spm);
-			if(spm != nullptr) {
+			if (spm != nullptr)
+			{
 				//An identical mapping already exists, remove it
-				if(RemoveNATPortMapping(externalPort, protocol)) {
+				if (RemoveNATPortMapping(externalPort, protocol))
+				{
 					std::cout << "Removed existing UPnP mapping." << std::endl;
 					spm->Release();
 					spm = nullptr;
 				}
 			}
 
-			if(!SUCCEEDED(hResult) || spm == nullptr) {
+			if (!SUCCEEDED(hResult) || spm == nullptr)
+			{
 				std::cout << "Attempting to automatically forward port via UPnP..." << std::endl;
 
 				vector<wstring> localIPs = GetLocalIPs();
 				BSTR desc = SysAllocString(L"Mesen NetPlay");
 				spm = nullptr;
 
-				for(size_t i = 0, len = localIPs.size(); i < len; i++) {
+				for (size_t i = 0, len = localIPs.size(); i < len; i++)
+				{
 					BSTR clientStr = SysAllocString(localIPs[i].c_str());
 					hResult = spmc->Add(externalPort, proto, internalPort, clientStr, true, desc, &spm);
 					SysFreeString(clientStr);
 					SysFreeString(desc);
 
-					if(SUCCEEDED(hResult) && spm) {
+					if (SUCCEEDED(hResult) && spm)
+					{
 						//Successfully added a new port mapping
-						std::cout << std::dec << "Forwarded port " << externalPort << " to IP " << utf8::utf8::encode(localIPs[i]) << std::endl;
+						std::cout << std::dec << "Forwarded port " << externalPort << " to IP " <<
+							utf8::utf8::encode(localIPs[i]) << std::endl;
 						result = true;
-					} else {
-						std::cout << "Unable to add UPnP port mapping. IP: " << utf8::utf8::encode(localIPs[i]) << " HRESULT: 0x" << std::hex << hResult << std::endl;
+					}
+					else
+					{
+						std::cout << "Unable to add UPnP port mapping. IP: " << utf8::utf8::encode(localIPs[i]) <<
+							" HRESULT: 0x" << std::hex << hResult << std::endl;
 					}
 
-					if(spm) {
+					if (spm)
+					{
 						spm->Release();
 					}
 				}
-			} else {
+			}
+			else
+			{
 				std::cout << "Unable to add UPnP port mapping." << std::endl;
 			}
 			spmc->Release();
@@ -66,16 +80,16 @@ bool UPnPPortMapper::AddNATPortMapping(uint16_t internalPort, uint16_t externalP
 	}
 
 	SysFreeString(proto);
-	
+
 	CoUninitialize();
 
 	return result;
 }
 
-bool UPnPPortMapper::RemoveNATPortMapping(uint16_t externalPort, IPProtocol protocol) 
+bool UPnPPortMapper::RemoveNATPortMapping(uint16_t externalPort, IPProtocol protocol)
 {
-	IUPnPNAT *nat = nullptr;
-	IStaticPortMappingCollection *spmc;
+	IUPnPNAT* nat = nullptr;
+	IStaticPortMappingCollection* spmc;
 	bool result = false;
 
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
@@ -84,9 +98,11 @@ bool UPnPPortMapper::RemoveNATPortMapping(uint16_t externalPort, IPProtocol prot
 
 	BSTR proto = SysAllocString((protocol == IPProtocol::TCP) ? L"TCP" : L"UDP");
 
-	if(SUCCEEDED(hResult) && nat) {
+	if (SUCCEEDED(hResult) && nat)
+	{
 		hResult = nat->get_StaticPortMappingCollection(&spmc);
-		if(SUCCEEDED(hResult) && spmc) {
+		if (SUCCEEDED(hResult) && spmc)
+		{
 			spmc->Remove(externalPort, proto);
 			spmc->Release();
 			result = true;
@@ -104,8 +120,8 @@ bool UPnPPortMapper::RemoveNATPortMapping(uint16_t externalPort, IPProtocol prot
 vector<wstring> UPnPPortMapper::GetLocalIPs()
 {
 	vector<wstring> localIPs;
-	ADDRINFOW *result = nullptr;
-	ADDRINFOW *current = nullptr;
+	ADDRINFOW* result = nullptr;
+	ADDRINFOW* current = nullptr;
 	ADDRINFOW hints;
 
 	ZeroMemory(&hints, sizeof(hints));
@@ -117,14 +133,18 @@ vector<wstring> UPnPPortMapper::GetLocalIPs()
 	DWORD hostSize = 255;
 	GetComputerName(hostName, &hostSize);
 
-	if(GetAddrInfoW(hostName, nullptr, &hints, &result) == 0) {
+	if (GetAddrInfoW(hostName, nullptr, &hints, &result) == 0)
+	{
 		current = result;
-		while(current != nullptr) {
+		while (current != nullptr)
+		{
 			wchar_t ipAddr[255];
 			DWORD ipSize = 255;
 
-			if(WSAAddressToString(current->ai_addr, (DWORD)current->ai_addrlen, nullptr, ipAddr, &ipSize) == 0) {
-				if(std::find(localIPs.begin(), localIPs.end(), ipAddr) == localIPs.end()) {
+			if (WSAAddressToString(current->ai_addr, (DWORD)current->ai_addrlen, nullptr, ipAddr, &ipSize) == 0)
+			{
+				if (std::find(localIPs.begin(), localIPs.end(), ipAddr) == localIPs.end())
+				{
 					localIPs.push_back(ipAddr);
 				}
 			}

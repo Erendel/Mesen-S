@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "../Utilities/Serializer.h"
 
-template<uint8_t rate>
+template <uint8_t rate>
 class SpcTimer
 {
 private:
@@ -18,19 +18,22 @@ private:
 	void ClockTimer()
 	{
 		uint8_t currentState = _stage1;
-		if(!_timersEnabled) {
+		if (!_timersEnabled)
+		{
 			//All timers are disabled
 			currentState = 0;
 		}
 
 		uint8_t prevState = _prevStage1;
 		_prevStage1 = currentState;
-		if(!_enabled || !prevState || currentState) {
+		if (!_enabled || !prevState || currentState)
+		{
 			//Only clock on 1->0 transitions, when the timer is enabled
 			return;
 		}
 
-		if(++_stage2 == _target) {
+		if (++_stage2 == _target)
+		{
 			_stage2 = 0;
 			_output++;
 		}
@@ -44,7 +47,8 @@ public:
 
 	void SetEnabled(bool enabled)
 	{
-		if(!_enabled && enabled) {
+		if (!_enabled && enabled)
+		{
 			_stage2 = 0;
 			_output = 0;
 		}
@@ -60,7 +64,8 @@ public:
 	void Run(uint8_t step)
 	{
 		_stage0 += step;
-		if(_stage0 >= rate) {
+		if (_stage0 >= rate)
+		{
 			_stage1 ^= 0x01;
 			_stage0 -= rate;
 
@@ -91,7 +96,7 @@ public:
 		_output = value;
 	}
 
-	void Serialize(Serializer &s)
+	void Serialize(Serializer& s)
 	{
 		s.Stream(_stage0, _stage1, _stage2, _output, _target, _enabled, _timersEnabled, _prevStage1);
 	}

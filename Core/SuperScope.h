@@ -9,16 +9,17 @@ class SuperScope : public BaseControlDevice
 {
 private:
 	enum Buttons { Fire = 0, Cursor = 1, Turbo = 2, Pause = 3 };
+
 	uint32_t _stateBuffer = 0;
 	bool _prevFireButton = false;
 	bool _prevTurboButton = false;
 	bool _prevPauseButton = false;
 	bool _turbo = false;
-	Ppu *_ppu;
+	Ppu* _ppu;
 
 protected:
 	bool HasCoordinates() override { return true; }
-	
+
 	string GetKeyNames() override
 	{
 		return "FCTP";
@@ -29,7 +30,8 @@ protected:
 		SetPressedState(Buttons::Fire, KeyManager::IsMouseButtonPressed(MouseButton::LeftButton));
 		SetPressedState(Buttons::Cursor, KeyManager::IsMouseButtonPressed(MouseButton::RightButton));
 		SetPressedState(Buttons::Turbo, KeyManager::IsMouseButtonPressed(MouseButton::MiddleButton));
-		for(KeyMapping keyMapping : _keyMappings) {
+		for (KeyMapping keyMapping : _keyMappings)
+		{
 			SetPressedState(Buttons::Pause, KeyManager::IsKeyPressed(keyMapping.Start));
 		}
 
@@ -42,12 +44,13 @@ protected:
 		MousePosition pos = GetCoordinates();
 
 		//Make the PPU latch the H/V counters at the mouse's position (offset slightly to make target in the center of the mouse cursor)
-		if(pos.X >= 0 && pos.Y >= 0) {
+		if (pos.X >= 0 && pos.Y >= 0)
+		{
 			_ppu->SetLocationLatchRequest(pos.X + 10, std::max(0, pos.Y - 3));
 		}
 	}
 
-	void Serialize(Serializer &s) override
+	void Serialize(Serializer& s) override
 	{
 		BaseControlDevice::Serialize(s);
 		s.Stream(_stateBuffer, _prevTurboButton, _prevFireButton, _prevPauseButton, _turbo);
@@ -65,27 +68,33 @@ protected:
 	{
 		uint16_t output = 0xFF00; //signature bits
 
-		if(!_prevTurboButton && IsPressed(Buttons::Turbo)) {
+		if (!_prevTurboButton && IsPressed(Buttons::Turbo))
+		{
 			_turbo = !_turbo;
 		}
 
-		if((_turbo || !_prevFireButton) && IsPressed(Buttons::Fire)) {
+		if ((_turbo || !_prevFireButton) && IsPressed(Buttons::Fire))
+		{
 			output |= 0x01;
 		}
 
-		if(IsPressed(Buttons::Cursor)) {
+		if (IsPressed(Buttons::Cursor))
+		{
 			output |= 0x02;
 		}
 
-		if(_turbo) {
+		if (_turbo)
+		{
 			output |= 0x04;
 		}
 
-		if(!_prevPauseButton && IsPressed(Buttons::Pause)) {
+		if (!_prevPauseButton && IsPressed(Buttons::Pause))
+		{
 			output |= 0x08;
 		}
 
-		if(GetCoordinates().X < 0 || GetCoordinates().Y < 0) {
+		if (GetCoordinates().X < 0 || GetCoordinates().Y < 0)
+		{
 			output |= 0x40; //offscreen flag
 		}
 
@@ -107,7 +116,8 @@ public:
 	{
 		uint8_t output = 0;
 
-		if(IsCurrentPort(addr)) {
+		if (IsCurrentPort(addr))
+		{
 			StrobeProcessRead();
 
 			output = (_stateBuffer & 0x01);

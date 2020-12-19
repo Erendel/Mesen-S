@@ -39,10 +39,13 @@ Spc7110::Spc7110(Console* console, bool useRtc) : BaseCoprocessor(SnesMemoryType
 
 	bool enableStrictBoardMappings = console->GetSettings()->GetEmulationConfig().EnableStrictBoardMappings;
 	uint32_t romSize = _cart->DebugGetPrgRomSize();
-	if(!enableStrictBoardMappings && _cart->DebugGetPrgRomSize() >= 0x600000) {
+	if (!enableStrictBoardMappings && _cart->DebugGetPrgRomSize() >= 0x600000)
+	{
 		mappings->RegisterHandler(0x40, 0x4F, 0x0000, 0xFFFF, prgRomHandlers, 0, 0x600);
 		_realDataRomSize = romSize - 0x200000;
-	} else {
+	}
+	else
+	{
 		_realDataRomSize = romSize - 0x100000;
 	}
 	mappings->RegisterHandler(0xC0, 0xCF, 0x0000, 0xFFFF, prgRomHandlers);
@@ -52,212 +55,258 @@ Spc7110::Spc7110(Console* console, bool useRtc) : BaseCoprocessor(SnesMemoryType
 
 void Spc7110::Serialize(Serializer& s)
 {
-	ArrayInfo<uint8_t> decompBuffer = { _decompBuffer, 32 };
-	ArrayInfo<uint8_t> dataRomBanks = { _dataRomBanks, 3 };
+	ArrayInfo<uint8_t> decompBuffer = {_decompBuffer, 32};
+	ArrayInfo<uint8_t> dataRomBanks = {_dataRomBanks, 3};
 
 	s.Stream(
-		_directoryBase, _directoryIndex, _targetOffset, _dataLengthCounter, _skipBytes, _decompFlags, _decompMode, _srcAddress, _decompOffset, _decompStatus,
-		decompBuffer, _dividend = 0, _multiplier, _divisor, _multDivResult, _remainder, _aluState, _aluFlags, _sramEnabled, dataRomBanks, _dataRomSize, _readBase,
+		_directoryBase, _directoryIndex, _targetOffset, _dataLengthCounter, _skipBytes, _decompFlags, _decompMode,
+		_srcAddress, _decompOffset, _decompStatus,
+		decompBuffer, _dividend = 0, _multiplier, _divisor, _multDivResult, _remainder, _aluState, _aluFlags,
+		_sramEnabled, dataRomBanks, _dataRomSize, _readBase,
 		_readOffset, _readStep, _readMode, _readBuffer
 	);
 
 	s.Stream(_decomp.get());
-	if(_rtc) {
+	if (_rtc)
+	{
 		s.Stream(_rtc.get());
 	}
 }
 
 uint8_t Spc7110::Read(uint32_t addr)
 {
-	if((addr & 0xFF0000) == 0x500000) {
+	if ((addr & 0xFF0000) == 0x500000)
+	{
 		addr = 0x4800;
-	} else if((addr & 0xFF0000) == 0x580000) {
+	}
+	else if ((addr & 0xFF0000) == 0x580000)
+	{
 		addr = 0x4808;
 	}
 
-	switch(addr & 0xFFFF) {
+	switch (addr & 0xFFFF)
+	{
 		//Decompression
-		case 0x4800:
-			_dataLengthCounter--;
-			return ReadDecompressedByte();
+	case 0x4800:
+		_dataLengthCounter--;
+		return ReadDecompressedByte();
 
-		case 0x4801: return (_directoryBase) & 0xFF;
-		case 0x4802: return (_directoryBase >> 8) & 0xFF;
-		case 0x4803: return (_directoryBase >> 16) & 0xFF;
-		case 0x4804: return _directoryIndex;
-		case 0x4805: return (_targetOffset) & 0xFF;
-		case 0x4806: return (_targetOffset >> 8) & 0xFF;
-		case 0x4807: return _skipBytes;
-		case 0x4808: return 0;
-		case 0x4809: return (_dataLengthCounter & 0xFF);
-		case 0x480A: return (_dataLengthCounter >> 8) & 0xFF;
-		case 0x480B: return _decompFlags;
-		case 0x480C: return _decompStatus;
+	case 0x4801: return (_directoryBase) & 0xFF;
+	case 0x4802: return (_directoryBase >> 8) & 0xFF;
+	case 0x4803: return (_directoryBase >> 16) & 0xFF;
+	case 0x4804: return _directoryIndex;
+	case 0x4805: return (_targetOffset) & 0xFF;
+	case 0x4806: return (_targetOffset >> 8) & 0xFF;
+	case 0x4807: return _skipBytes;
+	case 0x4808: return 0;
+	case 0x4809: return (_dataLengthCounter & 0xFF);
+	case 0x480A: return (_dataLengthCounter >> 8) & 0xFF;
+	case 0x480B: return _decompFlags;
+	case 0x480C: return _decompStatus;
 
 		//Data read
-		case 0x4810: {
+	case 0x4810:
+		{
 			uint8_t value = _readBuffer;
 			IncrementPosition4810();
 			return value;
 		}
 
-		case 0x4811: return _readBase & 0xFF;
-		case 0x4812: return (_readBase >> 8) & 0xFF;
-		case 0x4813: return (_readBase >> 16) & 0xFF;
-		case 0x4814: return _readOffset & 0xFF;
-		case 0x4815: return (_readOffset >> 8) & 0xFF;
-		case 0x4816: return _readStep & 0xFF;
-		case 0x4817: return (_readStep >> 8) & 0xFF;
-		case 0x4818: return _readMode;
+	case 0x4811: return _readBase & 0xFF;
+	case 0x4812: return (_readBase >> 8) & 0xFF;
+	case 0x4813: return (_readBase >> 16) & 0xFF;
+	case 0x4814: return _readOffset & 0xFF;
+	case 0x4815: return (_readOffset >> 8) & 0xFF;
+	case 0x4816: return _readStep & 0xFF;
+	case 0x4817: return (_readStep >> 8) & 0xFF;
+	case 0x4818: return _readMode;
 
-		case 0x481A:
-			if((_readMode & 0x60) == 0x60) {
-				IncrementPosition();
-			}
-			return 0;
+	case 0x481A:
+		if ((_readMode & 0x60) == 0x60)
+		{
+			IncrementPosition();
+		}
+		return 0;
 
 		//ALU
-		case 0x4820: return _dividend & 0xFF;
-		case 0x4821: return (_dividend >> 8) & 0xFF;
-		case 0x4822: return (_dividend >> 16) & 0xFF;
-		case 0x4823: return (_dividend >> 24) & 0xFF;
-		case 0x4824: return _multiplier & 0xFF;
-		case 0x4825: return (_multiplier >> 8) & 0xFF;
-		case 0x4826: return _divisor & 0xFF;
-		case 0x4827: return (_divisor >> 8) & 0xFF;
-		case 0x4828: return _multDivResult & 0xFF;
-		case 0x4829: return (_multDivResult >> 8) & 0xFF;
-		case 0x482A: return (_multDivResult >> 16) & 0xFF;
-		case 0x482B: return (_multDivResult >> 24) & 0xFF;
-		case 0x482C: return _remainder & 0xFF;
-		case 0x482D: return (_remainder >> 8) & 0xFF;
-		case 0x482E: return _aluFlags;
-		case 0x482F: return _aluState;
+	case 0x4820: return _dividend & 0xFF;
+	case 0x4821: return (_dividend >> 8) & 0xFF;
+	case 0x4822: return (_dividend >> 16) & 0xFF;
+	case 0x4823: return (_dividend >> 24) & 0xFF;
+	case 0x4824: return _multiplier & 0xFF;
+	case 0x4825: return (_multiplier >> 8) & 0xFF;
+	case 0x4826: return _divisor & 0xFF;
+	case 0x4827: return (_divisor >> 8) & 0xFF;
+	case 0x4828: return _multDivResult & 0xFF;
+	case 0x4829: return (_multDivResult >> 8) & 0xFF;
+	case 0x482A: return (_multDivResult >> 16) & 0xFF;
+	case 0x482B: return (_multDivResult >> 24) & 0xFF;
+	case 0x482C: return _remainder & 0xFF;
+	case 0x482D: return (_remainder >> 8) & 0xFF;
+	case 0x482E: return _aluFlags;
+	case 0x482F: return _aluState;
 
-		case 0x4830: return _sramEnabled;
-		case 0x4831: return _dataRomBanks[0];
-		case 0x4832: return _dataRomBanks[1];
-		case 0x4833: return _dataRomBanks[2];
-		case 0x4834: return _dataRomSize;
+	case 0x4830: return _sramEnabled;
+	case 0x4831: return _dataRomBanks[0];
+	case 0x4832: return _dataRomBanks[1];
+	case 0x4833: return _dataRomBanks[2];
+	case 0x4834: return _dataRomSize;
 
-		case 0x4840:
-		case 0x4841:
-		case 0x4842:
-			return _rtc ? _rtc->Read(addr) : 0;
+	case 0x4840:
+	case 0x4841:
+	case 0x4842:
+		return _rtc ? _rtc->Read(addr) : 0;
 
-		default:
-			if((addr & 0xFFFF) >= 0x4800) {
-				LogDebug("[Debug] Missing read handler: $" + HexUtilities::ToHex(addr & 0xFFFF));
-			}
-			return _cpuRegisterHandler->Read(addr);
+	default:
+		if ((addr & 0xFFFF) >= 0x4800)
+		{
+			LogDebug("[Debug] Missing read handler: $" + HexUtilities::ToHex(addr & 0xFFFF));
+		}
+		return _cpuRegisterHandler->Read(addr);
 	}
 }
 
 void Spc7110::Write(uint32_t addr, uint8_t value)
 {
-	if((addr & 0xFF0000) == 0x500000) {
+	if ((addr & 0xFF0000) == 0x500000)
+	{
 		addr = 0x4800;
-	} else if((addr & 0xFF0000) == 0x580000) {
+	}
+	else if ((addr & 0xFF0000) == 0x580000)
+	{
 		addr = 0x4808;
 	}
 
-	switch(addr & 0xFFFF) {
+	switch (addr & 0xFFFF)
+	{
 		//Data ROM Decompression (4800-480C)
-		case 0x4801: _directoryBase = (_directoryBase & 0xFFFF00) | value; break;
-		case 0x4802: _directoryBase = (_directoryBase & 0xFF00FF) | (value << 8); break;
-		case 0x4803: _directoryBase = (_directoryBase & 0x00FFFF) | (value << 16); break;
-		case 0x4804:
-			_directoryIndex = value; 
-			LoadEntryHeader();
-			break;
+	case 0x4801: _directoryBase = (_directoryBase & 0xFFFF00) | value;
+		break;
+	case 0x4802: _directoryBase = (_directoryBase & 0xFF00FF) | (value << 8);
+		break;
+	case 0x4803: _directoryBase = (_directoryBase & 0x00FFFF) | (value << 16);
+		break;
+	case 0x4804:
+		_directoryIndex = value;
+		LoadEntryHeader();
+		break;
 
-		case 0x4805: _targetOffset = (_targetOffset & 0xFF00) | value; break;
-		case 0x4806: 
-			_targetOffset = (_targetOffset & 0x00FF) | (value << 8);
-			BeginDecompression();
-			break;
+	case 0x4805: _targetOffset = (_targetOffset & 0xFF00) | value;
+		break;
+	case 0x4806:
+		_targetOffset = (_targetOffset & 0x00FF) | (value << 8);
+		BeginDecompression();
+		break;
 
-		case 0x4807: _skipBytes = value; break;
-		case 0x4808: break;
+	case 0x4807: _skipBytes = value;
+		break;
+	case 0x4808: break;
 
-		case 0x4809: _dataLengthCounter = (_dataLengthCounter & 0xFF00) | value; break;
-		case 0x480A: _dataLengthCounter = (_dataLengthCounter & 0x00FF) | (value << 8); break;
-		case 0x480B: _decompFlags = value & 0x03; break;
+	case 0x4809: _dataLengthCounter = (_dataLengthCounter & 0xFF00) | value;
+		break;
+	case 0x480A: _dataLengthCounter = (_dataLengthCounter & 0x00FF) | (value << 8);
+		break;
+	case 0x480B: _decompFlags = value & 0x03;
+		break;
 
 		//Direct Data ROM Access (4810-481A)
-		case 0x4811: _readBase = (_readBase & 0xFFFF00) | value; break;
-		case 0x4812: _readBase = (_readBase & 0xFF00FF) | (value << 8); break;
-		case 0x4813: 
-			_readBase = (_readBase & 0x00FFFF) | (value << 16);
+	case 0x4811: _readBase = (_readBase & 0xFFFF00) | value;
+		break;
+	case 0x4812: _readBase = (_readBase & 0xFF00FF) | (value << 8);
+		break;
+	case 0x4813:
+		_readBase = (_readBase & 0x00FFFF) | (value << 16);
+		FillReadBuffer();
+		break;
+
+	case 0x4814:
+		_readOffset = (_readOffset & 0xFF00) | value;
+		if ((_readMode & 0x60) == 0x20)
+		{
+			IncrementPosition();
+		}
+		break;
+
+	case 0x4815:
+		_readOffset = (_readOffset & 0x00FF) | (value << 8);
+		if (_readMode & 0x02)
+		{
 			FillReadBuffer();
-			break;
+		}
+		if ((_readMode & 0x60) == 0x40)
+		{
+			IncrementPosition();
+		}
+		break;
 
-		case 0x4814:
-			_readOffset = (_readOffset & 0xFF00) | value;
-			if((_readMode & 0x60) == 0x20) {
-				IncrementPosition();
-			}
-			break;
+	case 0x4816: _readStep = (_readStep & 0xFF00) | value;
+		break;
+	case 0x4817: _readStep = (_readStep & 0x00FF) | (value << 8);
+		break;
 
-		case 0x4815:
-			_readOffset = (_readOffset & 0x00FF) | (value << 8);
-			if(_readMode & 0x02) {
-				FillReadBuffer();
-			}
-			if((_readMode & 0x60) == 0x40) {
-				IncrementPosition();
-			}
-			break;
-
-		case 0x4816: _readStep = (_readStep & 0xFF00) | value; break;
-		case 0x4817: _readStep = (_readStep & 0x00FF) | (value << 8); break;
-
-		case 0x4818: 
-			_readMode = value & 0x7F;
-			FillReadBuffer();
-			break;
+	case 0x4818:
+		_readMode = value & 0x7F;
+		FillReadBuffer();
+		break;
 
 		//ALU (4820-482F)
-		case 0x4820: _dividend = (_dividend & 0xFFFFFF00) | value; break;
-		case 0x4821: _dividend = (_dividend & 0xFFFF00FF) | (value << 8); break;
-		case 0x4822: _dividend = (_dividend & 0xFF00FFFF) | (value << 16); break;
-		case 0x4823: _dividend = (_dividend & 0x00FFFFFF) | (value << 24); break;
-		case 0x4824: _multiplier = (_multiplier & 0xFF00) | value; break;
-		case 0x4825: 
-			_multiplier = (_multiplier & 0x00FF) | (value << 8);
-			ProcessMultiplication(); 
-			break;
+	case 0x4820: _dividend = (_dividend & 0xFFFFFF00) | value;
+		break;
+	case 0x4821: _dividend = (_dividend & 0xFFFF00FF) | (value << 8);
+		break;
+	case 0x4822: _dividend = (_dividend & 0xFF00FFFF) | (value << 16);
+		break;
+	case 0x4823: _dividend = (_dividend & 0x00FFFFFF) | (value << 24);
+		break;
+	case 0x4824: _multiplier = (_multiplier & 0xFF00) | value;
+		break;
+	case 0x4825:
+		_multiplier = (_multiplier & 0x00FF) | (value << 8);
+		ProcessMultiplication();
+		break;
 
-		case 0x4826: _divisor = (_divisor & 0xFF00) | value; break;
-		case 0x4827:
-			_divisor = (_divisor & 0x00FF) | (value << 8);
-			ProcessDivision();
-			break;
+	case 0x4826: _divisor = (_divisor & 0xFF00) | value;
+		break;
+	case 0x4827:
+		_divisor = (_divisor & 0x00FF) | (value << 8);
+		ProcessDivision();
+		break;
 
-		case 0x482E:  _aluFlags = value & 0x01; break; 
+	case 0x482E: _aluFlags = value & 0x01;
+		break;
 
 		//Memory mapping (4830-4834)
-		case 0x4830: _sramEnabled = value & 0x87; break;
-		case 0x4831: _dataRomBanks[0] = value & 0x07; UpdateMappings(); break;
-		case 0x4832: _dataRomBanks[1] = value & 0x07; UpdateMappings(); break;
-		case 0x4833: _dataRomBanks[2] = value & 0x07; UpdateMappings(); break;
-		case 0x4834: _dataRomSize = value & 0x07; break;
+	case 0x4830: _sramEnabled = value & 0x87;
+		break;
+	case 0x4831: _dataRomBanks[0] = value & 0x07;
+		UpdateMappings();
+		break;
+	case 0x4832: _dataRomBanks[1] = value & 0x07;
+		UpdateMappings();
+		break;
+	case 0x4833: _dataRomBanks[2] = value & 0x07;
+		UpdateMappings();
+		break;
+	case 0x4834: _dataRomSize = value & 0x07;
+		break;
 
 		//RTC (4840-4842)
-		case 0x4840:
-		case 0x4841:
-		case 0x4842:
-			if(_rtc) {
-				_rtc->Write(addr, value);
-			}
-			break;
+	case 0x4840:
+	case 0x4841:
+	case 0x4842:
+		if (_rtc)
+		{
+			_rtc->Write(addr, value);
+		}
+		break;
 
-		default: 
-			if((addr & 0xFFFF) >= 0x4800) {
-				LogDebug("[Debug] Missing write handler: $" + HexUtilities::ToHex(addr & 0xFFFF));
-			}
-			_cpuRegisterHandler->Write(addr, value);
-			break;
+	default:
+		if ((addr & 0xFFFF) >= 0x4800)
+		{
+			LogDebug("[Debug] Missing write handler: $" + HexUtilities::ToHex(addr & 0xFFFF));
+		}
+		_cpuRegisterHandler->Write(addr, value);
+		break;
 	}
 }
 
@@ -267,17 +316,22 @@ void Spc7110::UpdateMappings()
 	vector<unique_ptr<IMemoryHandler>>& prgRomHandlers = _cart->GetPrgRomHandlers();
 
 	uint32_t dataRomSize = _realDataRomSize >> 12;
-	for(int i = 0; i < 3; i++) {
-		mappings->RegisterHandler(0xD0 + (i * 0x10), 0xDF + (i * 0x10), 0x0000, 0xFFFF, prgRomHandlers, 0, 0x100 + ((_dataRomBanks[i] * 0x100) % dataRomSize));
+	for (int i = 0; i < 3; i++)
+	{
+		mappings->RegisterHandler(0xD0 + (i * 0x10), 0xDF + (i * 0x10), 0x0000, 0xFFFF, prgRomHandlers, 0,
+		                          0x100 + ((_dataRomBanks[i] * 0x100) % dataRomSize));
 	}
 }
 
 void Spc7110::ProcessMultiplication()
 {
-	if(_aluFlags & 0x01) {
+	if (_aluFlags & 0x01)
+	{
 		//Signed multiplication (16x16=32)
 		_multDivResult = (int32_t)((int16_t)_dividend * (int16_t)_multiplier);
-	} else {
+	}
+	else
+	{
 		//Unsigned multiplication (16x16=32)
 		_multDivResult = (uint32_t)(_dividend * _multiplier);
 	}
@@ -288,24 +342,33 @@ void Spc7110::ProcessMultiplication()
 
 void Spc7110::ProcessDivision()
 {
-	if(_aluFlags & 0x01) {
+	if (_aluFlags & 0x01)
+	{
 		//Signed division (32 / 16 = 32 + 16)
 		int32_t dividend = (int32_t)_dividend;
 		int16_t divisor = (int16_t)_divisor;
 
-		if(divisor != 0) {
+		if (divisor != 0)
+		{
 			_multDivResult = (int32_t)(dividend / divisor);
 			_remainder = ((int32_t)(dividend % divisor)) & 0xFFFF;
-		} else {
+		}
+		else
+		{
 			_multDivResult = 0;
 			_remainder = dividend & 0xFFFF;
 		}
-	} else {
+	}
+	else
+	{
 		//Unsigned division (32 / 16 = 32 + 16)
-		if(_divisor != 0) {
+		if (_divisor != 0)
+		{
 			_multDivResult = _dividend / _divisor;
 			_remainder = (uint16_t)(_dividend % _divisor);
-		} else {
+		}
+		else
+		{
 			_multDivResult = 0;
 			_remainder = _dividend & 0xffff;
 		}
@@ -318,7 +381,8 @@ uint8_t Spc7110::ReadDataRom(uint32_t addr)
 {
 	uint32_t configSize = 0x100000 * (1 << (_dataRomSize & 0x03));
 	uint32_t dataRomSize = std::min(configSize, _realDataRomSize);
-	if(addr >= dataRomSize) {
+	if (addr >= dataRomSize)
+	{
 		return 0x00;
 	}
 
@@ -328,7 +392,8 @@ uint8_t Spc7110::ReadDataRom(uint32_t addr)
 void Spc7110::FillReadBuffer()
 {
 	int32_t offset = _readMode & 0x02 ? _readOffset : 0;
-	if(_readMode & 0x08) {
+	if (_readMode & 0x08)
+	{
 		offset = (int16_t)offset;
 	}
 	_readBuffer = ReadDataRom(_readBase + offset);
@@ -343,13 +408,17 @@ void Spc7110::IncrementPosition()
 void Spc7110::IncrementPosition4810()
 {
 	int32_t step = _readMode & 0x01 ? _readStep : 1;
-	if(_readMode & 0x04) {
+	if (_readMode & 0x04)
+	{
 		step = (int16_t)step;
 	}
 
-	if(_readMode & 0x10) {
+	if (_readMode & 0x10)
+	{
 		_readOffset += step;
-	} else {
+	}
+	else
+	{
 		_readBase = (_readBase + step) & 0xFFFFFF;
 	}
 
@@ -365,7 +434,8 @@ void Spc7110::LoadEntryHeader()
 
 void Spc7110::BeginDecompression()
 {
-	if(_decompMode == 3) {
+	if (_decompMode == 3)
+	{
 		return;
 	}
 
@@ -373,7 +443,8 @@ void Spc7110::BeginDecompression()
 	_decomp->Decode();
 
 	uint32_t seek = _decompFlags & 0x02 ? _targetOffset : 0;
-	while(seek--) {
+	while (seek--)
+	{
 		_decomp->Decode();
 	}
 
@@ -383,32 +454,37 @@ void Spc7110::BeginDecompression()
 
 uint8_t Spc7110::ReadDecompressedByte()
 {
-	if((_decompStatus & 0x80) == 0) {
+	if ((_decompStatus & 0x80) == 0)
+	{
 		return 0x00;
 	}
 
 	uint8_t bpp = _decomp->GetBpp();
-	if(_decompOffset == 0) {
-		for(int i = 0; i < 8; i++) {
+	if (_decompOffset == 0)
+	{
+		for (int i = 0; i < 8; i++)
+		{
 			uint32_t result = _decomp->GetResult();
-			switch(bpp) {
-				case 1:
-					_decompBuffer[i] = result;
-					break;
-				case 2:
-					_decompBuffer[i * 2 + 0] = result >> 0;
-					_decompBuffer[i * 2 + 1] = result >> 8;
-					break;
-				case 4:
-					_decompBuffer[i * 2 + 0] = result >> 0;
-					_decompBuffer[i * 2 + 1] = result >> 8;
-					_decompBuffer[i * 2 + 16] = result >> 16;
-					_decompBuffer[i * 2 + 17] = result >> 24;
-					break;
+			switch (bpp)
+			{
+			case 1:
+				_decompBuffer[i] = result;
+				break;
+			case 2:
+				_decompBuffer[i * 2 + 0] = result >> 0;
+				_decompBuffer[i * 2 + 1] = result >> 8;
+				break;
+			case 4:
+				_decompBuffer[i * 2 + 0] = result >> 0;
+				_decompBuffer[i * 2 + 1] = result >> 8;
+				_decompBuffer[i * 2 + 16] = result >> 16;
+				_decompBuffer[i * 2 + 17] = result >> 24;
+				break;
 			}
 
 			uint32_t seek = (_decompFlags & 0x01) ? _skipBytes : 1;
-			while(seek--) {
+			while (seek--)
+			{
 				_decomp->Decode();
 			}
 		}
@@ -431,7 +507,7 @@ void Spc7110::PeekBlock(uint32_t addr, uint8_t* output)
 
 AddressInfo Spc7110::GetAbsoluteAddress(uint32_t address)
 {
-	return { -1, SnesMemoryType::Register };
+	return {-1, SnesMemoryType::Register};
 }
 
 void Spc7110::Reset()
@@ -471,21 +547,24 @@ void Spc7110::Reset()
 	UpdateMappings();
 
 	_decomp.reset(new Spc7110Decomp(this));
-	if(_useRtc) {
+	if (_useRtc)
+	{
 		_rtc.reset(new Rtc4513(_console));
 	}
 }
 
 void Spc7110::LoadBattery()
 {
-	if(_rtc) {
+	if (_rtc)
+	{
 		_rtc->LoadBattery();
 	}
 }
 
 void Spc7110::SaveBattery()
 {
-	if(_rtc) {
+	if (_rtc)
+	{
 		_rtc->SaveBattery();
 	}
 }

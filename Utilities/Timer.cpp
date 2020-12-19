@@ -6,7 +6,7 @@
 
 using namespace std::chrono;
 
-Timer::Timer() 
+Timer::Timer()
 {
 	Reset();
 }
@@ -25,9 +25,11 @@ double Timer::GetElapsedMS()
 
 void Timer::WaitUntil(double targetMillisecond)
 {
-	if(targetMillisecond > 0) {
+	if (targetMillisecond > 0)
+	{
 		double elapsedTime = GetElapsedMS();
-		if(targetMillisecond - elapsedTime > 1) {
+		if (targetMillisecond - elapsedTime > 1)
+		{
 			std::this_thread::sleep_for(std::chrono::duration<int, std::milli>((int)(targetMillisecond - elapsedTime)));
 		}
 	}

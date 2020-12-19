@@ -7,7 +7,7 @@
 class Sa1VectorHandler : public IMemoryHandler
 {
 private:
-	IMemoryHandler * _handler;
+	IMemoryHandler* _handler;
 	Sa1State* _state;
 
 public:
@@ -19,19 +19,28 @@ public:
 
 	uint8_t Read(uint32_t addr) override
 	{
-		if(addr >= Sa1Cpu::NmiVector && addr <= Sa1Cpu::ResetVector + 1) {
+		if (addr >= Sa1Cpu::NmiVector && addr <= Sa1Cpu::ResetVector + 1)
+		{
 			//Override the regular handlers
-			if(_state->UseCpuNmiVector) {
-				if(addr == Sa1Cpu::NmiVector) {
+			if (_state->UseCpuNmiVector)
+			{
+				if (addr == Sa1Cpu::NmiVector)
+				{
 					return (uint8_t)_state->CpuNmiVector;
-				} else if(addr == Sa1Cpu::NmiVector + 1) {
+				}
+				else if (addr == Sa1Cpu::NmiVector + 1)
+				{
 					return (uint8_t)(_state->CpuNmiVector >> 8);
 				}
 			}
-			if(_state->UseCpuIrqVector) {
-				if(addr == Sa1Cpu::IrqVector) {
+			if (_state->UseCpuIrqVector)
+			{
+				if (addr == Sa1Cpu::IrqVector)
+				{
 					return (uint8_t)_state->CpuIrqVector;
-				} else if(addr == Sa1Cpu::IrqVector + 1) {
+				}
+				else if (addr == Sa1Cpu::IrqVector + 1)
+				{
 					return (uint8_t)(_state->CpuIrqVector >> 8);
 				}
 			}
@@ -45,7 +54,7 @@ public:
 		return Read(addr);
 	}
 
-	void PeekBlock(uint32_t addr, uint8_t *output) override
+	void PeekBlock(uint32_t addr, uint8_t* output) override
 	{
 		_handler->PeekBlock(addr, output);
 	}

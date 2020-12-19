@@ -28,25 +28,25 @@ private:
 	unordered_map<uint64_t, LabelInfo, AddressHasher> _codeLabels;
 	unordered_map<string, uint64_t> _codeLabelReverseLookup;
 
-	Debugger *_debugger;
+	Debugger* _debugger;
 
 	int64_t GetLabelKey(uint32_t absoluteAddr, SnesMemoryType memType);
 	SnesMemoryType GetKeyMemoryType(uint64_t key);
 	bool InternalGetLabel(AddressInfo address, string& label);
 
 public:
-	LabelManager(Debugger *debugger);
+	LabelManager(Debugger* debugger);
 
 	void SetLabel(uint32_t address, SnesMemoryType memType, string label, string comment);
 	void ClearLabels();
 
-	int32_t GetLabelRelativeAddress(string &label, CpuType cpuType = CpuType::Cpu);
+	int32_t GetLabelRelativeAddress(string& label, CpuType cpuType = CpuType::Cpu);
 
 	string GetLabel(AddressInfo address);
 	string GetComment(AddressInfo absAddress);
-	bool GetLabelAndComment(AddressInfo address, LabelInfo &label);
+	bool GetLabelAndComment(AddressInfo address, LabelInfo& label);
 
-	bool ContainsLabel(string &label);
+	bool ContainsLabel(string& label);
 
 	bool HasLabelOrComment(AddressInfo address);
 };

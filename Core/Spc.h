@@ -49,7 +49,7 @@ private:
 
 	SpcState _state;
 	uint8_t* _ram;
-	uint8_t _spcBios[64] {
+	uint8_t _spcBios[64]{
 		0xCD, 0xEF, 0xBD, 0xE8, 0x00, 0xC6, 0x1D, 0xD0,
 		0xFC, 0x8F, 0xAA, 0xF4, 0x8F, 0xBB, 0xF5, 0x78,
 		0xCC, 0xF4, 0xD0, 0xFB, 0x2F, 0x19, 0xEB, 0xF4,
@@ -60,7 +60,7 @@ private:
 		0x5D, 0xD0, 0xDB, 0x1F, 0x00, 0x00, 0xC0, 0xFF
 	};
 
-	int16_t *_soundBuffer;
+	int16_t* _soundBuffer;
 
 	//Store operations
 	void STA();
@@ -81,7 +81,7 @@ private:
 	void LDW();
 
 	//Transfer
-	void Transfer(uint8_t & dst, uint8_t src);
+	void Transfer(uint8_t& dst, uint8_t src);
 	void TXA();
 	void TYA();
 	void TAX();
@@ -203,10 +203,14 @@ private:
 	void TSET1();
 	void TCLR1();
 
-	template<uint8_t bit> void SET1();
-	template<uint8_t bit> void CLR1();
-	template<uint8_t bit> void BBS();
-	template<uint8_t bit> void BBC();
+	template <uint8_t bit>
+	void SET1();
+	template <uint8_t bit>
+	void CLR1();
+	template <uint8_t bit>
+	void BBS();
+	template <uint8_t bit>
+	void BBC();
 
 	//Subroutine operations
 	void PCALL();
@@ -215,11 +219,12 @@ private:
 	void BRK();
 	void RTI();
 
-	template<uint8_t offset> void TCALL();
+	template <uint8_t offset>
+	void TCALL();
 
 	//Stack operations
 	void PushOperation(uint8_t value);
-	void PullOperation(uint8_t & dst);
+	void PullOperation(uint8_t& dst);
 
 	void PHA();
 	void PHX();
@@ -235,7 +240,7 @@ private:
 	void NOP();
 	void SLEEP();
 	void STOP();
-	
+
 	void Idle();
 	void DummyRead();
 	void DummyRead(uint16_t addr);
@@ -281,7 +286,7 @@ private:
 	void EndAddr();
 	void ProcessCycle();
 	void Exec();
-	
+
 	void UpdateClockRatio();
 
 public:
@@ -309,14 +314,14 @@ public:
 
 	bool IsMuted();
 	AddressInfo GetAbsoluteAddress(uint16_t addr);
-	int GetRelativeAddress(AddressInfo & absAddress);
+	int GetRelativeAddress(AddressInfo& absAddress);
 
 	uint8_t* GetSpcRam();
 	uint8_t* GetSpcRom();
 
 	void LoadSpcFile(SpcFileData* spcData);
 
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 
 	void SetReg(SpcRegister reg, uint16_t value);
 

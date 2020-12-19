@@ -9,7 +9,7 @@ private:
 	SimpleLock _lock;
 	vector<weak_ptr<INotificationListener>> _listenersToAdd;
 	vector<weak_ptr<INotificationListener>> _listeners;
-	
+
 	void CleanupNotificationListeners();
 
 public:

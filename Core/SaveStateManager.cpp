@@ -58,7 +58,7 @@ bool SaveStateManager::LoadState()
 	return LoadState(_lastIndex);
 }
 
-void SaveStateManager::GetSaveStateHeader(ostream &stream)
+void SaveStateManager::GetSaveStateHeader(ostream& stream)
 {
 	uint32_t emuVersion = _console->GetSettings()->GetVersion();
 	uint32_t formatVersion = SaveStateManager::FileFormatVersion;
@@ -72,9 +72,9 @@ void SaveStateManager::GetSaveStateHeader(ostream &stream)
 	bool isGameboyMode = _console->GetSettings()->CheckFlag(EmulationFlags::GameboyMode);
 	stream.write((char*)&isGameboyMode, sizeof(bool));
 
-	#ifndef LIBRETRO
+#ifndef LIBRETRO
 	SaveScreenshotData(stream);
-	#endif
+#endif
 
 	RomInfo romInfo = _console->GetCartridge()->GetRomInfo();
 	string romName = FolderUtilities::GetFilename(romInfo.RomFile.GetFileName(), true);
@@ -83,7 +83,7 @@ void SaveStateManager::GetSaveStateHeader(ostream &stream)
 	stream.write(romName.c_str(), romName.size());
 }
 
-void SaveStateManager::SaveState(ostream &stream)
+void SaveStateManager::SaveState(ostream& stream)
 {
 	GetSaveStateHeader(stream);
 	_console->Serialize(stream);
@@ -93,14 +93,16 @@ bool SaveStateManager::SaveState(string filepath)
 {
 	ofstream file(filepath, ios::out | ios::binary);
 
-	if(file) {
+	if (file)
+	{
 		_console->Lock();
 		SaveState(file);
 		_console->Unlock();
 		file.close();
 
 		shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-		if(debugger) {
+		if (debugger)
+		{
 			debugger->ProcessEvent(EventType::StateSaved);
 		}
 		return true;
@@ -111,8 +113,10 @@ bool SaveStateManager::SaveState(string filepath)
 void SaveStateManager::SaveState(int stateIndex, bool displayMessage)
 {
 	string filepath = SaveStateManager::GetStateFilepath(stateIndex);
-	if(SaveState(filepath)) {
-		if(displayMessage) {
+	if (SaveState(filepath))
+	{
+		if (displayMessage)
+		{
 			MessageManager::DisplayMessage("SaveStates", "SaveStateSaved", std::to_string(stateIndex));
 		}
 	}
@@ -127,16 +131,17 @@ void SaveStateManager::SaveScreenshotData(ostream& stream)
 	stream.write((char*)&width, sizeof(uint32_t));
 	stream.write((char*)&height, sizeof(uint32_t));
 
-	unsigned long compressedSize = compressBound(512*478*2);
+	unsigned long compressedSize = compressBound(512 * 478 * 2);
 	vector<uint8_t> compressedData(compressedSize, 0);
-	compress2(compressedData.data(), &compressedSize, (const unsigned char*)_console->GetPpu()->GetScreenBuffer(), width*height*2, MZ_DEFAULT_LEVEL);
+	compress2(compressedData.data(), &compressedSize, (const unsigned char*)_console->GetPpu()->GetScreenBuffer(),
+	          width * height * 2, MZ_DEFAULT_LEVEL);
 
 	uint32_t screenshotLength = (uint32_t)compressedSize;
 	stream.write((char*)&screenshotLength, sizeof(uint32_t));
 	stream.write((char*)compressedData.data(), screenshotLength);
 }
 
-bool SaveStateManager::GetScreenshotData(vector<uint8_t>& out, uint32_t &width, uint32_t &height, istream& stream)
+bool SaveStateManager::GetScreenshotData(vector<uint8_t>& out, uint32_t& width, uint32_t& height, istream& stream)
 {
 	stream.read((char*)&width, sizeof(uint32_t));
 	stream.read((char*)&height, sizeof(uint32_t));
@@ -149,67 +154,80 @@ bool SaveStateManager::GetScreenshotData(vector<uint8_t>& out, uint32_t &width, 
 
 	out = vector<uint8_t>(width * height * 2, 0);
 	unsigned long decompSize = width * height * 2;
-	if(uncompress(out.data(), &decompSize, compressedData.data(), (unsigned long)compressedData.size()) == MZ_OK) {
+	if (uncompress(out.data(), &decompSize, compressedData.data(), (unsigned long)compressedData.size()) == MZ_OK)
+	{
 		return true;
 	}
 	return false;
 }
 
-bool SaveStateManager::LoadState(istream &stream, bool hashCheckRequired)
+bool SaveStateManager::LoadState(istream& stream, bool hashCheckRequired)
 {
-	if(GameClient::Connected()) {
+	if (GameClient::Connected())
+	{
 		MessageManager::DisplayMessage("Netplay", "NetplayNotAllowed");
 		return false;
 	}
 
 	char header[3];
 	stream.read(header, 3);
-	if(memcmp(header, "MSS", 3) == 0) {
+	if (memcmp(header, "MSS", 3) == 0)
+	{
 		uint32_t emuVersion, fileFormatVersion;
 
 		stream.read((char*)&emuVersion, sizeof(emuVersion));
-		if(emuVersion > _console->GetSettings()->GetVersion()) {
+		if (emuVersion > _console->GetSettings()->GetVersion())
+		{
 			MessageManager::DisplayMessage("SaveStates", "SaveStateNewerVersion");
 			return false;
 		}
 
 		stream.read((char*)&fileFormatVersion, sizeof(fileFormatVersion));
-		if(fileFormatVersion <= 5) {
+		if (fileFormatVersion <= 5)
+		{
 			MessageManager::DisplayMessage("SaveStates", "SaveStateIncompatibleVersion");
 			return false;
-		} else {
+		}
+		else
+		{
 			char hash[41] = {};
 			stream.read(hash, 40);
 
-			if(fileFormatVersion >= 8) {
+			if (fileFormatVersion >= 8)
+			{
 				bool isGameboyMode = false;
 				stream.read((char*)&isGameboyMode, sizeof(bool));
-				if(isGameboyMode != _console->GetSettings()->CheckFlag(EmulationFlags::GameboyMode)) {
-					MessageManager::DisplayMessage("SaveStates", isGameboyMode ? "SaveStateWrongSystemGb" : "SaveStateWrongSystemSnes");
+				if (isGameboyMode != _console->GetSettings()->CheckFlag(EmulationFlags::GameboyMode))
+				{
+					MessageManager::DisplayMessage("SaveStates",
+					                               isGameboyMode ? "SaveStateWrongSystemGb" : "SaveStateWrongSystemSnes");
 					return false;
 				}
-			} 
-			
-			if(fileFormatVersion >= 7) {
-				#ifndef LIBRETRO
+			}
+
+			if (fileFormatVersion >= 7)
+			{
+#ifndef LIBRETRO
 				vector<uint8_t> frameData;
 				uint32_t width = 0;
 				uint32_t height = 0;
-				if(GetScreenshotData(frameData, width, height, stream)) {
+				if (GetScreenshotData(frameData, width, height, stream))
+				{
 					_console->GetVideoDecoder()->UpdateFrameSync((uint16_t*)frameData.data(), width, height, 0, true);
 				}
-				#endif
+#endif
 			}
 
 			uint32_t nameLength = 0;
 			stream.read((char*)&nameLength, sizeof(uint32_t));
-			
+
 			vector<char> nameBuffer(nameLength);
 			stream.read(nameBuffer.data(), nameBuffer.size());
 			string romName(nameBuffer.data(), nameLength);
-			
+
 			shared_ptr<BaseCartridge> cartridge = _console->GetCartridge();
-			if(!cartridge /*|| cartridge->GetSha1Hash() != string(hash)*/) {
+			if (!cartridge /*|| cartridge->GetSha1Hash() != string(hash)*/)
+			{
 				//Game isn't loaded, or CRC doesn't match
 				//TODO: Try to find and load the game
 				return false;
@@ -233,19 +251,24 @@ bool SaveStateManager::LoadState(string filepath, bool hashCheckRequired)
 	ifstream file(filepath, ios::in | ios::binary);
 	bool result = false;
 
-	if(file.good()) {
+	if (file.good())
+	{
 		_console->Lock();
 		result = LoadState(file, hashCheckRequired);
 		_console->Unlock();
 		file.close();
 
-		if(result) {
+		if (result)
+		{
 			shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-			if(debugger) {
+			if (debugger)
+			{
 				debugger->ProcessEvent(EventType::StateLoaded);
 			}
 		}
-	} else {
+	}
+	else
+	{
 		MessageManager::DisplayMessage("SaveStates", "SaveStateEmpty");
 	}
 
@@ -255,7 +278,8 @@ bool SaveStateManager::LoadState(string filepath, bool hashCheckRequired)
 bool SaveStateManager::LoadState(int stateIndex)
 {
 	string filepath = SaveStateManager::GetStateFilepath(stateIndex);
-	if(LoadState(filepath, false)) {
+	if (LoadState(filepath, false))
+	{
 		MessageManager::DisplayMessage("SaveStates", "SaveStateLoaded", std::to_string(stateIndex));
 		return true;
 	}
@@ -302,13 +326,18 @@ void SaveStateManager::LoadRecentGame(string filename, bool resetGame)
 	std::getline(romInfoStream, patchPath);
 
 	_console->Lock();
-	try {
-		if(_console->LoadRom(romPath, patchPath)) {
-			if(!resetGame) {
+	try
+	{
+		if (_console->LoadRom(romPath, patchPath))
+		{
+			if (!resetGame)
+			{
 				SaveStateManager::LoadState(stateStream, false);
 			}
 		}
-	} catch(std::exception&) { 
+	}
+	catch (std::exception&)
+	{
 		_console->Stop(true);
 	}
 	_console->Unlock();
@@ -318,23 +347,27 @@ int32_t SaveStateManager::GetSaveStatePreview(string saveStatePath, uint8_t* png
 {
 	ifstream stream(saveStatePath, ios::binary);
 
-	if(!stream) {
+	if (!stream)
+	{
 		return -1;
 	}
 
 	char header[3];
 	stream.read(header, 3);
-	if(memcmp(header, "MSS", 3) == 0) {
+	if (memcmp(header, "MSS", 3) == 0)
+	{
 		uint32_t emuVersion = 0;
 
 		stream.read((char*)&emuVersion, sizeof(emuVersion));
-		if(emuVersion > _console->GetSettings()->GetVersion()) {
+		if (emuVersion > _console->GetSettings()->GetVersion())
+		{
 			return -1;
 		}
 
 		uint32_t fileFormatVersion = 0;
 		stream.read((char*)&fileFormatVersion, sizeof(fileFormatVersion));
-		if(fileFormatVersion <= 6) {
+		if (fileFormatVersion <= 6)
+		{
 			return -1;
 		}
 
@@ -344,11 +377,12 @@ int32_t SaveStateManager::GetSaveStatePreview(string saveStatePath, uint8_t* png
 		vector<uint8_t> frameData;
 		uint32_t width = 0;
 		uint32_t height = 0;
-		if(GetScreenshotData(frameData, width, height, stream)) {
+		if (GetScreenshotData(frameData, width, height, stream))
+		{
 			FrameInfo baseFrameInfo;
 			baseFrameInfo.Width = width;
 			baseFrameInfo.Height = height;
-			
+
 			DefaultVideoFilter filter(_console);
 			filter.SetBaseFrameInfo(baseFrameInfo);
 			FrameInfo frameInfo = filter.GetFrameInfo();

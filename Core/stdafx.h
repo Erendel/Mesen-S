@@ -25,13 +25,13 @@
 #include "../Utilities/UTF8Util.h"
 
 #ifndef __MINGW32__
-	#ifdef __clang__
+#ifdef __clang__
 		#define __forceinline __attribute__((always_inline)) inline
-	#else
-		#ifdef __GNUC__
+#else
+#ifdef __GNUC__
 			#define __forceinline __attribute__((always_inline)) inline
-		#endif
-	#endif
+#endif
+#endif
 #endif
 
 using std::vector;

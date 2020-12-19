@@ -241,7 +241,7 @@ enum class BreakSource
 	BreakOnWdm = 5,
 	BreakOnStp = 6,
 	BreakOnUninitMemoryRead = 7,
-	
+
 	GbInvalidOamAccess = 8,
 	GbInvalidVramAccess = 9,
 	GbDisableLcdOutsideVblank = 10,

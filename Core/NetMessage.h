@@ -23,8 +23,8 @@ protected:
 	}
 
 public:
-	virtual ~NetMessage() 
-	{	
+	virtual ~NetMessage()
+	{
 	}
 
 	void Initialize()
@@ -38,7 +38,7 @@ public:
 		return _type;
 	}
 
-	void Send(Socket &socket)
+	void Send(Socket& socket)
 	{
 		Serializer s(SaveStateManager::FileFormatVersion);
 		Serialize(s);
@@ -53,5 +53,5 @@ public:
 	}
 
 protected:
-	virtual void Serialize(Serializer &s) = 0;
+	virtual void Serialize(Serializer& s) = 0;
 };

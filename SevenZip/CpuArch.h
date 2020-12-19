@@ -21,14 +21,14 @@ MY_CPU_LE_UNALIGN means that CPU is LITTLE ENDIAN and CPU supports unaligned mem
    || defined(__x86_64__) \
    || defined(__AMD64__) \
    || defined(__amd64__)
-  #define MY_CPU_AMD64
+#define MY_CPU_AMD64
 #endif
 
 #if defined(MY_CPU_AMD64) \
     || defined(_M_IA64) \
     || defined(__AARCH64EL__) \
     || defined(__AARCH64EB__)
-  #define MY_CPU_64BIT
+#define MY_CPU_64BIT
 #endif
 
 #if defined(_M_IX86) || defined(__i386__)
@@ -67,7 +67,7 @@ MY_CPU_LE_UNALIGN means that CPU is LITTLE ENDIAN and CPU supports unaligned mem
     || defined(__MIPSEL) \
     || defined(_MIPSEL) \
     || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__))
-  #define MY_CPU_LE
+#define MY_CPU_LE
 #endif
 
 #if defined(__BIG_ENDIAN__) \
@@ -91,10 +91,10 @@ Stop_Compiling_Bad_Endian
 
 
 #ifdef MY_CPU_LE
-  #if defined(MY_CPU_X86_OR_AMD64) \
+#if defined(MY_CPU_X86_OR_AMD64) \
       /* || defined(__AARCH64EL__) */
-    #define MY_CPU_LE_UNALIGN
-  #endif
+#define MY_CPU_LE_UNALIGN
+#endif
 #endif
 
 
@@ -183,30 +183,29 @@ Stop_Compiling_Bad_Endian
              ((const Byte *)(p))[1] ))
 
 
-
 #ifdef MY_CPU_X86_OR_AMD64
 
 typedef struct
 {
-  UInt32 maxFunc;
-  UInt32 vendor[3];
-  UInt32 ver;
-  UInt32 b;
-  UInt32 c;
-  UInt32 d;
+	UInt32 maxFunc;
+	UInt32 vendor[3];
+	UInt32 ver;
+	UInt32 b;
+	UInt32 c;
+	UInt32 d;
 } Cx86cpuid;
 
 enum
 {
-  CPU_FIRM_INTEL,
-  CPU_FIRM_AMD,
-  CPU_FIRM_VIA
+	CPU_FIRM_INTEL,
+	CPU_FIRM_AMD,
+	CPU_FIRM_VIA
 };
 
-void MyCPUID(UInt32 function, UInt32 *a, UInt32 *b, UInt32 *c, UInt32 *d);
+void MyCPUID(UInt32 function, UInt32* a, UInt32* b, UInt32* c, UInt32* d);
 
-Bool x86cpuid_CheckAndRead(Cx86cpuid *p);
-int x86cpuid_GetFirm(const Cx86cpuid *p);
+Bool x86cpuid_CheckAndRead(Cx86cpuid* p);
+int x86cpuid_GetFirm(const Cx86cpuid* p);
 
 #define x86cpuid_GetFamily(ver) (((ver >> 16) & 0xFF0) | ((ver >> 8) & 0xF))
 #define x86cpuid_GetModel(ver)  (((ver >> 12) &  0xF0) | ((ver >> 4) & 0xF))

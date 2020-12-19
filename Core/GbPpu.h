@@ -76,7 +76,8 @@ private:
 public:
 	virtual ~GbPpu();
 
-	void Init(Console* console, Gameboy* gameboy, GbMemoryManager* memoryManager, GbDmaController* dmaController, uint8_t* vram, uint8_t* oam);
+	void Init(Console* console, Gameboy* gameboy, GbMemoryManager* memoryManager, GbDmaController* dmaController,
+	          uint8_t* vram, uint8_t* oam);
 
 	GbPpuState GetState();
 	uint16_t* GetOutputBuffer();
@@ -109,6 +110,6 @@ public:
 
 	uint8_t ReadCgbRegister(uint16_t addr);
 	void WriteCgbRegister(uint16_t addr, uint8_t value);
-	
+
 	void Serialize(Serializer& s) override;
 };

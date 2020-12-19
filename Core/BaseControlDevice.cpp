@@ -44,7 +44,8 @@ bool BaseControlDevice::IsExpansionDevice()
 
 void BaseControlDevice::StrobeProcessRead()
 {
-	if(_strobe) {
+	if (_strobe)
+	{
 		RefreshStateBuffer();
 	}
 }
@@ -54,7 +55,8 @@ void BaseControlDevice::StrobeProcessWrite(uint8_t value)
 	bool prevStrobe = _strobe;
 	_strobe = (value & 0x01) == 0x01;
 
-	if(prevStrobe && !_strobe) {
+	if (prevStrobe && !_strobe)
+	{
 		RefreshStateBuffer();
 	}
 }
@@ -82,17 +84,25 @@ void BaseControlDevice::SetTextState(string textState)
 	auto lock = _stateLock.AcquireSafe();
 	ClearState();
 
-	if(IsRawString()) {
+	if (IsRawString())
+	{
 		_state.State.insert(_state.State.end(), textState.begin(), textState.end());
-	} else {
-		if(HasCoordinates()) {
+	}
+	else
+	{
+		if (HasCoordinates())
+		{
 			vector<string> data = StringUtilities::Split(textState, ' ');
-			if(data.size() >= 3) {
+			if (data.size() >= 3)
+			{
 				MousePosition pos;
-				try {
+				try
+				{
 					pos.X = (int16_t)std::stol(data[0]);
 					pos.Y = (int16_t)std::stol(data[1]);
-				} catch(std::exception&) {
+				}
+				catch (std::exception&)
+				{
 					pos.X = -1;
 					pos.Y = -1;
 				}
@@ -102,10 +112,13 @@ void BaseControlDevice::SetTextState(string textState)
 		}
 
 		int i = 0;
-		for(char c : textState) {
-			if(c != ':') {
+		for (char c : textState)
+		{
+			if (c != ':')
+			{
 				//Ignore colons (used by multitap to separate inputs)
-				if(c != '.') {
+				if (c != '.')
+				{
 					SetBit(i);
 				}
 				i++;
@@ -117,24 +130,32 @@ void BaseControlDevice::SetTextState(string textState)
 string BaseControlDevice::GetTextState()
 {
 	auto lock = _stateLock.AcquireSafe();
-	if(IsRawString()) {
+	if (IsRawString())
+	{
 		return string((char*)_state.State.data(), _state.State.size());
-	} else {
+	}
+	else
+	{
 		string keyNames = GetKeyNames();
 		string output = "";
 
-		if(HasCoordinates()) {
+		if (HasCoordinates())
+		{
 			MousePosition pos = GetCoordinates();
 			output += std::to_string(pos.X) + " " + std::to_string(pos.Y) + " ";
 		}
 
 		int keyNumber = 0;
-		for(size_t i = 0; i < keyNames.size(); i++) {
-			if(keyNames[i] != ':') {
+		for (size_t i = 0; i < keyNames.size(); i++)
+		{
+			if (keyNames[i] != ':')
+			{
 				//Ignore colons in string (used by multitap to split controllers)
 				output += IsPressed((uint8_t)keyNumber) ? keyNames[i] : '.';
 				keyNumber++;
-			} else {
+			}
+			else
+			{
 				output += ':';
 			}
 		}
@@ -149,7 +170,8 @@ void BaseControlDevice::EnsureCapacity(int32_t minBitCount)
 	uint32_t minByteCount = minBitCount / 8 + 1 + (HasCoordinates() ? 32 : 0);
 	int32_t gap = minByteCount - (int32_t)_state.State.size();
 
-	if(gap > 0) {
+	if (gap > 0)
+	{
 		_state.State.insert(_state.State.end(), gap, 0);
 	}
 }
@@ -179,9 +201,12 @@ bool BaseControlDevice::IsPressed(uint8_t bit)
 
 void BaseControlDevice::SetBitValue(uint8_t bit, bool set)
 {
-	if(set) {
+	if (set)
+	{
 		SetBit(bit);
-	} else {
+	}
+	else
+	{
 		ClearBit(bit);
 	}
 }
@@ -204,23 +229,28 @@ void BaseControlDevice::ClearBit(uint8_t bit)
 
 void BaseControlDevice::InvertBit(uint8_t bit)
 {
-	if(IsPressed(bit)) {
+	if (IsPressed(bit))
+	{
 		ClearBit(bit);
-	} else {
+	}
+	else
+	{
 		SetBit(bit);
 	}
 }
 
 void BaseControlDevice::SetPressedState(uint8_t bit, uint32_t keyCode)
 {
-	if(KeyManager::IsKeyPressed(keyCode)) {
+	if (KeyManager::IsKeyPressed(keyCode))
+	{
 		SetBit(bit);
 	}
 }
 
 void BaseControlDevice::SetPressedState(uint8_t bit, bool enabled)
 {
-	if(enabled) {
+	if (enabled)
+	{
 		SetBit(bit);
 	}
 }
@@ -252,17 +282,18 @@ void BaseControlDevice::SetMovement(MouseMovement mov)
 	MouseMovement prev = GetMovement();
 	mov.dx += prev.dx;
 	mov.dy += prev.dy;
-	SetCoordinates({ mov.dx, mov.dy });
+	SetCoordinates({mov.dx, mov.dy});
 }
 
 MouseMovement BaseControlDevice::GetMovement()
 {
 	MousePosition pos = GetCoordinates();
-	SetCoordinates({ 0, 0 });
-	return { pos.X, pos.Y };
+	SetCoordinates({0, 0});
+	return {pos.X, pos.Y};
 }
 
-void BaseControlDevice::SwapButtons(shared_ptr<BaseControlDevice> state1, uint8_t button1, shared_ptr<BaseControlDevice> state2, uint8_t button2)
+void BaseControlDevice::SwapButtons(shared_ptr<BaseControlDevice> state1, uint8_t button1,
+                                    shared_ptr<BaseControlDevice> state2, uint8_t button2)
 {
 	bool pressed1 = state1->IsPressed(button1);
 	bool pressed2 = state2->IsPressed(button2);
@@ -270,15 +301,17 @@ void BaseControlDevice::SwapButtons(shared_ptr<BaseControlDevice> state1, uint8_
 	state1->ClearBit(button1);
 	state2->ClearBit(button2);
 
-	if(pressed1) {
+	if (pressed1)
+	{
 		state2->SetBit(button2);
 	}
-	if(pressed2) {
+	if (pressed2)
+	{
 		state1->SetBit(button1);
 	}
 }
 
-void BaseControlDevice::Serialize(Serializer &s)
+void BaseControlDevice::Serialize(Serializer& s)
 {
 	auto lock = _stateLock.AcquireSafe();
 	s.Stream(_strobe);

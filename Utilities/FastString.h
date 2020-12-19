@@ -8,29 +8,38 @@ private:
 	uint16_t _pos = 0;
 	bool _lowerCase = false;
 
-	void WriteAll() {}
+	void WriteAll()
+	{
+	}
 
 public:
 	FastString(bool lowerCase = false) { _lowerCase = lowerCase; }
 	FastString(const char* str, int size) { Write(str, size); }
-	FastString(string &str) { Write(str); }
+	FastString(string& str) { Write(str); }
 
 	void Write(char c)
 	{
-		if(_lowerCase) {
+		if (_lowerCase)
+		{
 			_buffer[_pos++] = ::tolower(c);
-		} else {
+		}
+		else
+		{
 			_buffer[_pos++] = c;
 		}
 	}
 
 	void Write(const char* str, int size)
 	{
-		if(_lowerCase) {
-			for(int i = 0; i < size; i++) {
+		if (_lowerCase)
+		{
+			for (int i = 0; i < size; i++)
+			{
 				_buffer[_pos + i] = ::tolower(str[i]);
 			}
-		} else {
+		}
+		else
+		{
 			memcpy(_buffer + _pos, str, size);
 		}
 		_pos += size;
@@ -38,7 +47,8 @@ public:
 
 	void Delimiter(const char* str)
 	{
-		if(_pos > 0) {
+		if (_pos > 0)
+		{
 			Write(str, (uint16_t)strlen(str));
 		}
 	}
@@ -48,19 +58,23 @@ public:
 		Write(str, (uint16_t)strlen(str));
 	}
 
-	void Write(string &str, bool preserveCase = false)
+	void Write(string& str, bool preserveCase = false)
 	{
-		if(_lowerCase && !preserveCase) {
-			for(size_t i = 0; i < str.size(); i++) {
+		if (_lowerCase && !preserveCase)
+		{
+			for (size_t i = 0; i < str.size(); i++)
+			{
 				_buffer[_pos + i] = ::tolower(str[i]);
 			}
-		} else {
+		}
+		else
+		{
 			memcpy(_buffer + _pos, str.c_str(), str.size());
 		}
 		_pos += (uint16_t)str.size();
 	}
 
-	void Write(FastString &str)
+	void Write(FastString& str)
 	{
 		memcpy(_buffer + _pos, str._buffer, str._pos);
 		_pos += str._pos;
@@ -77,8 +91,8 @@ public:
 		return _pos;
 	}
 
-	template<typename T, typename... Args>
-	void WriteAll(T first, Args... args)
+	template <typename T, typename... Args>
+	void WriteAll(T first, Args ... args)
 	{
 		Write(first);
 		WriteAll(args...);

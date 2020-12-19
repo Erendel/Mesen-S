@@ -53,12 +53,15 @@ bool BsxStream::NeedUpdate()
 
 bool BsxStream::FillQueues()
 {
-	if(_queueLength > 0) {
+	if (_queueLength > 0)
+	{
 		_queueLength--;
-		if(_prefixLatch && _prefixQueueLength < 0x80) {
+		if (_prefixLatch && _prefixQueueLength < 0x80)
+		{
 			_prefixQueueLength++;
 		}
-		if(_dataLatch && _dataQueueLength < 0x80) {
+		if (_dataLatch && _dataQueueLength < 0x80)
+		{
 			_dataQueueLength++;
 		}
 	}
@@ -80,18 +83,23 @@ bool BsxStream::LoadStreamFile()
 
 	OpenStreamFile();
 
-	if(_file) {
+	if (_file)
+	{
 		_firstPacket = true;
 		_file.seekg(0, ios::end);
 		_queueLength = (uint16_t)std::ceil(_file.tellg() / 22.0);
 		_file.seekg(0, ios::beg);
 		_fileIndex++;
 		return true;
-	} else {
-		if(_fileIndex > 0) {
+	}
+	else
+	{
+		if (_fileIndex > 0)
+		{
 			//Go back to file #0 and try again
 			_fileIndex = 0;
-			if(LoadStreamFile()) {
+			if (LoadStreamFile())
+			{
 				return true;
 			}
 		}
@@ -104,19 +112,24 @@ bool BsxStream::LoadStreamFile()
 
 uint8_t BsxStream::GetPrefixCount()
 {
-	if(!_prefixLatch || !_dataLatch) {
+	if (!_prefixLatch || !_dataLatch)
+	{
 		//Stream is disabled
 		return 0;
 	}
 
-	if(_prefixQueueLength == 0 && _dataQueueLength == 0) {
+	if (_prefixQueueLength == 0 && _dataQueueLength == 0)
+	{
 		//Queue is empty, try to load in new data
 		_fileOffset = 0;
-		if(_channel == 0) {
+		if (_channel == 0)
+		{
 			//Time channel
 			_queueLength = 1;
 			_firstPacket = true;
-		} else {
+		}
+		else
+		{
 			LoadStreamFile();
 		}
 	}
@@ -126,19 +139,23 @@ uint8_t BsxStream::GetPrefixCount()
 
 uint8_t BsxStream::GetPrefix()
 {
-	if(!_prefixLatch) {
+	if (!_prefixLatch)
+	{
 		return 0;
 	}
 
-	if(_prefixQueueLength > 0) {
+	if (_prefixQueueLength > 0)
+	{
 		_prefix = 0;
-		if(_firstPacket) {
+		if (_firstPacket)
+		{
 			_prefix |= 0x10;
 			_firstPacket = false;
 		}
 
 		_prefixQueueLength--;
-		if(_queueLength == 0 && _prefixQueueLength == 0) {
+		if (_queueLength == 0 && _prefixQueueLength == 0)
+		{
 			//Last packet
 			_prefix |= 0x80;
 		}
@@ -151,15 +168,20 @@ uint8_t BsxStream::GetPrefix()
 
 uint8_t BsxStream::GetData()
 {
-	if(!_dataLatch) {
+	if (!_dataLatch)
+	{
 		return 0;
 	}
 
-	if(_dataQueueLength > 0) {
-		if(_channel == 0) {
+	if (_dataQueueLength > 0)
+	{
+		if (_channel == 0)
+		{
 			//Return Time
 			_data = GetTime();
-		} else if(_file) {
+		}
+		else if (_file)
+		{
 			//Read byte from stream file
 			char byte;
 			_file.get(byte);
@@ -167,7 +189,8 @@ uint8_t BsxStream::GetData()
 		}
 
 		_fileOffset++;
-		if(_fileOffset % 22 == 0) {
+		if (_fileOffset % 22 == 0)
+		{
 			//Finished reading current packet
 			_dataQueueLength--;
 		}
@@ -179,7 +202,8 @@ uint8_t BsxStream::GetData()
 uint8_t BsxStream::GetStatus(bool reset)
 {
 	uint8_t status = _status;
-	if(reset) {
+	if (reset)
+	{
 		_status = 0;
 	}
 	return status;
@@ -187,7 +211,8 @@ uint8_t BsxStream::GetStatus(bool reset)
 
 void BsxStream::SetChannelLow(uint8_t value)
 {
-	if((_channel & 0xFF) != 0xFF) {
+	if ((_channel & 0xFF) != 0xFF)
+	{
 		_fileIndex = 0;
 	}
 	_channel = (_channel & 0xFF00) | value;
@@ -195,7 +220,8 @@ void BsxStream::SetChannelLow(uint8_t value)
 
 void BsxStream::SetChannelHigh(uint8_t value)
 {
-	if((_channel >> 8) != (value & 0x3F)) {
+	if ((_channel >> 8) != (value & 0x3F))
+	{
 		_fileIndex = 0;
 	}
 	_channel = (_channel & 0xFF) | ((value & 0x3F) << 8);
@@ -215,7 +241,8 @@ void BsxStream::SetDataLatch(uint8_t value)
 
 void BsxStream::InitTimeStruct()
 {
-	time_t dateTime = _resetDate + ((_memoryManager->GetMasterClock() - _resetMasterClock) / _console->GetMasterClockRate());
+	time_t dateTime = _resetDate + ((_memoryManager->GetMasterClock() - _resetMasterClock) / _console->
+		GetMasterClockRate());
 
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 	localtime_s(&_tm, &dateTime);
@@ -230,30 +257,32 @@ void BsxStream::InitTimeStruct()
 
 uint8_t BsxStream::GetTime()
 {
-	if(_fileOffset == 0) {
+	if (_fileOffset == 0)
+	{
 		InitTimeStruct();
 	}
 
-	switch(_fileOffset) {
-		case 0: return 0x00; //Data Group ID / Repetition
-		case 1: return 0x00; //Data Group Link / Continuity
-		case 2: return 0x00; //Data Group Size (24-bit)
-		case 3: return 0x00;
-		case 4: return 0x10;
-		case 5: return 0x01; //Must be 0x01
-		case 6: return 0x01; //Amount of packets (1)
-		case 7: return 0x00; //Offset (24-bit)
-		case 8: return 0x00;
-		case 9: return 0x00;
-		case 10: return _tm.tm_sec;
-		case 11: return _tm.tm_min;
-		case 12: return _tm.tm_hour;
-		case 13: return _tm.tm_wday;
-		case 14: return _tm.tm_mday;
-		case 15: return _tm.tm_mon;
-		case 16: return _tm.tm_year >> 0;
-		case 17: return _tm.tm_year >> 8;
-		default: return 0x00;
+	switch (_fileOffset)
+	{
+	case 0: return 0x00; //Data Group ID / Repetition
+	case 1: return 0x00; //Data Group Link / Continuity
+	case 2: return 0x00; //Data Group Size (24-bit)
+	case 3: return 0x00;
+	case 4: return 0x10;
+	case 5: return 0x01; //Must be 0x01
+	case 6: return 0x01; //Amount of packets (1)
+	case 7: return 0x00; //Offset (24-bit)
+	case 8: return 0x00;
+	case 9: return 0x00;
+	case 10: return _tm.tm_sec;
+	case 11: return _tm.tm_min;
+	case 12: return _tm.tm_hour;
+	case 13: return _tm.tm_wday;
+	case 14: return _tm.tm_mday;
+	case 15: return _tm.tm_mon;
+	case 16: return _tm.tm_year >> 0;
+	case 17: return _tm.tm_year >> 8;
+	default: return 0x00;
 	}
 }
 
@@ -261,14 +290,17 @@ void BsxStream::Serialize(Serializer& s)
 {
 	s.Stream(
 		_channel, _prefix, _data, _status, _prefixLatch, _dataLatch, _firstPacket, _fileOffset, _fileIndex,
-		_queueLength, _prefixQueueLength, _dataQueueLength, _resetDate, _resetMasterClock, _activeChannel, _activeFileIndex
+		_queueLength, _prefixQueueLength, _dataQueueLength, _resetDate, _resetMasterClock, _activeChannel,
+		_activeFileIndex
 	);
 
-	if(!s.IsSaving()) {
+	if (!s.IsSaving())
+	{
 		InitTimeStruct();
 		OpenStreamFile();
 
-		if(_file) {
+		if (_file)
+		{
 			//Seek back to the previous location
 			_file.seekg(_fileOffset, ios::beg);
 		}

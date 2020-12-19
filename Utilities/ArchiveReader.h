@@ -14,15 +14,15 @@ public:
 	bool LoadArchive(void* buffer, size_t size);
 	bool LoadArchive(vector<uint8_t>& data);
 	bool LoadArchive(string filename);
-	bool LoadArchive(std::istream &in);
+	bool LoadArchive(std::istream& in);
 
-	bool GetStream(string filename, std::stringstream &stream);
+	bool GetStream(string filename, std::stringstream& stream);
 
 	vector<string> GetFileList(std::initializer_list<string> extensions = {});
 	bool CheckFile(string filename);
 
-	virtual bool ExtractFile(string filename, vector<uint8_t> &output) = 0;
+	virtual bool ExtractFile(string filename, vector<uint8_t>& output) = 0;
 
-	static shared_ptr<ArchiveReader> GetReader(std::istream &in);
+	static shared_ptr<ArchiveReader> GetReader(std::istream& in);
 	static shared_ptr<ArchiveReader> GetReader(string filepath);
 };

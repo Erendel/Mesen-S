@@ -21,17 +21,22 @@ Rtc4513::~Rtc4513()
 void Rtc4513::LoadBattery()
 {
 	vector<uint8_t> rtcData = _console->GetBatteryManager()->LoadBattery(".rtc");
-	
-	if(rtcData.size() == sizeof(_regs) + sizeof(uint64_t)) {
+
+	if (rtcData.size() == sizeof(_regs) + sizeof(uint64_t))
+	{
 		memcpy(_regs, rtcData.data(), sizeof(_regs));
 		uint64_t time = 0;
-		for(uint32_t i = 0; i < sizeof(uint64_t); i++) {
+		for (uint32_t i = 0; i < sizeof(uint64_t); i++)
+		{
 			time <<= 8;
 			time |= rtcData[sizeof(_regs) + i];
 		}
 		_lastTime = time;
-	} else {
-		_lastTime = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	}
+	else
+	{
+		_lastTime = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).
+			count();
 	}
 }
 
@@ -42,7 +47,8 @@ void Rtc4513::SaveBattery()
 
 	memcpy(rtcData.data(), _regs, sizeof(_regs));
 	uint64_t time = _lastTime;
-	for(uint32_t i = 0; i < sizeof(uint64_t); i++) {
+	for (uint32_t i = 0; i < sizeof(uint64_t); i++)
+	{
 		rtcData[sizeof(_regs) + i] = (time >> 56) & 0xFF;
 		time <<= 8;
 	}
@@ -52,24 +58,28 @@ void Rtc4513::SaveBattery()
 
 void Rtc4513::UpdateTime()
 {
-	if(IsReset()) {
+	if (IsReset())
+	{
 		//Reset seconds to 0
 		_regs[0] = 0;
 		_regs[1] = 0;
 	}
 
-	uint64_t currentTime = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	uint64_t currentTime = std::chrono::duration_cast<std::chrono::seconds>(
+		std::chrono::system_clock::now().time_since_epoch()).count();
 	uint32_t elapsedSeconds = (uint32_t)(currentTime - _lastTime);
-	if(elapsedSeconds <= 0) {
+	if (elapsedSeconds <= 0)
+	{
 		return;
 	}
 
-	if(IsStop() || IsReset() || IsHold()) {
+	if (IsStop() || IsReset() || IsHold())
+	{
 		_lastTime = currentTime;
 		return;
 	}
 
-	std::tm tm = { };
+	std::tm tm = {};
 	tm.tm_sec = GetSeconds();
 	tm.tm_min = GetMinutes();
 	tm.tm_hour = GetHours();
@@ -78,13 +88,15 @@ void Rtc4513::UpdateTime()
 	tm.tm_year = (GetYear() >= 90 ? 0 : 100) + GetYear();
 
 	std::time_t tt = mktime(&tm);
-	if(tt == -1 || GetMonth() == 0) {
+	if (tt == -1 || GetMonth() == 0)
+	{
 		_lastTime = currentTime;
 		return;
 	}
 
 	int8_t dowGap = 0;
-	if(tm.tm_wday != GetDoW()) {
+	if (tm.tm_wday != GetDoW())
+	{
 		//The DoW on the RTC can be set to any arbitrary value for a specific date
 		//Check the gap between the value set by the game & the real dow for that date
 		dowGap = (int8_t)tm.tm_wday - (int8_t)GetDoW();
@@ -121,7 +133,7 @@ void Rtc4513::UpdateTime()
 
 	_regs[10] = year % 10;
 	_regs[11] = year / 10;
-	
+
 	_regs[12] = (newTm.tm_wday - dowGap) % 7;
 
 	_lastTime = currentTime;
@@ -131,22 +143,24 @@ uint8_t Rtc4513::Read(uint16_t addr)
 {
 	UpdateTime();
 
-	switch(addr) {
-		case 0x4840: break;
-		
-		case 0x4841: 
-			if(_mode == 0x0C) {
-				//Read mode
-				//LogDebug("Read: " + HexUtilities::ToHex(_index) + " = " + HexUtilities::ToHex(_regs[_index]));
-				uint8_t index = _index;
-				_index = (_index + 1) & 0x0F;
-				return _regs[index];
-			} 
-			break;
-		
-		case 0x4842:
-			//Ready
-			return 0x80;
+	switch (addr)
+	{
+	case 0x4840: break;
+
+	case 0x4841:
+		if (_mode == 0x0C)
+		{
+			//Read mode
+			//LogDebug("Read: " + HexUtilities::ToHex(_index) + " = " + HexUtilities::ToHex(_regs[_index]));
+			uint8_t index = _index;
+			_index = (_index + 1) & 0x0F;
+			return _regs[index];
+		}
+		break;
+
+	case 0x4842:
+		//Ready
+		return 0x80;
 	}
 
 	return 0;
@@ -156,37 +170,44 @@ void Rtc4513::Write(uint16_t addr, uint8_t value)
 {
 	UpdateTime();
 
-	switch(addr) {
-		case 0x4840: 
-			_enabled = value; 
-			if(!(_enabled & 0x01)) {
-				_mode = -1;
-				_index = -1;
+	switch (addr)
+	{
+	case 0x4840:
+		_enabled = value;
+		if (!(_enabled & 0x01))
+		{
+			_mode = -1;
+			_index = -1;
 
-				//Turn off reset ($01) and test ($08) bits when disabled
-				_regs[0x0F] &= 0x06;
-			}
-			break;
+			//Turn off reset ($01) and test ($08) bits when disabled
+			_regs[0x0F] &= 0x06;
+		}
+		break;
 
-		case 0x4841:
-			if(_mode == -1) {
-				_mode = value & 0x0F;
-			} else if(_index == -1) {
-				_index = value & 0x0F;
-			} else if(_mode == 0x03) {
-				//Write mode
-				//LogDebug(HexUtilities::ToHex(_index) + " = " + HexUtilities::ToHex(value & 0x0F));
-				uint8_t index = _index;
-				_index = (_index + 1) & 0x0F;
-				_regs[index] = value & 0x0F;
-			}
-		
-		case 0x4842: break;
+	case 0x4841:
+		if (_mode == -1)
+		{
+			_mode = value & 0x0F;
+		}
+		else if (_index == -1)
+		{
+			_index = value & 0x0F;
+		}
+		else if (_mode == 0x03)
+		{
+			//Write mode
+			//LogDebug(HexUtilities::ToHex(_index) + " = " + HexUtilities::ToHex(value & 0x0F));
+			uint8_t index = _index;
+			_index = (_index + 1) & 0x0F;
+			_regs[index] = value & 0x0F;
+		}
+
+	case 0x4842: break;
 	}
 }
 
 void Rtc4513::Serialize(Serializer& s)
 {
-	ArrayInfo<uint8_t> regs = { _regs, 0x10 };
+	ArrayInfo<uint8_t> regs = {_regs, 0x10};
 	s.Stream(_lastTime, _enabled, _mode, _index, regs);
 }

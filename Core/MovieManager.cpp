@@ -15,7 +15,8 @@ MovieManager::MovieManager(shared_ptr<Console> console)
 void MovieManager::Record(RecordMovieOptions options)
 {
 	shared_ptr<MovieRecorder> recorder(new MovieRecorder(_console));
-	if(recorder->Record(options)) {
+	if (recorder->Record(options))
+	{
 		_recorder = recorder;
 	}
 }
@@ -23,22 +24,27 @@ void MovieManager::Record(RecordMovieOptions options)
 void MovieManager::Play(VirtualFile file, bool forTest)
 {
 	vector<uint8_t> fileData;
-	if(file.IsValid() && file.ReadFile(fileData)) {
+	if (file.IsValid() && file.ReadFile(fileData))
+	{
 		shared_ptr<IMovie> player;
-		if(memcmp(fileData.data(), "PK", 2) == 0) {
+		if (memcmp(fileData.data(), "PK", 2) == 0)
+		{
 			//Mesen movie
 			ZipReader reader;
 			reader.LoadArchive(fileData);
 
 			vector<string> files = reader.GetFileList();
-			if(std::find(files.begin(), files.end(), "GameSettings.txt") != files.end()) {
+			if (std::find(files.begin(), files.end(), "GameSettings.txt") != files.end())
+			{
 				player.reset(new MesenMovie(_console, forTest));
 			}
 		}
 
-		if(player && player->Play(file)) {
+		if (player && player->Play(file))
+		{
 			_player = player;
-			if(!forTest) {
+			if (!forTest)
+			{
 				MessageManager::DisplayMessage("Movies", "MoviePlaying", file.GetFileName());
 			}
 		}

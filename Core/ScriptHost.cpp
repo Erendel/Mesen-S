@@ -26,7 +26,8 @@ bool ScriptHost::LoadScript(string scriptName, string scriptContent, Debugger* d
 {
 #ifndef LIBRETRO
 	_context.reset(new LuaScriptingContext(debugger));
-	if(!_context->LoadScript(scriptName, scriptContent, debugger)) {
+	if (!_context->LoadScript(scriptName, scriptContent, debugger))
+	{
 		return false;
 	}
 	return true;
@@ -35,28 +36,35 @@ bool ScriptHost::LoadScript(string scriptName, string scriptContent, Debugger* d
 #endif
 }
 
-void ScriptHost::ProcessMemoryOperation(uint32_t addr, uint8_t &value, MemoryOperationType type, CpuType cpuType)
+void ScriptHost::ProcessMemoryOperation(uint32_t addr, uint8_t& value, MemoryOperationType type, CpuType cpuType)
 {
-	if(_context) {
-		switch(type) {
-			case MemoryOperationType::Read: _context->CallMemoryCallback(addr, value, CallbackType::CpuRead, cpuType); break;
-			case MemoryOperationType::Write: _context->CallMemoryCallback(addr, value, CallbackType::CpuWrite, cpuType); break;
-			case MemoryOperationType::ExecOpCode: _context->CallMemoryCallback(addr, value, CallbackType::CpuExec, cpuType); break;
-			default: break;
+	if (_context)
+	{
+		switch (type)
+		{
+		case MemoryOperationType::Read: _context->CallMemoryCallback(addr, value, CallbackType::CpuRead, cpuType);
+			break;
+		case MemoryOperationType::Write: _context->CallMemoryCallback(addr, value, CallbackType::CpuWrite, cpuType);
+			break;
+		case MemoryOperationType::ExecOpCode: _context->CallMemoryCallback(addr, value, CallbackType::CpuExec, cpuType);
+			break;
+		default: break;
 		}
 	}
 }
 
 void ScriptHost::ProcessEvent(EventType eventType)
 {
-	if(_context) {
+	if (_context)
+	{
 		_context->CallEventCallback(eventType);
 	}
 }
 
 bool ScriptHost::ProcessSavestate()
 {
-	if(_context) {
+	if (_context)
+	{
 		return _context->ProcessSavestate();
 	}
 	return false;
@@ -64,7 +72,8 @@ bool ScriptHost::ProcessSavestate()
 
 bool ScriptHost::CheckStateLoadedFlag()
 {
-	if(_context) {
+	if (_context)
+	{
 		return _context->CheckStateLoadedFlag();
 	}
 	return false;

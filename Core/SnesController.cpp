@@ -2,7 +2,8 @@
 #include "SnesController.h"
 #include "Console.h"
 
-SnesController::SnesController(Console* console, uint8_t port, KeyMappingSet keyMappings) : BaseControlDevice(console, port, keyMappings)
+SnesController::SnesController(Console* console, uint8_t port, KeyMappingSet keyMappings) : BaseControlDevice(
+	console, port, keyMappings)
 {
 	_turboSpeed = keyMappings.TurboSpeed;
 }
@@ -14,7 +15,8 @@ string SnesController::GetKeyNames()
 
 void SnesController::InternalSetStateFromInput()
 {
-	for(KeyMapping keyMapping : _keyMappings) {
+	for (KeyMapping keyMapping : _keyMappings)
+	{
 		SetPressedState(Buttons::A, keyMapping.A);
 		SetPressedState(Buttons::B, keyMapping.B);
 		SetPressedState(Buttons::X, keyMapping.X);
@@ -30,7 +32,8 @@ void SnesController::InternalSetStateFromInput()
 
 		uint8_t turboFreq = 1 << (4 - _turboSpeed);
 		bool turboOn = (uint8_t)(_console->GetFrameCount() % turboFreq) < turboFreq / 2;
-		if(turboOn) {
+		if (turboOn)
+		{
 			SetPressedState(Buttons::A, keyMapping.TurboA);
 			SetPressedState(Buttons::B, keyMapping.TurboB);
 			SetPressedState(Buttons::X, keyMapping.TurboX);
@@ -60,7 +63,7 @@ uint16_t SnesController::ToByte()
 		((uint8_t)IsPressed(Buttons::R) << 11);
 }
 
-void SnesController::Serialize(Serializer & s)
+void SnesController::Serialize(Serializer& s)
 {
 	BaseControlDevice::Serialize(s);
 	s.Stream(_stateBuffer);
@@ -80,12 +83,16 @@ uint8_t SnesController::ReadRam(uint16_t addr)
 {
 	uint8_t output = 0;
 
-	if(IsCurrentPort(addr)) {
+	if (IsCurrentPort(addr))
+	{
 		StrobeProcessRead();
 
-		if(_port >= 2) {
-			output = (_stateBuffer & 0x01) << 1;  //P3/P4 are reported in bit 2
-		} else {
+		if (_port >= 2)
+		{
+			output = (_stateBuffer & 0x01) << 1; //P3/P4 are reported in bit 2
+		}
+		else
+		{
 			output = _stateBuffer & 0x01;
 		}
 		_stateBuffer >>= 1;

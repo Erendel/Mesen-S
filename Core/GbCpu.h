@@ -66,7 +66,7 @@ private:
 	void AND(uint8_t value);
 	void OR(uint8_t value);
 	void XOR(uint8_t value);
-	
+
 	void CP(uint8_t value);
 
 	void NOP();
@@ -98,19 +98,19 @@ private:
 	void SWAP(uint8_t& dst);
 	void SWAP_Indirect(uint16_t addr);
 
-	template<uint8_t bit>
+	template <uint8_t bit>
 	void BIT(uint8_t src);
 
-	template<uint8_t bit>
+	template <uint8_t bit>
 	void RES(uint8_t& dst);
 
-	template<uint8_t bit>
+	template <uint8_t bit>
 	void RES_Indirect(uint16_t addr);
 
-	template<uint8_t bit>
+	template <uint8_t bit>
 	void SET(uint8_t& dst);
 
-	template<uint8_t bit>
+	template <uint8_t bit>
 	void SET_Indirect(uint16_t addr);
 
 	void DAA();
@@ -127,7 +127,7 @@ private:
 	void RET(bool condition);
 	void RETI();
 	void RST(uint8_t value);
-	
+
 	void POP(Register16& reg);
 	void PUSH(Register16& reg);
 	void POP_AF();
@@ -148,7 +148,7 @@ public:
 	bool IsHalted();
 
 	void Exec();
-	
+
 	void Serialize(Serializer& s) override;
 
 	void SetReg(GbRegister reg, uint16_t value);

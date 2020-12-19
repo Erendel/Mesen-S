@@ -19,7 +19,7 @@ class ControlManager : public ISerializable
 private:
 	vector<IInputRecorder*> _inputRecorders;
 	vector<IInputProvider*> _inputProviders;
-	
+
 	uint32_t _pollCounter;
 	uint32_t _inputConfigVersion;
 
@@ -54,11 +54,11 @@ public:
 	SystemActionManager* GetSystemActionManager();
 	shared_ptr<BaseControlDevice> GetControlDevice(uint8_t port);
 	vector<shared_ptr<BaseControlDevice>> GetControlDevices();
-	
+
 	static shared_ptr<BaseControlDevice> CreateControllerDevice(ControllerType type, uint8_t port, Console* console);
 
 	uint8_t Read(uint16_t addr);
 	void Write(uint16_t addr, uint8_t value);
 
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 };

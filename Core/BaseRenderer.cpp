@@ -9,7 +9,8 @@ BaseRenderer::BaseRenderer(shared_ptr<Console> console, bool registerAsMessageMa
 {
 	_console = console;
 
-	if(registerAsMessageManager) {
+	if (registerAsMessageManager)
+	{
 		//Only display messages on the master CPU's screen
 		MessageManager::RegisterMessageManager(this);
 	}
@@ -37,34 +38,44 @@ void BaseRenderer::DrawToasts()
 
 	int counter = 0;
 	int lastHeight = 5;
-	for(shared_ptr<ToastInfo> toast : _toasts) {
-		if(counter < 6) {
+	for (shared_ptr<ToastInfo> toast : _toasts)
+	{
+		if (counter < 6)
+		{
 			DrawToast(toast, lastHeight);
-		} else {
+		}
+		else
+		{
 			break;
 		}
 		counter++;
 	}
 }
 
-std::wstring BaseRenderer::WrapText(string utf8Text, float maxLineWidth, uint32_t &lineCount)
+std::wstring BaseRenderer::WrapText(string utf8Text, float maxLineWidth, uint32_t& lineCount)
 {
 	using std::wstring;
 	wstring text = utf8::utf8::decode(utf8Text);
 	wstring wrappedText;
 	list<wstring> words;
 	wstring currentWord;
-	for(size_t i = 0, len = text.length(); i < len; i++) {
-		if(text[i] == L' ' || text[i] == L'\n') {
-			if(currentWord.length() > 0) {
+	for (size_t i = 0, len = text.length(); i < len; i++)
+	{
+		if (text[i] == L' ' || text[i] == L'\n')
+		{
+			if (currentWord.length() > 0)
+			{
 				words.push_back(currentWord);
 				currentWord.clear();
 			}
-		} else {
+		}
+		else
+		{
 			currentWord += text[i];
 		}
 	}
-	if(currentWord.length() > 0) {
+	if (currentWord.length() > 0)
+	{
 		words.push_back(currentWord);
 	}
 
@@ -72,19 +83,25 @@ std::wstring BaseRenderer::WrapText(string utf8Text, float maxLineWidth, uint32_
 	float spaceWidth = MeasureString(L" ");
 
 	float lineWidth = 0.0f;
-	for(wstring word : words) {
-		for(unsigned int i = 0; i < word.size(); i++) {
-			if(!ContainsCharacter(word[i])) {
+	for (wstring word : words)
+	{
+		for (unsigned int i = 0; i < word.size(); i++)
+		{
+			if (!ContainsCharacter(word[i]))
+			{
 				word[i] = L'?';
 			}
 		}
 
 		float wordWidth = MeasureString(word.c_str());
 
-		if(lineWidth + wordWidth < maxLineWidth) {
+		if (lineWidth + wordWidth < maxLineWidth)
+		{
 			wrappedText += word + L" ";
 			lineWidth += wordWidth + spaceWidth;
-		} else {
+		}
+		else
+		{
 			wrappedText += L"\n" + word + L" ";
 			lineWidth = wordWidth + spaceWidth;
 			lineCount++;
@@ -94,10 +111,10 @@ std::wstring BaseRenderer::WrapText(string utf8Text, float maxLineWidth, uint32_
 	return wrappedText;
 }
 
-void BaseRenderer::DrawToast(shared_ptr<ToastInfo> toast, int &lastHeight)
+void BaseRenderer::DrawToast(shared_ptr<ToastInfo> toast, int& lastHeight)
 {
 	//Get opacity for fade in/out effect
-	uint8_t opacity = (uint8_t)(toast->GetOpacity()*255);
+	uint8_t opacity = (uint8_t)(toast->GetOpacity() * 255);
 	int textLeftMargin = 4;
 
 	int lineHeight = 25;
@@ -117,24 +134,31 @@ void BaseRenderer::DrawString(std::string message, int x, int y, uint8_t r, uint
 void BaseRenderer::ShowFpsCounter(int lineNumber)
 {
 	int yPos = 13 + 24 * lineNumber;
-	if(_fpsTimer.GetElapsedMS() > 1000) {
+	if (_fpsTimer.GetElapsedMS() > 1000)
+	{
 		//Update fps every sec
 		uint32_t frameCount = _console->GetFrameCount();
-		if(_lastFrameCount > frameCount) {
+		if (_lastFrameCount > frameCount)
+		{
 			_currentFPS = 0;
-		} else {
+		}
+		else
+		{
 			_currentFPS = (int)(std::round((double)(frameCount - _lastFrameCount) / (_fpsTimer.GetElapsedMS() / 1000)));
-			_currentRenderedFPS = (int)(std::round((double)(_renderedFrameCount - _lastRenderedFrameCount) / (_fpsTimer.GetElapsedMS() / 1000)));
+			_currentRenderedFPS = (int)(std::round(
+				(double)(_renderedFrameCount - _lastRenderedFrameCount) / (_fpsTimer.GetElapsedMS() / 1000)));
 		}
 		_lastFrameCount = frameCount;
 		_lastRenderedFrameCount = _renderedFrameCount;
 		_fpsTimer.Reset();
 	}
 
-	if(_currentFPS > 5000) {
+	if (_currentFPS > 5000)
+	{
 		_currentFPS = 0;
 	}
-	if(_currentRenderedFPS > 5000) {
+	if (_currentRenderedFPS > 5000)
+	{
 		_currentRenderedFPS = 0;
 	}
 
@@ -171,13 +195,16 @@ void BaseRenderer::DrawCounters()
 {
 	int lineNumber = 0;
 	PreferencesConfig cfg = _console->GetSettings()->GetPreferences();
-	if(cfg.ShowGameTimer) {
+	if (cfg.ShowGameTimer)
+	{
 		ShowGameTimer(lineNumber++);
 	}
-	if(cfg.ShowFps) {
+	if (cfg.ShowFps)
+	{
 		ShowFpsCounter(lineNumber++);
 	}
-	if(cfg.ShowFrameCounter) {
+	if (cfg.ShowFrameCounter)
+	{
 		ShowFrameCounter(lineNumber++);
 	}
 }
@@ -185,4 +212,4 @@ void BaseRenderer::DrawCounters()
 bool BaseRenderer::IsMessageShown()
 {
 	return !_toasts.empty();
-}	
+}

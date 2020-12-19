@@ -22,7 +22,9 @@ all other #include lines. */
 // Like printf() except output goes to debug log file. Might be defined to do
 // nothing (not even evaluate its arguments).
 // void dprintf( const char* format, ... );
-static inline void blargg_dprintf_( const char*, ... ) { }
+static inline void blargg_dprintf_(const char*, ...)
+{
+}
 #undef dprintf
 #define dprintf (1) ? (void) 0 : blargg_dprintf_
 
@@ -51,12 +53,12 @@ static inline void blargg_dprintf_( const char*, ... ) { }
 	static inline type min( type x, type y ) { if ( x < y ) return x; return y; }\
 	static inline type max( type x, type y ) { if ( y < x ) return x; return y; }
 
-DEF_MIN_MAX( int )
-DEF_MIN_MAX( unsigned )
-DEF_MIN_MAX( long )
-DEF_MIN_MAX( unsigned long )
-DEF_MIN_MAX( float )
-DEF_MIN_MAX( double )
+DEF_MIN_MAX(int)
+DEF_MIN_MAX(unsigned)
+DEF_MIN_MAX(long)
+DEF_MIN_MAX(unsigned long)
+DEF_MIN_MAX(float)
+DEF_MIN_MAX(double)
 
 #undef DEF_MIN_MAX
 

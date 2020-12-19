@@ -25,7 +25,8 @@ public:
 
 	void ProcessFrame()
 	{
-		if(_resetRunTimers || (_clockTimer.GetElapsedMS() - _targetTime) > 300) {
+		if (_resetRunTimers || (_clockTimer.GetElapsedMS() - _targetTime) > 300)
+		{
 			//Reset the timers, this can happen in 3 scenarios:
 			//1) Target frame rate changed
 			//2) The console was reset/power cycled or the emulation was paused (with or without the debugger)
@@ -41,7 +42,8 @@ public:
 
 	bool WaitForNextFrame()
 	{
-		if(_targetTime - _clockTimer.GetElapsedMS() > 50) {
+		if (_targetTime - _clockTimer.GetElapsedMS() > 50)
+		{
 			//When sleeping for a long time (e.g <= 25% speed), sleep in small chunks and check to see if we need to stop sleeping between each sleep call
 			_clockTimer.WaitUntil(_clockTimer.GetElapsedMS() + 40);
 			return true;

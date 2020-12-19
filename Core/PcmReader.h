@@ -29,7 +29,7 @@ private:
 	uint32_t _sampleRate;
 
 	void LoadSamples(uint32_t samplesToLoad);
-	void ReadSample(int16_t &left, int16_t &right);
+	void ReadSample(int16_t& left, int16_t& right);
 
 public:
 	PcmReader();

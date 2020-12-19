@@ -36,7 +36,8 @@ void HermiteResampler::PushSample(double prevValues[4], int16_t sample)
 
 void HermiteResampler::Reset()
 {
-	for(int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++)
+	{
 		_prevLeft[i] = 0.0;
 		_prevRight[i] = 0.0;
 	}
@@ -50,15 +51,18 @@ void HermiteResampler::SetSampleRates(double srcRate, double dstRate)
 
 uint32_t HermiteResampler::Resample(int16_t* in, uint32_t inSampleCount, int16_t* out)
 {
-	if(_rateRatio == 1.0) {
+	if (_rateRatio == 1.0)
+	{
 		memcpy(out, in, inSampleCount * 2 * sizeof(int16_t));
 		return inSampleCount;
 	}
 
 	uint32_t outPos = 0;
 
-	for(uint32_t i = 0; i < inSampleCount * 2; i += 2) {
-		while(_fraction <= 1.0) {
+	for (uint32_t i = 0; i < inSampleCount * 2; i += 2)
+	{
+		while (_fraction <= 1.0)
+		{
 			//Generate interpolated samples until we have enough samples for the current source sample
 			out[outPos] = HermiteInterpolate(_prevLeft, _fraction);
 			out[outPos + 1] = HermiteInterpolate(_prevRight, _fraction);

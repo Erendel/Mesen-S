@@ -19,6 +19,6 @@ public:
 	NtscFilter(shared_ptr<Console> console);
 	virtual ~NtscFilter();
 
-	virtual void ApplyFilter(uint16_t *ppuOutputBuffer);
+	virtual void ApplyFilter(uint16_t* ppuOutputBuffer);
 	virtual FrameInfo GetFrameInfo();
 };

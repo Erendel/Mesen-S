@@ -6,7 +6,7 @@
 class DebugBreakHelper
 {
 private:
-	Debugger * _debugger;
+	Debugger* _debugger;
 	bool _needResume = false;
 	bool _isEmulationThread = false;
 
@@ -17,11 +17,15 @@ public:
 
 		_isEmulationThread = debugger->GetConsole()->GetEmulationThreadId() == std::this_thread::get_id();
 
-		if(!_isEmulationThread) {
+		if (!_isEmulationThread)
+		{
 			//Only attempt to break if this is done in a thread other than the main emulation thread
 			debugger->BreakRequest(false);
-			if(!debugger->IsExecutionStopped()) {
-				while(!debugger->IsExecutionStopped()) {}
+			if (!debugger->IsExecutionStopped())
+			{
+				while (!debugger->IsExecutionStopped())
+				{
+				}
 				_needResume = true;
 			}
 		}
@@ -29,7 +33,8 @@ public:
 
 	~DebugBreakHelper()
 	{
-		if(!_isEmulationThread) {
+		if (!_isEmulationThread)
+		{
 			_debugger->BreakRequest(true);
 		}
 	}

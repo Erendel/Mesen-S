@@ -16,14 +16,14 @@ class VideoDecoder
 private:
 	shared_ptr<Console> _console;
 
-	uint16_t *_ppuOutputBuffer = nullptr;
+	uint16_t* _ppuOutputBuffer = nullptr;
 	uint32_t _frameNumber = 0;
 
 	unique_ptr<thread> _decodeThread;
 	unique_ptr<InputHud> _inputHud;
 
 	AutoResetEvent _waitForFrame;
-	
+
 	atomic<bool> _frameChanged;
 	atomic<bool> _stopFlag;
 	uint32_t _frameCount = 0;
@@ -48,15 +48,16 @@ public:
 
 	void DecodeFrame(bool synchronous = false);
 	void TakeScreenshot();
-	void TakeScreenshot(std::stringstream &stream);
+	void TakeScreenshot(std::stringstream& stream);
 
 	uint32_t GetFrameCount();
 
 	FrameInfo GetFrameInfo();
 	ScreenSize GetScreenSize(bool ignoreScale);
 
-	void UpdateFrameSync(uint16_t *ppuOutputBuffer, uint16_t width, uint16_t height, uint32_t frameNumber, bool forRewind);
-	void UpdateFrame(uint16_t *ppuOutputBuffer, uint16_t width, uint16_t height, uint32_t frameNumber);
+	void UpdateFrameSync(uint16_t* ppuOutputBuffer, uint16_t width, uint16_t height, uint32_t frameNumber,
+	                     bool forRewind);
+	void UpdateFrame(uint16_t* ppuOutputBuffer, uint16_t width, uint16_t height, uint32_t frameNumber);
 
 	bool IsRunning();
 	void StartThread();

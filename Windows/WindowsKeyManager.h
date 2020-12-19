@@ -8,7 +8,8 @@
 #include "XInputManager.h"
 #include "DirectInputManager.h"
 
-struct KeyDefinition {
+struct KeyDefinition
+{
 	string name;
 	uint32_t keyCode;
 	string description;
@@ -19,40 +20,40 @@ class Console;
 
 class WindowsKeyManager : public IKeyManager
 {
-	private:
-		HWND _hWnd;
-		shared_ptr<Console> _console;
+private:
+	HWND _hWnd;
+	shared_ptr<Console> _console;
 
-		bool _keyState[0x200];
-		bool _mouseState[0x03];
-		unique_ptr<DirectInputManager> _directInput;
-		unique_ptr<XInputManager> _xInput;
-		std::unordered_map<uint32_t, string> _keyNames;
-		std::unordered_map<uint32_t, string> _keyExtendedNames;
-		std::unordered_map<string, uint32_t> _keyCodes;
+	bool _keyState[0x200];
+	bool _mouseState[0x03];
+	unique_ptr<DirectInputManager> _directInput;
+	unique_ptr<XInputManager> _xInput;
+	std::unordered_map<uint32_t, string> _keyNames;
+	std::unordered_map<uint32_t, string> _keyExtendedNames;
+	std::unordered_map<string, uint32_t> _keyCodes;
 
-		AutoResetEvent _stopSignal;
-		
-		std::thread _updateDeviceThread;
-		atomic<bool> _stopUpdateDeviceThread = false;
-		bool _disableAllKeys = false;
+	AutoResetEvent _stopSignal;
 
-		void StartUpdateDeviceThread();
+	std::thread _updateDeviceThread;
+	atomic<bool> _stopUpdateDeviceThread = false;
+	bool _disableAllKeys = false;
 
-	public:
-		WindowsKeyManager(shared_ptr<Console> console, HWND hWnd);
-		~WindowsKeyManager();
+	void StartUpdateDeviceThread();
 
-		void RefreshState();
-		bool IsKeyPressed(uint32_t key);
-		bool IsMouseButtonPressed(MouseButton button);
-		vector<uint32_t> GetPressedKeys();
-		string GetKeyName(uint32_t key);
-		uint32_t GetKeyCode(string keyName);
+public:
+	WindowsKeyManager(shared_ptr<Console> console, HWND hWnd);
+	~WindowsKeyManager();
 
-		void SetKeyState(uint16_t scanCode, bool state);
-		void ResetKeyState();
-		void SetDisabled(bool disabled);
+	void RefreshState();
+	bool IsKeyPressed(uint32_t key);
+	bool IsMouseButtonPressed(MouseButton button);
+	vector<uint32_t> GetPressedKeys();
+	string GetKeyName(uint32_t key);
+	uint32_t GetKeyCode(string keyName);
 
-		void UpdateDevices();
+	void SetKeyState(uint16_t scanCode, bool state);
+	void ResetKeyState();
+	void SetDisabled(bool disabled);
+
+	void UpdateDevices();
 };

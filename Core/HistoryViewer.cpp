@@ -39,12 +39,15 @@ uint32_t HistoryViewer::GetHistoryLength()
 void HistoryViewer::GetHistorySegments(uint32_t* segmentBuffer, uint32_t& bufferSize)
 {
 	uint32_t segmentIndex = 0;
-	for (size_t i = 0; i < _history.size(); i++) {
-		if (_history[i].EndOfSegment) {
+	for (size_t i = 0; i < _history.size(); i++)
+	{
+		if (_history[i].EndOfSegment)
+		{
 			segmentBuffer[segmentIndex] = (uint32_t)i;
 			segmentIndex++;
 
-			if (segmentIndex == bufferSize) {
+			if (segmentIndex == bufferSize)
+			{
 				//Reached buffer size, can't return any more values
 				break;
 			}
@@ -61,7 +64,8 @@ uint32_t HistoryViewer::GetPosition()
 void HistoryViewer::SeekTo(uint32_t seekPosition)
 {
 	//Seek to the specified position
-	if (seekPosition < _history.size()) {
+	if (seekPosition < _history.size())
+	{
 		_console->Lock();
 
 		bool wasPaused = _console->IsPaused();
@@ -73,7 +77,8 @@ void HistoryViewer::SeekTo(uint32_t seekPosition)
 		_console->GetSoundMixer()->StopAudio(true);
 		_pollCounter = 0;
 
-		if (wasPaused) {
+		if (wasPaused)
+		{
 			_console->Pause();
 		}
 
@@ -83,13 +88,15 @@ void HistoryViewer::SeekTo(uint32_t seekPosition)
 
 bool HistoryViewer::CreateSaveState(string outputFile, uint32_t position)
 {
-	if (position < _history.size()) {
+	if (position < _history.size())
+	{
 		std::stringstream stateData;
 		_console->GetSaveStateManager()->GetSaveStateHeader(stateData);
 		_history[position].GetStateData(stateData);
 
 		ofstream output(outputFile, ios::binary);
-		if (output) {
+		if (output)
+		{
 			output << stateData.rdbuf();
 			output.close();
 			return true;
@@ -120,16 +127,19 @@ bool HistoryViewer::SaveMovie(string movieFile, uint32_t startPosition, uint32_t
 void HistoryViewer::ResumeGameplay(shared_ptr<Console> console, uint32_t resumePosition)
 {
 	console->Lock();
-	if (_console->GetRomInfo().RomFile.GetSha1Hash() != console->GetRomInfo().RomFile.GetSha1Hash()) {
+	if (_console->GetRomInfo().RomFile.GetSha1Hash() != console->GetRomInfo().RomFile.GetSha1Hash())
+	{
 		//Load game on the main window if they aren't the same		
 		console->LoadRom(console->GetRomInfo().RomFile, console->GetRomInfo().PatchFile);
 		// Mesen does console->Initialize(_console->GetRomPath(), _console->GetPatchFile());
 		// but that's probably equivalent
 	}
-	if (resumePosition < _history.size()) {
+	if (resumePosition < _history.size())
+	{
 		_history[resumePosition].LoadState(console);
 	}
-	else {
+	else
+	{
 		_history[_history.size() - 1].LoadState(console);
 	}
 	console->Unlock();
@@ -137,16 +147,18 @@ void HistoryViewer::ResumeGameplay(shared_ptr<Console> console, uint32_t resumeP
 
 bool HistoryViewer::SetInput(BaseControlDevice* device)
 {
-
 	uint8_t port = device->GetPort();
-	if (_position < _history.size()) {
+	if (_position < _history.size())
+	{
 		std::deque<ControlDeviceState>& stateData = _history[_position].InputLogs[port];
-		if (_pollCounter < stateData.size()) {
+		if (_pollCounter < stateData.size())
+		{
 			ControlDeviceState state = stateData[_pollCounter];
 			device->SetRawState(state);
 		}
 	}
-	if (port == 0 && _pollCounter < HistoryViewer::BufferSize) {
+	if (port == 0 && _pollCounter < HistoryViewer::BufferSize)
+	{
 		_pollCounter++;
 	}
 	return true;
@@ -154,11 +166,13 @@ bool HistoryViewer::SetInput(BaseControlDevice* device)
 
 void HistoryViewer::ProcessEndOfFrame()
 {
-	if (_pollCounter == HistoryViewer::BufferSize) {
+	if (_pollCounter == HistoryViewer::BufferSize)
+	{
 		_pollCounter = 0;
 		_position++;
 
-		if (_position >= _history.size()) {
+		if (_position >= _history.size())
+		{
 			//Reached the end of history data
 			_console->Pause();
 			return;

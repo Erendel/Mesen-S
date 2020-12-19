@@ -15,7 +15,8 @@ BsxMemoryPack::BsxMemoryPack(Console* console, vector<uint8_t>& data, bool persi
 
 	_calculatedSize = std::min<uint8_t>(0x0C, (uint8_t)log2(_dataSize >> 10));
 
-	for(uint32_t i = 0; i < _dataSize / 0x1000; i++) {
+	for (uint32_t i = 0; i < _dataSize / 0x1000; i++)
+	{
 		_handlers.push_back(unique_ptr<BsxMemoryPackHandler>(new BsxMemoryPackHandler(this, i * 0x1000)));
 	}
 }
@@ -27,7 +28,8 @@ BsxMemoryPack::~BsxMemoryPack()
 
 void BsxMemoryPack::SaveBattery()
 {
-	if(_persistFlash) {
+	if (_persistFlash)
+	{
 		_console->GetBatteryManager()->SaveBattery(".bs", _data, _dataSize);
 	}
 }
@@ -35,20 +37,24 @@ void BsxMemoryPack::SaveBattery()
 void BsxMemoryPack::Serialize(Serializer& s)
 {
 	s.Stream(_enableCsr, _enableEsr, _enableVendorInfo, _writeByte, _command);
-	
-	if(s.IsSaving()) {
+
+	if (s.IsSaving())
+	{
 		//Save content of memory pack as an IPS patch
 		vector<uint8_t> newData(_data, _data + _dataSize);
 		vector<uint8_t> ipsData = IpsPatcher::CreatePatch(_orgData, newData);
-		VectorInfo<uint8_t> data { &ipsData };
+		VectorInfo<uint8_t> data{&ipsData};
 		s.Stream(data);
-	} else {
+	}
+	else
+	{
 		//Apply IPS patch to original data and overwrite the current data
 		vector<uint8_t> ipsData;
-		VectorInfo<uint8_t> data { &ipsData };
+		VectorInfo<uint8_t> data{&ipsData};
 		s.Stream(data);
 
-		if(ipsData.size() > 8) {
+		if (ipsData.size() > 8)
+		{
 			vector<uint8_t> output;
 			IpsPatcher::PatchBuffer(ipsData, _orgData, output);
 			memcpy(_data, output.data(), _dataSize);
@@ -60,27 +66,34 @@ void BsxMemoryPack::ProcessCommand(uint8_t value, uint32_t page)
 {
 	_command = (_command << 8) | value;
 
-	switch(value) {
-		case 0x00:
-		case 0xFF:
-			_enableCsr = false;
-			_enableEsr = false;
-			_enableVendorInfo = false;
-			break;
+	switch (value)
+	{
+	case 0x00:
+	case 0xFF:
+		_enableCsr = false;
+		_enableEsr = false;
+		_enableVendorInfo = false;
+		break;
 
-		case 0x10:
-		case 0x40:
-			_writeByte = true;
-			break;
+	case 0x10:
+	case 0x40:
+		_writeByte = true;
+		break;
 
-		case 0x70: _enableCsr = true; break;
-		case 0x71: _enableEsr = true; break;
-		case 0x75: _enableVendorInfo = true; break;
+	case 0x70: _enableCsr = true;
+		break;
+	case 0x71: _enableEsr = true;
+		break;
+	case 0x75: _enableVendorInfo = true;
+		break;
 	}
 
-	switch(_command) {
-		case 0x20D0: memset(_data + page * 0x10000, 0xFF, 0x10000); break; //Page erase
-		case 0xA7D0: memset(_data, 0xFF, _dataSize); break; //Chip erase
+	switch (_command)
+	{
+	case 0x20D0: memset(_data + page * 0x10000, 0xFF, 0x10000);
+		break; //Page erase
+	case 0xA7D0: memset(_data, 0xFF, _dataSize);
+		break; //Chip erase
 	}
 }
 
@@ -108,7 +121,8 @@ uint32_t BsxMemoryPack::DebugGetMemoryPackSize()
 	return _dataSize;
 }
 
-BsxMemoryPack::BsxMemoryPackHandler::BsxMemoryPackHandler(BsxMemoryPack* memPack, uint32_t offset) : RamHandler(memPack->_data, offset, memPack->_dataSize, SnesMemoryType::BsxMemoryPack)
+BsxMemoryPack::BsxMemoryPackHandler::BsxMemoryPackHandler(BsxMemoryPack* memPack, uint32_t offset) : RamHandler(
+	memPack->_data, offset, memPack->_dataSize, SnesMemoryType::BsxMemoryPack)
 {
 	_memPack = memPack;
 	_page = offset / 0x10000;
@@ -116,30 +130,35 @@ BsxMemoryPack::BsxMemoryPackHandler::BsxMemoryPackHandler(BsxMemoryPack* memPack
 
 uint8_t BsxMemoryPack::BsxMemoryPackHandler::Read(uint32_t addr)
 {
-	if(_offset == 0 && _memPack->_enableEsr) {
-		switch(addr & 0xFFF) {
-			case 0x0002: return 0xC0;
-			case 0x0004: return 0x82;
+	if (_offset == 0 && _memPack->_enableEsr)
+	{
+		switch (addr & 0xFFF)
+		{
+		case 0x0002: return 0xC0;
+		case 0x0004: return 0x82;
 		}
 	}
 
-	if(_memPack->_enableCsr) {
+	if (_memPack->_enableCsr)
+	{
 		_memPack->_enableCsr = false;
 		return 0x80;
 	}
 
-	if(_memPack->_enableVendorInfo && ((addr & 0x7FFF) >= 0x7F00) && ((addr & 0x7FFF) <= 0x7F13)) {
+	if (_memPack->_enableVendorInfo && ((addr & 0x7FFF) >= 0x7F00) && ((addr & 0x7FFF) <= 0x7F13))
+	{
 		//Flash cartridge vendor information
-		switch(addr & 0xFF) {
-			case 0x00: return 0x4d;
-			case 0x01: return 0x00;
-			case 0x02: return 0x50;
-			case 0x03: return 0x00;
-			case 0x04: return 0x00;
-			case 0x05: return 0x00;
-			case 0x06: return 0x10 | _memPack->_calculatedSize; //Memory Pack Type 1
-			case 0x07: return 0x00;
-			default:   return 0x00;
+		switch (addr & 0xFF)
+		{
+		case 0x00: return 0x4d;
+		case 0x01: return 0x00;
+		case 0x02: return 0x50;
+		case 0x03: return 0x00;
+		case 0x04: return 0x00;
+		case 0x05: return 0x00;
+		case 0x06: return 0x10 | _memPack->_calculatedSize; //Memory Pack Type 1
+		case 0x07: return 0x00;
+		default: return 0x00;
 		}
 	}
 
@@ -148,11 +167,14 @@ uint8_t BsxMemoryPack::BsxMemoryPackHandler::Read(uint32_t addr)
 
 void BsxMemoryPack::BsxMemoryPackHandler::Write(uint32_t addr, uint8_t value)
 {
-	if(_memPack->_writeByte) {
+	if (_memPack->_writeByte)
+	{
 		uint8_t currentByte = RamHandler::Read(addr);
 		RamHandler::Write(addr, value & currentByte);
 		_memPack->_writeByte = false;
-	} else if(_offset == 0 && (addr & 0xFFF) == 0) {
+	}
+	else if (_offset == 0 && (addr & 0xFFF) == 0)
+	{
 		_memPack->ProcessCommand(value, _page);
 	}
 }

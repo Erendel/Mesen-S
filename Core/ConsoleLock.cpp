@@ -3,7 +3,7 @@
 #include "Console.h"
 #include "Debugger.h"
 
-ConsoleLock::ConsoleLock(Console *console)
+ConsoleLock::ConsoleLock(Console* console)
 {
 	_console = console;
 	_console->Lock();

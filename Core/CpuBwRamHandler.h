@@ -10,7 +10,7 @@
 class CpuBwRamHandler : public IMemoryHandler
 {
 private:
-	IMemoryHandler * _handler;
+	IMemoryHandler* _handler;
 	Sa1State* _state;
 	Sa1* _sa1;
 
@@ -24,9 +24,12 @@ public:
 
 	uint8_t Read(uint32_t addr) override
 	{
-		if(_state->CharConvDmaActive) {
+		if (_state->CharConvDmaActive)
+		{
 			return _sa1->ReadCharConvertType1(addr);
-		} else {
+		}
+		else
+		{
 			return _handler->Read(addr);
 		}
 	}
@@ -36,7 +39,7 @@ public:
 		return Read(addr);
 	}
 
-	void PeekBlock(uint32_t addr, uint8_t *output) override
+	void PeekBlock(uint32_t addr, uint8_t* output) override
 	{
 		_handler->PeekBlock(addr, output);
 	}

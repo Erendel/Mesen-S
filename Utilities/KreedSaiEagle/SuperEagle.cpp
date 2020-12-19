@@ -125,20 +125,23 @@
          out += 2
 #endif
 
-void supereagle_generic_xrgb8888(unsigned width, unsigned height, uint32_t *src, unsigned src_stride, uint32_t *dst, unsigned dst_stride)
+void supereagle_generic_xrgb8888(unsigned width, unsigned height, uint32_t* src, unsigned src_stride, uint32_t* dst,
+                                 unsigned dst_stride)
 {
-   unsigned finish;
+	unsigned finish;
 	int y = 0;
 	int x = 0;
-	for(; height; height--) {
-		uint32_t *in = (uint32_t*)src;
-		uint32_t *out = (uint32_t*)dst;
+	for (; height; height--)
+	{
+		uint32_t* in = (uint32_t*)src;
+		uint32_t* out = (uint32_t*)dst;
 
 		int prevline = (y > 0 ? src_stride : 0);
 		int nextline = (height > 1 ? src_stride : 0);
 		int nextline2 = (height > 2 ? src_stride * 2 : nextline);
 
-		for(finish = width; finish; finish -= 1) {
+		for (finish = width; finish; finish -= 1)
+		{
 			int prevcolumn = (x > 0 ? 1 : 0);
 			int nextcolumn = (finish > 1 ? 1 : 0);
 			int nextcolumn2 = (finish > 2 ? 2 : nextcolumn);

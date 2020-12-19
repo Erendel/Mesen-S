@@ -12,7 +12,7 @@
 #include "SuperGameboy.h"
 #include "../Utilities/Equalizer.h"
 
-SoundMixer::SoundMixer(Console *console)
+SoundMixer::SoundMixer(Console* console)
 {
 	_console = console;
 	_audioDevice = nullptr;
@@ -25,26 +25,33 @@ SoundMixer::~SoundMixer()
 	delete[] _sampleBuffer;
 }
 
-void SoundMixer::RegisterAudioDevice(IAudioDevice *audioDevice)
+void SoundMixer::RegisterAudioDevice(IAudioDevice* audioDevice)
 {
 	_audioDevice = audioDevice;
 }
 
 AudioStatistics SoundMixer::GetStatistics()
 {
-	if(_audioDevice) {
+	if (_audioDevice)
+	{
 		return _audioDevice->GetStatistics();
-	} else {
+	}
+	else
+	{
 		return AudioStatistics();
 	}
 }
 
 void SoundMixer::StopAudio(bool clearBuffer)
 {
-	if(_audioDevice) {
-		if(clearBuffer) {
+	if (_audioDevice)
+	{
+		if (clearBuffer)
+		{
 			_audioDevice->Stop();
-		} else {
+		}
+		else
+		{
 			_audioDevice->Pause();
 		}
 	}
@@ -54,57 +61,73 @@ void SoundMixer::PlayAudioBuffer(int16_t* samples, uint32_t sampleCount, uint32_
 {
 	AudioConfig cfg = _console->GetSettings()->GetAudioConfig();
 
-	if(cfg.EnableEqualizer) {
+	if (cfg.EnableEqualizer)
+	{
 		ProcessEqualizer(samples, sampleCount);
 	}
 
 	uint32_t masterVolume = cfg.MasterVolume;
-	if(_console->GetSettings()->CheckFlag(EmulationFlags::InBackground)) {
-		if(cfg.MuteSoundInBackground) {
+	if (_console->GetSettings()->CheckFlag(EmulationFlags::InBackground))
+	{
+		if (cfg.MuteSoundInBackground)
+		{
 			masterVolume = 0;
-		} else if(cfg.ReduceSoundInBackground) {
+		}
+		else if (cfg.ReduceSoundInBackground)
+		{
 			masterVolume = cfg.VolumeReduction == 100 ? 0 : masterVolume * (100 - cfg.VolumeReduction) / 100;
 		}
-	} else if(cfg.ReduceSoundInFastForward && _console->GetSettings()->CheckFlag(EmulationFlags::TurboOrRewind)) {
+	}
+	else if (cfg.ReduceSoundInFastForward && _console->GetSettings()->CheckFlag(EmulationFlags::TurboOrRewind))
+	{
 		masterVolume = cfg.VolumeReduction == 100 ? 0 : masterVolume * (100 - cfg.VolumeReduction) / 100;
 	}
 
 	_leftSample = samples[0];
 	_rightSample = samples[1];
 
-	int16_t *out = _sampleBuffer;
+	int16_t* out = _sampleBuffer;
 	uint32_t count = _resampler->Resample(samples, sampleCount, sourceRate, cfg.SampleRate, out);
 
 	SuperGameboy* sgb = _console->GetCartridge()->GetSuperGameboy();
-	if(sgb) {
+	if (sgb)
+	{
 		uint32_t targetRate = (uint32_t)(cfg.SampleRate * _resampler->GetRateAdjustment());
 		sgb->MixAudio(targetRate, out, count);
 	}
 
 	shared_ptr<Msu1> msu1 = _console->GetMsu1();
-	if(msu1) {
+	if (msu1)
+	{
 		msu1->MixAudio(out, count, cfg.SampleRate);
 	}
-	
-	if(masterVolume < 100) {
+
+	if (masterVolume < 100)
+	{
 		//Apply volume if not using the default value
-		for(uint32_t i = 0; i < count * 2; i++) {
+		for (uint32_t i = 0; i < count * 2; i++)
+		{
 			out[i] = (int32_t)out[i] * (int32_t)masterVolume / 100;
 		}
 	}
 
 	shared_ptr<RewindManager> rewindManager = _console->GetRewindManager();
-	if(!_console->IsRunAheadFrame() && rewindManager && rewindManager->SendAudio(out, count)) {
+	if (!_console->IsRunAheadFrame() && rewindManager && rewindManager->SendAudio(out, count))
+	{
 		bool isRecording = _waveRecorder || _console->GetVideoRenderer()->IsRecording();
-		if(isRecording) {
-			if(_waveRecorder) {
+		if (isRecording)
+		{
+			if (_waveRecorder)
+			{
 				_waveRecorder->WriteSamples(out, count, cfg.SampleRate, true);
 			}
 			_console->GetVideoRenderer()->AddRecordingSound(out, count, cfg.SampleRate);
 		}
 
-		if(_audioDevice) {
-			if(!cfg.EnableAudio) {
+		if (_audioDevice)
+		{
+			if (!cfg.EnableAudio)
+			{
 				_audioDevice->Stop();
 				return;
 			}
@@ -118,7 +141,8 @@ void SoundMixer::PlayAudioBuffer(int16_t* samples, uint32_t sampleCount, uint32_
 void SoundMixer::ProcessEqualizer(int16_t* samples, uint32_t sampleCount)
 {
 	AudioConfig cfg = _console->GetSettings()->GetAudioConfig();
-	if(!_equalizer) {
+	if (!_equalizer)
+	{
 		_equalizer.reset(new Equalizer());
 	}
 	vector<double> bandGains = {
@@ -151,7 +175,7 @@ bool SoundMixer::IsRecording()
 	return _waveRecorder.get() != nullptr;
 }
 
-void SoundMixer::GetLastSamples(int16_t &left, int16_t &right)
+void SoundMixer::GetLastSamples(int16_t& left, int16_t& right)
 {
 	left = _leftSample;
 	right = _rightSample;

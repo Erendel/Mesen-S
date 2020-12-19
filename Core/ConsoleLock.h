@@ -7,9 +7,9 @@ class Debugger;
 class ConsoleLock
 {
 private:
-	Console *_console = nullptr;
+	Console* _console = nullptr;
 
 public:
-	ConsoleLock(Console *console);
+	ConsoleLock(Console* console);
 	~ConsoleLock();
 };

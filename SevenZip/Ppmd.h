@@ -34,9 +34,9 @@ EXTERN_C_BEGIN
 /* SEE-contexts for PPM-contexts with masked symbols */
 typedef struct
 {
-  UInt16 Summ; /* Freq */
-  Byte Shift;  /* Speed of Freq change; low Shift is for fast change */
-  Byte Count;  /* Count to next change of Shift */
+	UInt16 Summ; /* Freq */
+	Byte Shift; /* Speed of Freq change; low Shift is for fast change */
+	Byte Count; /* Count to next change of Shift */
 } CPpmd_See;
 
 #define Ppmd_See_Update(p)  if ((p)->Shift < PPMD_PERIOD_BITS && --(p)->Count == 0) \
@@ -44,42 +44,42 @@ typedef struct
 
 typedef struct
 {
-  Byte Symbol;
-  Byte Freq;
-  UInt16 SuccessorLow;
-  UInt16 SuccessorHigh;
+	Byte Symbol;
+	Byte Freq;
+	UInt16 SuccessorLow;
+	UInt16 SuccessorHigh;
 } CPpmd_State;
 
 #pragma pack(pop)
 
 typedef
-  #ifdef PPMD_32BIT
+#ifdef PPMD_32BIT
     CPpmd_State *
-  #else
-    UInt32
-  #endif
-  CPpmd_State_Ref;
+#else
+UInt32
+#endif
+CPpmd_State_Ref;
 
 typedef
-  #ifdef PPMD_32BIT
+#ifdef PPMD_32BIT
     void *
-  #else
-    UInt32
-  #endif
-  CPpmd_Void_Ref;
+#else
+UInt32
+#endif
+CPpmd_Void_Ref;
 
 typedef
-  #ifdef PPMD_32BIT
+#ifdef PPMD_32BIT
     Byte *
-  #else
-    UInt32
-  #endif
-  CPpmd_Byte_Ref;
+#else
+UInt32
+#endif
+CPpmd_Byte_Ref;
 
 #define PPMD_SetAllBitsIn256Bytes(p) \
   { unsigned z; for (z = 0; z < 256 / sizeof(p[0]); z += 8) { \
   p[z+7] = p[z+6] = p[z+5] = p[z+4] = p[z+3] = p[z+2] = p[z+1] = p[z+0] = ~(size_t)0; }}
 
 EXTERN_C_END
- 
+
 #endif

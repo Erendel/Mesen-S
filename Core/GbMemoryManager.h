@@ -31,7 +31,7 @@ private:
 	GbDmaController* _dmaController = nullptr;
 
 	uint8_t* _highRam = nullptr;
-	
+
 	uint8_t* _reads[0x100] = {};
 	uint8_t* _writes[0x100] = {};
 
@@ -42,7 +42,8 @@ public:
 
 	GbMemoryManagerState GetState();
 
-	void Init(Console* console, Gameboy* gameboy, GbCart* cart, GbPpu* ppu, GbApu* apu, GbTimer* timer, GbDmaController* dmaController);
+	void Init(Console* console, Gameboy* gameboy, GbCart* cart, GbPpu* ppu, GbApu* apu, GbTimer* timer,
+	          GbDmaController* dmaController);
 	void MapRegisters(uint16_t start, uint16_t end, RegisterAccess access);
 	void Map(uint16_t start, uint16_t end, GbMemoryType type, uint32_t offset, bool readonly);
 	void Unmap(uint16_t start, uint16_t end);
@@ -50,14 +51,14 @@ public:
 
 	void Exec();
 
-	template<MemoryOperationType type = MemoryOperationType::Read>
+	template <MemoryOperationType type = MemoryOperationType::Read>
 	uint8_t Read(uint16_t addr);
 
 	bool IsOamDmaRunning();
 	void WriteDma(uint16_t addr, uint8_t value);
 	uint8_t ReadDma(uint16_t addr);
 
-	template<MemoryOperationType type = MemoryOperationType::Write>
+	template <MemoryOperationType type = MemoryOperationType::Write>
 	void Write(uint16_t addr, uint8_t value);
 
 	uint8_t PeekRegister(uint16_t addr);
@@ -74,7 +75,7 @@ public:
 
 	uint64_t GetCycleCount();
 	uint64_t GetApuCycleCount();
-	
+
 	uint8_t ReadInputPort();
 	void WriteInputPort(uint8_t value);
 

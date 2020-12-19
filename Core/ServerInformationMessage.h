@@ -8,13 +8,16 @@ private:
 	string _hashSalt;
 
 protected:
-	void Serialize(Serializer &s) override
+	void Serialize(Serializer& s) override
 	{
 		s.Stream(_hashSalt);
 	}
 
 public:
-	ServerInformationMessage(void* buffer, uint32_t length) : NetMessage(buffer, length) {}
+	ServerInformationMessage(void* buffer, uint32_t length) : NetMessage(buffer, length)
+	{
+	}
+
 	ServerInformationMessage(string hashSalt) : NetMessage(MessageType::ServerInformation)
 	{
 		_hashSalt = hashSalt;

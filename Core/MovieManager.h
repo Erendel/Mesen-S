@@ -11,7 +11,7 @@ class Console;
 class IMovie : public IInputProvider
 {
 public:
-	virtual bool Play(VirtualFile &file) = 0;
+	virtual bool Play(VirtualFile& file) = 0;
 	virtual bool IsPlaying() = 0;
 };
 

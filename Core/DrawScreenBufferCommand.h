@@ -5,13 +5,15 @@
 class DrawScreenBufferCommand : public DrawCommand
 {
 private:
-	uint32_t _screenBuffer[256*240];
+	uint32_t _screenBuffer[256 * 240];
 
 protected:
 	void InternalDraw()
 	{
-		for(int y = 0; y < 240; y++) {
-			for(int x = 0; x < 256; x++) {
+		for (int y = 0; y < 240; y++)
+		{
+			for (int x = 0; x < 256; x++)
+			{
 				DrawPixel(x, y, _screenBuffer[(y << 8) + x]);
 			}
 		}

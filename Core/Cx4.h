@@ -13,9 +13,9 @@ class Cx4 : public BaseCoprocessor
 private:
 	static constexpr int DataRamSize = 0xC00;
 
-	Console *_console;
-	MemoryManager *_memoryManager;
-	Cpu *_cpu;
+	Console* _console;
+	MemoryManager* _memoryManager;
+	Cpu* _cpu;
 	MemoryMappings _mappings;
 	double _clockRatio;
 
@@ -119,7 +119,7 @@ public:
 	uint8_t Read(uint32_t addr) override;
 	void Write(uint32_t addr, uint8_t value) override;
 
-	void Serialize(Serializer &s) override;
+	void Serialize(Serializer& s) override;
 
 	uint8_t Peek(uint32_t addr) override;
 	void PeekBlock(uint32_t addr, uint8_t* output) override;

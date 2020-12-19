@@ -14,7 +14,7 @@ Serializer::Serializer(uint32_t version)
 	_saving = true;
 }
 
-Serializer::Serializer(istream &file, uint32_t version, bool compressed)
+Serializer::Serializer(istream& file, uint32_t version, bool compressed)
 {
 	_version = version;
 
@@ -22,7 +22,8 @@ Serializer::Serializer(istream &file, uint32_t version, bool compressed)
 	_block->Position = 0;
 	_saving = false;
 
-	if(compressed) {
+	if (compressed)
+	{
 		uint32_t decompressedSize;
 		file.read((char*)&decompressedSize, sizeof(decompressedSize));
 
@@ -36,7 +37,9 @@ Serializer::Serializer(istream &file, uint32_t version, bool compressed)
 
 		unsigned long decompSize = decompressedSize;
 		uncompress(_block->Data.data(), &decompSize, compressedData.data(), (unsigned long)compressedData.size());
-	} else {
+	}
+	else
+	{
 		file.seekg(0, std::ios::end);
 		uint32_t size = (uint32_t)file.tellg();
 		file.seekg(0, std::ios::beg);
@@ -50,14 +53,16 @@ void Serializer::EnsureCapacity(uint32_t typeSize)
 {
 	//Make sure the current block/stream is large enough to fit the next write
 	uint32_t oldSize = (uint32_t)_block->Data.size();
-	if(oldSize == 0) {
+	if (oldSize == 0)
+	{
 		oldSize = typeSize * 2;
 	}
 
 	uint32_t sizeRequired = _block->Position + typeSize;
-	
+
 	uint32_t newSize = oldSize;
-	while(newSize < sizeRequired) {
+	while (newSize < sizeRequired)
+	{
 		newSize *= 2;
 	}
 
@@ -73,10 +78,13 @@ void Serializer::StreamStartBlock()
 	unique_ptr<BlockData> block(new BlockData());
 	block->Position = 0;
 
-	if(!_saving) {
-		VectorInfo<uint8_t> vectorInfo = { &block->Data };
+	if (!_saving)
+	{
+		VectorInfo<uint8_t> vectorInfo = {&block->Data};
 		InternalStream(vectorInfo);
-	} else {
+	}
+	else
+	{
 		block->Data = vector<uint8_t>(0x100);
 	}
 
@@ -86,7 +94,8 @@ void Serializer::StreamStartBlock()
 
 void Serializer::StreamEndBlock()
 {
-	if(_blocks.empty()) {
+	if (_blocks.empty())
+	{
 		throw std::runtime_error("Invalid call to end block");
 	}
 
@@ -95,20 +104,25 @@ void Serializer::StreamEndBlock()
 	_block = std::move(_blocks.back());
 	_blocks.pop_back();
 
-	if(_saving) {
-		ArrayInfo<uint8_t> arrayInfo { block->Data.data(), block->Position };
+	if (_saving)
+	{
+		ArrayInfo<uint8_t> arrayInfo{block->Data.data(), block->Position};
 		InternalStream(arrayInfo);
 	}
 }
 
 void Serializer::Save(ostream& file, int compressionLevel)
 {
-	if(compressionLevel == 0) {
+	if (compressionLevel == 0)
+	{
 		file.write((char*)_block->Data.data(), _block->Position);
-	} else {
+	}
+	else
+	{
 		unsigned long compressedSize = compressBound((unsigned long)_block->Position);
 		uint8_t* compressedData = new uint8_t[compressedSize];
-		compress2(compressedData, &compressedSize, (unsigned char*)_block->Data.data(), (unsigned long)_block->Position, compressionLevel);
+		compress2(compressedData, &compressedSize, (unsigned char*)_block->Data.data(), (unsigned long)_block->Position,
+		          compressionLevel);
 
 		uint32_t size = (uint32_t)compressedSize;
 		file.write((char*)&_block->Position, sizeof(uint32_t));
@@ -131,27 +145,31 @@ void Serializer::SkipBlock(istream* file)
 	file->seekg(blockSize, std::ios::cur);
 }
 
-void Serializer::Stream(ISerializable &obj)
+void Serializer::Stream(ISerializable& obj)
 {
 	StreamStartBlock();
 	obj.Serialize(*this);
 	StreamEndBlock();
 }
-void Serializer::Stream(ISerializable *obj)
+
+void Serializer::Stream(ISerializable* obj)
 {
 	StreamStartBlock();
 	obj->Serialize(*this);
 	StreamEndBlock();
 }
 
-void Serializer::InternalStream(string &str)
+void Serializer::InternalStream(string& str)
 {
-	if(_saving) {
+	if (_saving)
+	{
 		vector<uint8_t> stringData;
 		stringData.resize(str.size());
 		memcpy(stringData.data(), str.data(), str.size());
 		StreamVector(stringData);
-	} else {
+	}
+	else
+	{
 		vector<uint8_t> stringData;
 		StreamVector(stringData);
 		str = string(stringData.begin(), stringData.end());

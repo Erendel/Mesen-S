@@ -14,7 +14,7 @@ private:
 	GbMemoryManager* _memoryManager;
 	GbPpu* _ppu;
 	GbCpu* _cpu;
-	
+
 	void ProcessDmaBlock();
 
 public:

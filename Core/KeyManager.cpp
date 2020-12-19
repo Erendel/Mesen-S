@@ -6,7 +6,7 @@
 #include "VideoDecoder.h"
 
 IKeyManager* KeyManager::_keyManager = nullptr;
-MousePosition KeyManager::_mousePosition = { 0, 0 };
+MousePosition KeyManager::_mousePosition = {0, 0};
 atomic<int16_t> KeyManager::_xMouseMovement;
 atomic<int16_t> KeyManager::_yMouseMovement;
 EmuSettings* KeyManager::_settings = nullptr;
@@ -20,19 +20,21 @@ void KeyManager::RegisterKeyManager(IKeyManager* keyManager)
 
 void KeyManager::RefreshKeyState()
 {
-	if(_keyManager != nullptr) {
+	if (_keyManager != nullptr)
+	{
 		return _keyManager->RefreshState();
 	}
 }
 
-void KeyManager::SetSettings(EmuSettings *settings)
+void KeyManager::SetSettings(EmuSettings* settings)
 {
 	_settings = settings;
 }
 
 bool KeyManager::IsKeyPressed(uint32_t keyCode)
 {
-	if(_keyManager != nullptr) {
+	if (_keyManager != nullptr)
+	{
 		return _settings->IsInputEnabled() && _keyManager->IsKeyPressed(keyCode);
 	}
 	return false;
@@ -40,7 +42,8 @@ bool KeyManager::IsKeyPressed(uint32_t keyCode)
 
 bool KeyManager::IsMouseButtonPressed(MouseButton button)
 {
-	if(_keyManager != nullptr) {
+	if (_keyManager != nullptr)
+	{
 		return _settings->IsInputEnabled() && _keyManager->IsMouseButtonPressed(button);
 	}
 	return false;
@@ -48,7 +51,8 @@ bool KeyManager::IsMouseButtonPressed(MouseButton button)
 
 vector<uint32_t> KeyManager::GetPressedKeys()
 {
-	if(_keyManager != nullptr) {
+	if (_keyManager != nullptr)
+	{
 		return _keyManager->GetPressedKeys();
 	}
 	return vector<uint32_t>();
@@ -56,7 +60,8 @@ vector<uint32_t> KeyManager::GetPressedKeys()
 
 string KeyManager::GetKeyName(uint32_t keyCode)
 {
-	if(_keyManager != nullptr) {
+	if (_keyManager != nullptr)
+	{
 		return _keyManager->GetKeyName(keyCode);
 	}
 	return "";
@@ -64,7 +69,8 @@ string KeyManager::GetKeyName(uint32_t keyCode)
 
 uint32_t KeyManager::GetKeyCode(string keyName)
 {
-	if(_keyManager != nullptr) {
+	if (_keyManager != nullptr)
+	{
 		return _keyManager->GetKeyCode(keyName);
 	}
 	return 0;
@@ -72,7 +78,8 @@ uint32_t KeyManager::GetKeyCode(string keyName)
 
 void KeyManager::UpdateDevices()
 {
-	if(_keyManager != nullptr) {
+	if (_keyManager != nullptr)
+	{
 		_keyManager->UpdateDevices();
 	}
 }
@@ -97,14 +104,17 @@ MouseMovement KeyManager::GetMouseMovement(double videoScale, double mouseSensit
 
 void KeyManager::SetMousePosition(shared_ptr<Console> console, double x, double y)
 {
-	if(x < 0 || y < 0) {
+	if (x < 0 || y < 0)
+	{
 		_mousePosition.X = -1;
 		_mousePosition.Y = -1;
-	} else {
+	}
+	else
+	{
 		OverscanDimensions overscan = console->GetSettings()->GetOverscan();
 		ScreenSize size = console->GetVideoDecoder()->GetScreenSize(true);
-		_mousePosition.X = (int32_t)(x*size.Width + overscan.Left);
-		_mousePosition.Y = (int32_t)(y*size.Height + overscan.Top);
+		_mousePosition.X = (int32_t)(x * size.Width + overscan.Left);
+		_mousePosition.Y = (int32_t)(y * size.Height + overscan.Top);
 	}
 }
 

@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "../Lua/lua.hpp"
 
-template<typename T>
+template <typename T>
 struct Nullable
 {
 	bool HasValue = false;
