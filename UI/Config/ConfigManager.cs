@@ -20,7 +20,7 @@ namespace Mesen.GUI.Config
 		private static Configuration _dirtyConfig;
 		public static bool DoNotSaveSettings { get; set; }
 
-		public static string DefaultPortableFolder { get { return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location); } }
+		public static string DefaultPortableFolder { get { return Path.GetDirectoryName(Assembly.GetCallingAssembly().Location); } }
 		public static string DefaultDocumentsFolder
 		{
 			get
