@@ -18,7 +18,7 @@ using Mesen.GUI.Utilities;
 
 namespace Mesen.GUI
 {
-	static class Program
+	public static class Program
 	{
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -40,9 +40,11 @@ namespace Mesen.GUI
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
+#if !IDA_DBG
 		[STAThread]
+#endif
 		[HandleProcessCorruptedStateExceptions]
-		private static void Main(string[] args)
+		public static void Main(string[] args)
 		{
 			try {
 				Task.Run(() => {
@@ -128,7 +130,12 @@ namespace Mesen.GUI
 							}
 						};
 
+#if IDA_DBG
+						Thread th = new Thread(() => Application.Run(frmMain));
+						th.Start();
+#else
 						Application.Run(frmMain);
+#endif
 					} else {
 						if(singleInstance.PassArgumentsToFirstInstance(args)) {
 							Process current = Process.GetCurrentProcess();
@@ -139,7 +146,12 @@ namespace Mesen.GUI
 								}
 							}
 						} else {
+#if IDA_DBG
+							Thread th = new Thread(() => Application.Run(new frmMain(args)));
+							th.Start();
+#else
 							Application.Run(new frmMain(args));
+#endif
 						}
 					}
 				}

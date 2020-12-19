@@ -200,7 +200,11 @@ namespace FastColoredTextBoxNS
             PaddingBackColor = Color.Transparent;
             DisabledColor = Color.FromArgb(100, 180, 180, 180);
             needRecalcFoldingLines = true;
+#if IDA_DBG
+            AllowDrop = false;
+#else
             AllowDrop = true;
+#endif
             FindEndOfFoldingBlockStrategy = FindEndOfFoldingBlockStrategy.Strategy1;
             VirtualSpace = false;
             bookmarks = new Bookmarks(this);

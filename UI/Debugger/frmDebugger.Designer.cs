@@ -1136,7 +1136,11 @@
 			// 
 			// frmDebugger
 			// 
+#if IDA_DBG
+			this.AllowDrop = false;
+#else
 			this.AllowDrop = true;
+#endif
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(832, 644);
@@ -1166,7 +1170,7 @@
 
 		}
 
-		#endregion
+#endregion
 
 		private Controls.ctrlDisassemblyView ctrlDisassemblyView;
 		private GUI.Controls.ctrlMesenMenuStrip ctrlMesenMenuStrip1;
