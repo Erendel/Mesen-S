@@ -44,7 +44,7 @@ extern "C"
 	DllExport bool __stdcall IsDebuggerRunning()
 	{
 		auto dbg = _console.get() ? _console->GetDebugger(false) : nullptr;
-		return dbg.get() ? (dbg.get() != nullptr) : false;
+		return dbg.get() ? true : false;
 	}
 
 	DllExport bool __stdcall IsExecutionStopped()
