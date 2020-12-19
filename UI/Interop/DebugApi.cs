@@ -50,7 +50,7 @@ namespace Mesen.GUI
 		[DllImport(DllPath, EntryPoint = "GetExecutionTrace")] private static extern IntPtr GetExecutionTraceWrapper(UInt32 lineCount);
 		public static string GetExecutionTrace(UInt32 lineCount) { return Utf8Marshaler.PtrToStringUtf8(DebugApi.GetExecutionTraceWrapper(lineCount)); }
 
-		[DllImport(DllPath, EntryPoint = "GetState")] private static extern void GetStateWrapper(ref DebugState state);
+		[DllImport(DllPath, EntryPoint = "GetState")] public static extern void GetStateWrapper(ref DebugState state);
 		public static DebugState GetState()
 		{
 			DebugState state = new DebugState();
@@ -58,6 +58,15 @@ namespace Mesen.GUI
 			return state;
 		}
 
+		public static UInt32 GetPcAddress()
+		{
+			DebugState state = new DebugState();
+			DebugApi.GetStateWrapper(ref state);
+
+			return (UInt32)((state.Cpu.K << 16) | state.Cpu.PC);
+		}
+
+		[DllImport(DllPath)] public static extern bool GetCpuProcFlag(ProcFlags flag);
 		[DllImport(DllPath)] public static extern void SetCpuRegister(CpuRegister reg, UInt16 value);
 		[DllImport(DllPath)] public static extern void SetCpuProcFlag(ProcFlags flag, [MarshalAs(UnmanagedType.I1)]bool set);
 		[DllImport(DllPath)] public static extern void SetSpcRegister(SpcRegister reg, UInt16 value);
@@ -93,7 +102,7 @@ namespace Mesen.GUI
 
 		[DllImport(DllPath)] public static extern void SaveRomToDisk([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf8Marshaler))]string filename, [MarshalAs(UnmanagedType.I1)]bool saveAsIps, CdlStripOption cdlStripOption);
 
-		[DllImport(DllPath, EntryPoint = "GetMemoryState")] private static extern void GetMemoryStateWrapper(SnesMemoryType type, [In, Out] byte[] buffer);
+		[DllImport(DllPath, EntryPoint = "GetMemoryState")] public static extern void GetMemoryStateWrapper(SnesMemoryType type, [In, Out] byte[] buffer);
 		public static byte[] GetMemoryState(SnesMemoryType type)
 		{
 			byte[] buffer = new byte[DebugApi.GetMemorySize(type)];
