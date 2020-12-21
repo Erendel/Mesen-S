@@ -61,7 +61,7 @@ namespace Mesen.GUI
 		public static UInt32 GetPcAddress()
 		{
 			DebugState state = GetState();
-			return (UInt32)((state.Cpu.K << 16) | state.Cpu.PC);
+			return (UInt32)(((state.Cpu.K << 16) | state.Cpu.PC) | (state.Cpu.K <= 0x7D ? 0x800000 : 0x000000));
 		}
 
 		[DllImport(DllPath)] public static extern bool GetCpuProcFlag(ProcFlags flag);

@@ -316,7 +316,7 @@ static bool read_registers(thid_t tid, int clsmask, regval_t* values, qstring* e
 	values[static_cast<int>(SNES_REGS::SR_D)].ival = lastState.Cpu.D;
 	values[static_cast<int>(SNES_REGS::SR_DBR)].ival = lastState.Cpu.DBR;
 
-	values[static_cast<int>(SNES_REGS::SR_PC)].ival = (lastState.Cpu.K << 16) | lastState.Cpu.PC;
+	values[static_cast<int>(SNES_REGS::SR_PC)].ival = ((lastState.Cpu.K << 16) | lastState.Cpu.PC) | (lastState.Cpu.K <= 0x7D ? 0x800000 : 0x000000);
 	values[static_cast<int>(SNES_REGS::SR_PS)].ival = lastState.Cpu.PS;
 
 	values[static_cast<int>(SNES_REGS::SR_A8)].ival = GetCpuProcFlag(ProcFlags::MemoryMode8);
