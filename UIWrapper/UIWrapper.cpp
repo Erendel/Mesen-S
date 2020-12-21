@@ -79,31 +79,6 @@ extern "C" {
         EmuApi::UnregisterNotificationCallback(IntPtr(notificationListener));
     }
 
-    void __stdcall GetMemoryRegions(mem_region_t* regions, int& count)
-    {
-        if (regions != nullptr)
-        {
-            array<Mesen::GUI::MemoryRegionInfo>^ rs = gcnew array<Mesen::GUI::MemoryRegionInfo>(count);
-            DebugApi::GetMemoryRegions(rs, count);
-
-            for (auto i = 0; i < count; ++i)
-            {
-                auto arr = System::Text::Encoding::UTF8->GetBytes(rs[i].name);
-                pin_ptr<unsigned char> arr_start = &arr[0];
-                memcpy(regions[i].name, arr_start, arr->Length);
-
-                regions[i].startBank = rs[i].startBank;
-                regions[i].endBank = rs[i].endBank;
-                regions[i].startPage = rs[i].startPage;
-                regions[i].endPage = rs[i].endPage;
-            }
-        }
-        else
-        {
-            DebugApi::GetMemoryRegions(nullptr, count);
-        }
-    }
-
     uint32_t __stdcall GetMemorySize(::SnesMemoryType type) {
         return DebugApi::GetMemorySize((Mesen::GUI::SnesMemoryType)type);
     }
