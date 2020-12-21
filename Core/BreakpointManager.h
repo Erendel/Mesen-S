@@ -13,7 +13,7 @@ enum class MemoryOperationType;
 class BreakpointManager
 {
 private:
-	static constexpr int BreakpointTypeCount = 3; //Read, Write, Exec
+	static constexpr int BreakpointTypeCount = 3; // Exec, Read, Write
 
 	Debugger* _debugger;
 	CpuType _cpuType;
@@ -26,7 +26,7 @@ private:
 
 	unique_ptr<ExpressionEvaluator> _bpExpEval;
 
-	BreakpointType GetBreakpointType(MemoryOperationType type);
+	int GetBreakpointTypeArrayIndex(MemoryOperationType type);
 	int InternalCheckBreakpoint(MemoryOperationInfo operationInfo, AddressInfo& address);
 
 public:

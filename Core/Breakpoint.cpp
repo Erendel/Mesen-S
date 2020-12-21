@@ -39,14 +39,14 @@ bool Breakpoint::Matches(uint32_t memoryAddr, AddressInfo& info)
 	return false;
 }
 
-bool Breakpoint::HasBreakpointType(BreakpointType bpType)
+bool Breakpoint::HasBreakpointType(int arrIndex)
 {
-	switch (bpType)
+	switch (arrIndex)
 	{
 	default:
-	case BreakpointType::Execute: return ((uint8_t)type & (uint8_t)BreakpointTypeFlags::Execute) != 0;
-	case BreakpointType::Read: return ((uint8_t)type & (uint8_t)BreakpointTypeFlags::Read) != 0;
-	case BreakpointType::Write: return ((uint8_t)type & (uint8_t)BreakpointTypeFlags::Write) != 0;
+	case 0: return ((uint8_t)type & (uint8_t)BreakpointTypeFlags::Execute) != 0;
+	case 1: return ((uint8_t)type & (uint8_t)BreakpointTypeFlags::Read) != 0;
+	case 2: return ((uint8_t)type & (uint8_t)BreakpointTypeFlags::Write) != 0;
 	}
 }
 

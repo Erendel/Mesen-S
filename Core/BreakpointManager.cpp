@@ -32,8 +32,7 @@ void BreakpointManager::SetBreakpoints(Breakpoint breakpoints[], uint32_t count)
 		Breakpoint& bp = breakpoints[j];
 		for (int i = 0; i < BreakpointManager::BreakpointTypeCount; i++)
 		{
-			BreakpointType bpType = (BreakpointType)i;
-			if ((bp.IsMarked() || bp.IsEnabled()) && bp.HasBreakpointType(bpType))
+			if ((bp.IsMarked() || bp.IsEnabled()) && bp.HasBreakpointType(i))
 			{
 				CpuType cpuType = bp.GetCpuType();
 				if (_cpuType != cpuType)
@@ -64,9 +63,9 @@ void BreakpointManager::SetBreakpoints(Breakpoint breakpoints[], uint32_t count)
 
 void BreakpointManager::GetBreakpoints(Breakpoint* breakpoints, int& execs, int& reads, int& writes)
 {
-	execs = _breakpoints[static_cast<int>(BreakpointType::Execute)].size();
-	reads = _breakpoints[static_cast<int>(BreakpointType::Read)].size();
-	writes = _breakpoints[static_cast<int>(BreakpointType::Write)].size();
+	execs = _breakpoints[0].size();
+	reads = _breakpoints[1].size();
+	writes = _breakpoints[2].size();
 
 	if (breakpoints == NULL)
 	{
@@ -74,49 +73,46 @@ void BreakpointManager::GetBreakpoints(Breakpoint* breakpoints, int& execs, int&
 	}
 
 	int offset = 0;
-	for (auto it = _breakpoints[static_cast<int>(BreakpointType::Execute)].cbegin(); it != _breakpoints[static_cast<int>(
-		     BreakpointType::Execute)].cend(); it++)
+	for (auto it = _breakpoints[0].cbegin(); it != _breakpoints[0].cend(); it++)
 	{
 		breakpoints[offset++] = it->second;
 	}
 
-	for (auto it = _breakpoints[static_cast<int>(BreakpointType::Read)].cbegin(); it != _breakpoints[static_cast<int>(
-		     BreakpointType::Read)].cend(); it++)
+	for (auto it = _breakpoints[1].cbegin(); it != _breakpoints[1].cend(); it++)
 	{
 		breakpoints[offset++] = it->second;
 	}
 
-	for (auto it = _breakpoints[static_cast<int>(BreakpointType::Write)].cbegin(); it != _breakpoints[static_cast<int>(
-		     BreakpointType::Write)].cend(); it++)
+	for (auto it = _breakpoints[2].cbegin(); it != _breakpoints[2].cend(); it++)
 	{
 		breakpoints[offset++] = it->second;
 	}
 }
 
-BreakpointType BreakpointManager::GetBreakpointType(MemoryOperationType type)
+int BreakpointManager::GetBreakpointTypeArrayIndex(MemoryOperationType type)
 {
 	switch (type)
 	{
 	default:
 	case MemoryOperationType::ExecOperand:
 	case MemoryOperationType::ExecOpCode:
-		return BreakpointType::Execute;
+		return 0;
 
 	case MemoryOperationType::DmaRead:
 	case MemoryOperationType::Read:
-		return BreakpointType::Read;
+		return 1;
 
 	case MemoryOperationType::DmaWrite:
 	case MemoryOperationType::Write:
-		return BreakpointType::Write;
+		return 2;
 	}
 }
 
 int BreakpointManager::InternalCheckBreakpoint(MemoryOperationInfo operationInfo, AddressInfo& address)
 {
-	BreakpointType type = GetBreakpointType(operationInfo.Type);
+	int arrIndex = GetBreakpointTypeArrayIndex(operationInfo.Type);
 
-	if (!_hasBreakpointType[(int)type])
+	if (!_hasBreakpointType[arrIndex])
 	{
 		return -1;
 	}
@@ -124,12 +120,12 @@ int BreakpointManager::InternalCheckBreakpoint(MemoryOperationInfo operationInfo
 	DebugState state;
 	_debugger->GetState(state, false);
 	EvalResultType resultType;
-	unordered_map<int, Breakpoint>& breakpoints = _breakpoints[(int)type];
+	unordered_map<int, Breakpoint>& breakpoints = _breakpoints[arrIndex];
 	for (auto it = breakpoints.begin(); it != breakpoints.end(); it++)
 	{
 		if (it->second.Matches(operationInfo.Address, address))
 		{
-			if (!it->second.HasCondition() || _bpExpEval->Evaluate(_rpnList[(int)type][it->first], state, resultType,
+			if (!it->second.HasCondition() || _bpExpEval->Evaluate(_rpnList[arrIndex][it->first], state, resultType,
 			                                                       operationInfo))
 			{
 				if (it->second.IsMarked())

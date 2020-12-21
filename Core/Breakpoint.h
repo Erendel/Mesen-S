@@ -4,7 +4,6 @@
 enum class CpuType : uint8_t;
 enum class SnesMemoryType;
 struct AddressInfo;
-enum class BreakpointType;
 enum class BreakpointTypeFlags;
 enum class BreakpointCategory;
 
@@ -12,7 +11,7 @@ class Breakpoint
 {
 public:
 	bool Matches(uint32_t memoryAddr, AddressInfo& info);
-	bool HasBreakpointType(BreakpointType bpType);
+	bool HasBreakpointType(int arrIndex);
 	string GetCondition();
 	bool HasCondition();
 

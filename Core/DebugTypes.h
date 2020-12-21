@@ -50,13 +50,10 @@ enum class BreakpointTypeFlags
 	Execute = 1,
 	Read = 2,
 	Write = 4,
-};
-
-enum class BreakpointType
-{
-	Execute = 0,
-	Read = 1,
-	Write = 2,
+	ExecuteRead = (Execute | Read),
+	ExecuteWrite = (Execute | Write),
+	ReadWrite = (Read | Write),
+	ExecuteReadWrite = (Execute | Read | Write),
 };
 
 enum class BreakpointCategory
