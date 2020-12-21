@@ -367,17 +367,17 @@ static bool do_step(thid_t tid, resume_mode_t resmod)
 {
 	switch (resmod)
 	{
-	case resume_mode_t::RESMOD_INTO:
+	case RESMOD_INTO:
 		{
 			Step(CpuType::Cpu, 1, StepType::Step);
 		}
 		break;
-	case resume_mode_t::RESMOD_OVER:
+	case RESMOD_OVER:
 		{
 			Step(CpuType::Cpu, 1, StepType::StepOver);
 		}
 		break;
-	case resume_mode_t::RESMOD_OUT:
+	case RESMOD_OUT:
 		{
 			Step(CpuType::Cpu, 1, StepType::StepOut);
 		}
@@ -444,61 +444,6 @@ static bool thread_suspend(thid_t tid)
 
 static bool get_memory_info(meminfo_vec_t& areas, qstring* errbuf)
 {
-	//memory_info_t info;
-
-	//info.start_ea = 0x000000;
-	//info.end_ea = 0xFFFFFF;
-	//info.name.sprnt("CPU");
-	//info.sclass.sprnt("DATA");
-	//info.perm = 0;
-	//info.sbase = 0;
-	//info.bitness = 1;
-
-	//areas.push_back(info);
-
-	//auto count = 0;
-	//GetMemoryRegions(nullptr, count);
-
-	//if (!count)
-	//{
-	//	return false;
-	//}
-
-	//if (regions == nullptr) {
-	//	regions = new mem_region_t[count];
-	//	memset(regions, 0, sizeof(mem_region_t) * count);
-	//	GetMemoryRegions(regions, count);
-	//}
-
-	//for (auto i = 0; i < count; ++i)
-	//{
-	//	memory_info_t info;
-	//	info.start_ea = (regions[i].startBank << 16) | (regions[i].startPage);
-	//	info.end_ea = (regions[i].endBank << 16) | (regions[i].endPage);
-	//	info.name = regions[i].name;
-
-	//	if (info.name == "PrgROM")
-	//	{
-	//		info.sclass = "CODE";
-	//		info.perm = SEGPERM_READ | SEGPERM_WRITE;
-	//	}
-	//	else if (info.name.find("Regs") != qstring::npos)
-	//	{
-	//		info.sclass = "XTRN";
-	//		info.perm = SEGPERM_WRITE;
-	//	}
-	//	else
-	//	{
-	//		info.sclass = "DATA";
-	//		info.perm = SEGPERM_MAXVAL;
-	//	}
-
-	//	info.sbase = 0;
-	//	info.bitness = 0;
-
-	//	areas.push_back(info);
-	//}
-
 	memory_info_t info;
 
 	// Don't remove this loop
@@ -613,9 +558,7 @@ static ssize_t idaapi idd_notify(void* user_data, int notification_code, va_list
 
 			switch (event->eid())
 			{
-			case event_id_t::BREAKPOINT:
-			case event_id_t::PROCESS_SUSPENDED:
-			case event_id_t::STEP:
+			case BREAKPOINT:
 				{
 					thread_continue(event->tid);
 				}
