@@ -251,28 +251,20 @@ static bool update_bpts(int* nbpts, update_bpt_info_t* bpts, int nadd, int ndel,
 
 	for (int i = 0; i < nadd; ++i)
 	{
-		BreakpointTypeFlags type;
+		auto type = static_cast<BreakpointTypeFlags>(0);
 		int count = 0;
 
-		switch (bpts[i].type)
-		{
-		case BPT_EXEC:
-			{
-				type = BreakpointTypeFlags::Execute;
-			}
-			break;
-		case BPT_READ:
-			{
-				type = BreakpointTypeFlags::Read;
-			}
-			break;
-		case BPT_WRITE:
-			{
-				type = BreakpointTypeFlags::Write;
-			}
-			break;
-		default:
-			continue;
+		if (bpts[i].type & BPT_SOFT) {
+			type = BreakpointTypeFlags::ExecuteReadWrite;
+		}
+		else if (bpts[i].type & BPT_READ) {
+			type = BreakpointTypeFlags::Read;
+		}
+		if (bpts[i].type & BPT_WRITE) {
+			type = static_cast<BreakpointTypeFlags>(static_cast<int>(type) | static_cast<int>(BreakpointTypeFlags::Write));
+		}
+		if (bpts[i].type & BPT_EXEC) {
+			type = static_cast<BreakpointTypeFlags>(static_cast<int>(type) | static_cast<int>(BreakpointTypeFlags::Execute));
 		}
 
 		Breakpoint newBp = {
@@ -317,7 +309,7 @@ static bool read_memory(ea_t ea, void* buffer, size_t size, qstring* errbuf)
 
 static bool read_registers(thid_t tid, int clsmask, regval_t* values, qstring* errbuf)
 {
-	memset(&lastState, 0, sizeof(lastState));
+	memset(&lastState.MasterClock, 0, sizeof(lastState));
 	GetState(lastState);
 
 	values[static_cast<int>(SNES_REGS::SR_A)].ival = lastState.Cpu.A;
@@ -456,17 +448,84 @@ static bool thread_suspend(thid_t tid)
 
 static bool get_memory_info(meminfo_vec_t& areas, qstring* errbuf)
 {
+	//memory_info_t info;
+
+	//info.start_ea = 0x000000;
+	//info.end_ea = 0xFFFFFF;
+	//info.name.sprnt("CPU");
+	//info.sclass.sprnt("DATA");
+	//info.perm = 0;
+	//info.sbase = 0;
+	//info.bitness = 1;
+
+	//areas.push_back(info);
+
+	//auto count = 0;
+	//GetMemoryRegions(nullptr, count);
+
+	//if (!count)
+	//{
+	//	return false;
+	//}
+
+	//if (regions == nullptr) {
+	//	regions = new mem_region_t[count];
+	//	memset(regions, 0, sizeof(mem_region_t) * count);
+	//	GetMemoryRegions(regions, count);
+	//}
+
+	//for (auto i = 0; i < count; ++i)
+	//{
+	//	memory_info_t info;
+	//	info.start_ea = (regions[i].startBank << 16) | (regions[i].startPage);
+	//	info.end_ea = (regions[i].endBank << 16) | (regions[i].endPage);
+	//	info.name = regions[i].name;
+
+	//	if (info.name == "PrgROM")
+	//	{
+	//		info.sclass = "CODE";
+	//		info.perm = SEGPERM_READ | SEGPERM_WRITE;
+	//	}
+	//	else if (info.name.find("Regs") != qstring::npos)
+	//	{
+	//		info.sclass = "XTRN";
+	//		info.perm = SEGPERM_WRITE;
+	//	}
+	//	else
+	//	{
+	//		info.sclass = "DATA";
+	//		info.perm = SEGPERM_MAXVAL;
+	//	}
+
+	//	info.sbase = 0;
+	//	info.bitness = 0;
+
+	//	areas.push_back(info);
+	//}
+
 	memory_info_t info;
 
-	info.start_ea = 0x000000;
-	info.end_ea = 0xFFFFFF;
-	info.name.sprnt("CPU");
-	info.sclass.sprnt("DATA");
-	info.perm = 0;
-	info.sbase = 0;
-	info.bitness = 1;
+	// Don't remove this loop
+	for (int i = 0; i < get_segm_qty(); ++i)
+	{
+		segment_t* segm = getnseg(i);
 
-	areas.push_back(info);
+		info.start_ea = segm->start_ea;
+		info.end_ea = segm->end_ea;
+
+		qstring buf;
+		get_segm_name(&buf, segm);
+		info.name = buf;
+
+		get_segm_class(&buf, segm);
+		info.sclass = buf;
+
+		info.sbase = get_segm_base(segm);
+		info.perm = segm->perm;
+		info.bitness = segm->bitness;
+		areas.push_back(info);
+	}
+	// Don't remove this loop
 
 	return true;
 }
