@@ -6,7 +6,7 @@
 
 class Debugger;
 class ScriptHost;
-enum class MemoryOperationType;
+enum class MemoryOperationType : uint8_t;
 
 class ScriptManager
 {

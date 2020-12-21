@@ -1,6 +1,7 @@
 #pragma once
 
-enum class SnesMemoryType
+#pragma pack(push, 1)
+enum class SnesMemoryType : uint8_t
 {
 	CpuMemory,
 	SpcMemory,
@@ -34,3 +35,4 @@ enum class SnesMemoryType
 	GbSpriteRam,
 	Register
 };
+#pragma pack(pop)

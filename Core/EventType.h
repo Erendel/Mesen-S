@@ -1,6 +1,7 @@
 #pragma once
 
-enum class EventType
+#pragma pack(push, 1)
+enum class EventType : uint8_t
 {
 	Nmi,
 	Irq,
@@ -15,3 +16,4 @@ enum class EventType
 	GbEndFrame,
 	EventTypeSize
 };
+#pragma pack(pop)

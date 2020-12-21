@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 struct DmaChannelConfig
 {
 	bool DmaActive;
@@ -27,3 +28,4 @@ struct DmaChannelConfig
 
 	uint8_t UnusedByte; // 43xB and 43xF
 };
+#pragma pack(pop)

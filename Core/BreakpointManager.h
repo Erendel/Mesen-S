@@ -8,7 +8,7 @@ class ExpressionEvaluator;
 class Debugger;
 class IEventManager;
 struct ExpressionData;
-enum class MemoryOperationType;
+enum class MemoryOperationType : uint8_t;
 
 class BreakpointManager
 {

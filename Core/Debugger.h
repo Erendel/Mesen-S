@@ -39,7 +39,7 @@ class IEventManager;
 class IAssembler;
 class Gameboy;
 
-enum class EventType;
+enum class EventType : uint8_t;
 enum class EvalResultType : int32_t;
 
 class Debugger

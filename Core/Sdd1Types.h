@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 struct Sdd1State
 {
 	uint8_t AllowDmaProcessing;
@@ -11,3 +12,4 @@ struct Sdd1State
 	uint16_t DmaLength[8];
 	bool NeedInit;
 };
+#pragma pack(pop)

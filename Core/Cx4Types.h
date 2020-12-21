@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 struct Cx4Dma
 {
 	uint32_t Source;
@@ -88,3 +89,4 @@ struct Cx4State
 	Cx4Suspend Suspend;
 	uint8_t Vectors[0x20];
 };
+#pragma pack(pop)

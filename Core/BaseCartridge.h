@@ -18,7 +18,7 @@ class BsxMemoryPack;
 class Gameboy;
 class Console;
 class SpcFileData;
-enum class ConsoleRegion;
+enum class ConsoleRegion : uint8_t;
 
 class BaseCartridge : public ISerializable
 {

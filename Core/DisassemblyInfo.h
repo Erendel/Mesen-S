@@ -6,7 +6,7 @@ class MemoryDumper;
 class LabelManager;
 class EmuSettings;
 
-enum class SnesMemoryType;
+enum class SnesMemoryType : uint8_t;
 enum class CpuType : uint8_t;
 
 class DisassemblyInfo

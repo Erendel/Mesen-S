@@ -1,7 +1,8 @@
 #pragma once
 #include "stdafx.h"
 
-enum class ConsoleNotificationType
+#pragma pack(push, 1)
+enum class ConsoleNotificationType : uint8_t
 {
 	GameLoaded = 0,
 	StateLoaded = 1,
@@ -21,6 +22,7 @@ enum class ConsoleNotificationType
 	BeforeGameUnload = 16,
 	CheatsChanged = 17
 };
+#pragma pack(pop)
 
 class INotificationListener
 {

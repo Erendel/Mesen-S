@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 enum class CpuStopState : uint8_t
 {
 	Running = 0,
@@ -71,7 +72,7 @@ namespace ProcFlags
 	};
 }
 
-enum class MemoryOperationType
+enum class MemoryOperationType : uint8_t
 {
 	Read = 0,
 	Write = 1,
@@ -82,9 +83,11 @@ enum class MemoryOperationType
 	DummyRead = 6
 };
 
-enum class IrqSource
+enum class IrqSource : uint8_t
 {
 	None = 0,
 	Ppu = 1,
 	Coprocessor = 2
 };
+
+#pragma pack(pop)

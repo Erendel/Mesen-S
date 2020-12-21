@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 enum class MessageType : uint8_t
 {
 	HandShake = 0,
@@ -13,3 +14,4 @@ enum class MessageType : uint8_t
 	ForceDisconnect = 7,
 	ServerInformation = 8
 };
+#pragma pack(pop)

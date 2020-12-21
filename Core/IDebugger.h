@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-enum class StepType;
+enum class StepType : uint8_t;
 
 class IDebugger
 {

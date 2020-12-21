@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 struct AluState
 {
 	uint8_t MultOperand1;
@@ -27,3 +28,4 @@ struct InternalRegisterState
 
 	uint16_t ControllerData[4];
 };
+#pragma pack(pop)

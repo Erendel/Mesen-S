@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 struct NecDspAccFlags
 {
 	bool Carry;
@@ -23,7 +24,7 @@ struct NecDspAccFlags
 
 namespace NecDspStatusFlags
 {
-	enum NecDspStatusFlags
+	enum NecDspStatusFlags : uint16_t
 	{
 		RequestForMaster = 0x8000,
 		UserFlag1 = 0x4000,
@@ -85,3 +86,4 @@ struct NecDspState
 	/* Stack pointer */
 	uint8_t SP;
 };
+#pragma pack(pop)

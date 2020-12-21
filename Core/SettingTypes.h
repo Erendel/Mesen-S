@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include <algorithm>
 
-enum class EmulationFlags
+enum class EmulationFlags : uint8_t
 {
 	Turbo = 0x01,
 	Rewind = 0x02,
@@ -12,7 +12,7 @@ enum class EmulationFlags
 	GameboyMode = 0x10,
 };
 
-enum class ScaleFilterType
+enum class ScaleFilterType : uint8_t
 {
 	xBRZ = 0,
 	HQX = 1,
@@ -23,7 +23,7 @@ enum class ScaleFilterType
 	Prescale = 6,
 };
 
-enum class VideoFilterType
+enum class VideoFilterType : uint8_t
 {
 	None = 0,
 	NTSC,
@@ -49,13 +49,13 @@ enum class VideoFilterType
 	Prescale10x
 };
 
-enum class VideoResizeFilter
+enum class VideoResizeFilter : uint8_t
 {
 	NearestNeighbor = 0,
 	Bilinear = 1
 };
 
-enum class VideoAspectRatio
+enum class VideoAspectRatio : uint8_t
 {
 	NoStretching = 0,
 	Auto = 1,
@@ -151,7 +151,7 @@ struct AudioConfig
 };
 
 //Update ControllerTypeNames when changing this
-enum class ControllerType
+enum class ControllerType : uint8_t
 {
 	None = 0,
 	SnesController = 1,
@@ -245,7 +245,7 @@ struct ControllerConfig
 	ControllerType Type = ControllerType::SnesController;
 };
 
-enum class InputDisplayPosition
+enum class InputDisplayPosition : uint8_t
 {
 	TopLeft = 0,
 	TopRight = 1,
@@ -264,28 +264,28 @@ struct InputConfig
 	bool DisplayInputHorizontally = true;
 };
 
-enum class RamState
+enum class RamState : uint8_t
 {
 	Random = 0,
 	AllZeros = 1,
 	AllOnes = 2,
 };
 
-enum class ConsoleRegion
+enum class ConsoleRegion : uint8_t
 {
 	Auto = 0,
 	Ntsc = 1,
 	Pal = 2
 };
 
-enum class ConsoleType
+enum class ConsoleType : uint8_t
 {
 	Snes = 0,
 	Gameboy = 1,
 	GameboyColor = 2
 };
 
-enum class GameboyModel
+enum class GameboyModel : uint8_t
 {
 	Auto = 0,
 	Gameboy = 1,
@@ -372,7 +372,7 @@ struct ScreenSize
 	double Scale;
 };
 
-enum class EmulatorShortcut
+enum class EmulatorShortcut : uint8_t
 {
 	FastForward,
 	Rewind,

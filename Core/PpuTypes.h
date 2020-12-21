@@ -1,7 +1,8 @@
 #pragma once
 #include "stdafx.h"
 
-enum class WindowMaskLogic
+#pragma pack(push, 1)
+enum class WindowMaskLogic : uint8_t
 {
 	Or = 0,
 	And = 1,
@@ -9,7 +10,7 @@ enum class WindowMaskLogic
 	Xnor = 3
 };
 
-enum class ColorWindowMode
+enum class ColorWindowMode : uint8_t
 {
 	Never = 0,
 	OutsideWindow = 1,
@@ -194,7 +195,9 @@ struct PpuState
 };
 
 
-enum PixelFlags
+enum PixelFlags : uint8_t
 {
 	AllowColorMath = 0x80,
 };
+
+#pragma pack(pop)

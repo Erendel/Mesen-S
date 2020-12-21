@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 struct GsuFlags
 {
 	bool Zero;
@@ -122,3 +123,4 @@ struct GsuState
 	GsuPixelCache PrimaryCache;
 	GsuPixelCache SecondaryCache;
 };
+#pragma pack(pop)

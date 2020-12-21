@@ -6,7 +6,7 @@
 
 typedef void (__stdcall* NotificationListenerCallback)(::ConsoleNotificationType, void*);
 
-enum class ConsoleId
+enum class ConsoleId : uint8_t
 {
 	Main = 0,
 	HistoryViewer = 1

@@ -2,11 +2,12 @@
 #include "stdafx.h"
 
 enum class CpuType : uint8_t;
-enum class SnesMemoryType;
+enum class SnesMemoryType : uint8_t;
 struct AddressInfo;
-enum class BreakpointTypeFlags;
-enum class BreakpointCategory;
+enum class BreakpointTypeFlags : uint8_t;
+enum class BreakpointCategory : uint8_t;
 
+#pragma pack(push, 1)
 class Breakpoint
 {
 public:
@@ -28,3 +29,4 @@ public:
 	bool markEvent;
 	char condition[1000];
 };
+#pragma pack(pop)

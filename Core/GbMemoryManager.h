@@ -14,7 +14,7 @@ class EmuSettings;
 class Console;
 class ControlManager;
 
-enum class MemoryOperationType;
+enum class MemoryOperationType : uint8_t;
 
 class GbMemoryManager : public ISerializable
 {

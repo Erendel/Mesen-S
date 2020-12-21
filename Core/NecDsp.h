@@ -6,7 +6,7 @@
 class Console;
 class MemoryManager;
 class RamHandler;
-enum class CoprocessorType;
+enum class CoprocessorType : uint8_t;
 
 class NecDsp final : public BaseCoprocessor
 {

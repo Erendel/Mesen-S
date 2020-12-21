@@ -12,6 +12,7 @@
 #include "DmaControllerTypes.h"
 #include "SnesMemoryType.h"
 
+#pragma pack(push, 1)
 struct DebugState
 {
 	uint64_t MasterClock;
@@ -44,7 +45,7 @@ struct MemoryOperationInfo
 	MemoryOperationType Type;
 };
 
-enum class BreakpointTypeFlags
+enum class BreakpointTypeFlags : uint8_t
 {
 	None = 0,
 	Execute = 1,
@@ -56,7 +57,7 @@ enum class BreakpointTypeFlags
 	ExecuteReadWrite = (Execute | Read | Write),
 };
 
-enum class BreakpointCategory
+enum class BreakpointCategory : uint8_t
 {
 	Cpu = 0,
 	VideoRam = 1,
@@ -83,7 +84,7 @@ namespace CdlFlags
 	};
 }
 
-enum class CdlStripOption
+enum class CdlStripOption : uint8_t
 {
 	StripNone = 0,
 	StripUnused,
@@ -162,7 +163,7 @@ struct GetTilemapOptions
 	uint8_t Layer;
 };
 
-enum class TileFormat
+enum class TileFormat : uint8_t
 {
 	Bpp2,
 	Bpp4,
@@ -172,14 +173,14 @@ enum class TileFormat
 	Mode7DirectColor,
 };
 
-enum class TileLayout
+enum class TileLayout : uint8_t
 {
 	Normal,
 	SingleLine8x16,
 	SingleLine16x16
 };
 
-enum class TileBackground
+enum class TileBackground : uint8_t
 {
 	Default = 0,
 	PaletteColor = 1,
@@ -203,7 +204,7 @@ struct GetSpritePreviewOptions
 	int32_t SelectedSprite;
 };
 
-enum class StackFrameFlags
+enum class StackFrameFlags : uint8_t
 {
 	None = 0,
 	Nmi = 1,
@@ -219,7 +220,7 @@ struct StackFrameInfo
 	StackFrameFlags Flags;
 };
 
-enum class DebugEventType
+enum class DebugEventType : uint8_t
 {
 	Register,
 	Nmi,
@@ -227,9 +228,9 @@ enum class DebugEventType
 	Breakpoint
 };
 
-enum class BreakSource
+enum class BreakSource : uint8_t
 {
-	Unspecified = -1,
+	Unspecified = 0xFF,
 	Breakpoint = 0,
 	CpuStep = 1,
 	PpuStep = 2,
@@ -254,7 +255,7 @@ struct BreakEvent
 	int32_t BreakpointId;
 };
 
-enum class StepType
+enum class StepType : uint8_t
 {
 	Step,
 	StepOut,
@@ -387,3 +388,5 @@ enum class SpcRegister : uint8_t
 	SpcRegSP,
 	SpcRegPS
 };
+
+#pragma pack(pop)

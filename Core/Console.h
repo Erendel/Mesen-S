@@ -34,11 +34,11 @@ class FrameLimiter;
 class DebugStats;
 class Msu1;
 
-enum class MemoryOperationType;
-enum class SnesMemoryType;
-enum class EventType;
-enum class ConsoleRegion;
-enum class ConsoleType;
+enum class MemoryOperationType : uint8_t;
+enum class SnesMemoryType : uint8_t;
+enum class EventType : uint8_t;
+enum class ConsoleRegion : uint8_t;
+enum class ConsoleType : uint8_t;
 
 class Console : public std::enable_shared_from_this<Console>
 {

@@ -6,7 +6,7 @@
 #include "SimpleLock.h"
 #include "BaseCodec.h"
 
-enum class VideoCodec
+enum class VideoCodec : uint8_t
 {
 	None = 0,
 	ZMBV = 1,

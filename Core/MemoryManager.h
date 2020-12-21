@@ -14,7 +14,7 @@ class Console;
 class Ppu;
 class Cpu;
 class CheatManager;
-enum class MemoryOperationType;
+enum class MemoryOperationType : uint8_t;
 
 enum class SnesEventType : uint8_t
 {

@@ -2,14 +2,15 @@
 #include "stdafx.h"
 #include "CpuTypes.h"
 
-enum class Sa1MathOp
+#pragma pack(push, 1)
+enum class Sa1MathOp : uint8_t
 {
 	Mul = 0,
 	Div = 1,
 	Sum = 2
 };
 
-enum class Sa1DmaSrcDevice
+enum class Sa1DmaSrcDevice : uint8_t
 {
 	PrgRom = 0,
 	BwRam = 1,
@@ -17,7 +18,7 @@ enum class Sa1DmaSrcDevice
 	Reserved = 3
 };
 
-enum class Sa1DmaDestDevice
+enum class Sa1DmaDestDevice : uint8_t
 {
 	InternalRam = 0,
 	BwRam = 1
@@ -113,3 +114,4 @@ struct DebugSa1State
 	CpuState Cpu;
 	Sa1State Sa1;
 };
+#pragma pack(pop)

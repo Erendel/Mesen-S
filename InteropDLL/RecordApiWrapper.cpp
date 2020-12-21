@@ -5,7 +5,7 @@
 #include "../Core/MovieManager.h"
 
 extern shared_ptr<Console> _console;
-enum class VideoCodec;
+enum class VideoCodec : uint8_t;
 
 extern "C" {
 DllExport void __stdcall AviRecord(char* filename, VideoCodec codec, uint32_t compressionLevel)

@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
+#pragma pack(push, 1)
 enum class RecordMovieFrom
 {
 	StartWithoutSaveData = 0,
@@ -59,3 +60,4 @@ namespace MovieKeys
 	constexpr const char* InputPollScanline = "InputPollScanline";
 	constexpr const char* GsuClockSpeed = "GsuClockSpeed";
 };
+#pragma pack(pop)

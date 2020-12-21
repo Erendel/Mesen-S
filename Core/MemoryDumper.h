@@ -9,7 +9,7 @@ class Ppu;
 class Spc;
 class Debugger;
 class Disassembler;
-enum class SnesMemoryType;
+enum class SnesMemoryType : uint8_t;
 
 class MemoryDumper
 {

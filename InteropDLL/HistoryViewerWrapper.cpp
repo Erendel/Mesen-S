@@ -20,7 +20,7 @@ extern shared_ptr<Console> _console;
 shared_ptr<Console> _historyConsole;
 unique_ptr<IRenderingDevice> _historyRenderer;
 unique_ptr<IAudioDevice> _historySoundManager;
-enum class VideoCodec;
+enum class VideoCodec : uint8_t;
 
 extern "C" {
 DllExport bool __stdcall HistoryViewerEnabled()

@@ -3,6 +3,7 @@
 #include "SpcTimer.h"
 #include "CpuTypes.h"
 
+#pragma pack(push, 1)
 struct SpcState
 {
 	uint64_t Cycle;
@@ -90,3 +91,4 @@ enum class SpcOpStep : uint8_t
 	AfterAddressing = 2,
 	Operation = 3
 };
+#pragma pack(pop)

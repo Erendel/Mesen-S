@@ -7,7 +7,7 @@ class IRenderingDevice;
 class Console;
 
 class IVideoRecorder;
-enum class VideoCodec;
+enum class VideoCodec : uint8_t;
 
 class VideoRenderer
 {

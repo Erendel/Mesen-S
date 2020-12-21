@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "SnesMemoryType.h"
 
+#pragma pack(push, 1)
 struct GbCpuState
 {
 	uint16_t PC;
@@ -25,7 +26,7 @@ struct GbCpuState
 
 namespace GbCpuFlags
 {
-	enum GbCpuFlags
+	enum GbCpuFlags : uint8_t
 	{
 		Zero = 0x80,
 		AddSub = 0x40,
@@ -36,7 +37,7 @@ namespace GbCpuFlags
 
 namespace GbIrqSource
 {
-	enum GbIrqSource
+	enum GbIrqSource : uint8_t
 	{
 		VerticalBlank = 0x01,
 		LcdStat = 0x02,
@@ -82,7 +83,7 @@ public:
 	operator uint16_t() { return Read(); }
 };
 
-enum class PpuMode
+enum class PpuMode : uint8_t
 {
 	HBlank,
 	VBlank,
@@ -93,7 +94,7 @@ enum class PpuMode
 
 namespace GbPpuStatusFlags
 {
-	enum GbPpuStatusFlags
+	enum GbPpuStatusFlags : uint8_t
 	{
 		CoincidenceIrq = 0x40,
 		OamIrq = 0x20,
@@ -102,7 +103,7 @@ namespace GbPpuStatusFlags
 	};
 }
 
-enum class EvtColor
+enum class EvtColor : uint8_t
 {
 	HBlank = 0,
 	VBlank = 1,
@@ -327,7 +328,7 @@ struct GbApuDebugState
 	GbNoiseState Noise;
 };
 
-enum class RegisterAccess
+enum class RegisterAccess : uint8_t
 {
 	None = 0,
 	Read = 1,
@@ -335,7 +336,7 @@ enum class RegisterAccess
 	ReadWrite = 3
 };
 
-enum class GbMemoryType
+enum class GbMemoryType : uint8_t
 {
 	None = 0,
 	PrgRom = (int)SnesMemoryType::GbPrgRom,
@@ -375,7 +376,7 @@ struct GbMemoryManagerState
 	RegisterAccess MemoryAccessType[0x100];
 };
 
-enum class GbType
+enum class GbType : uint8_t
 {
 	Gb = 0,
 	Cgb = 1,
@@ -392,3 +393,4 @@ struct GbState
 	GbDmaControllerState Dma;
 	bool HasBattery;
 };
+#pragma pack(pop)

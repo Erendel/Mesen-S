@@ -5,7 +5,7 @@
 #include "BaseEventManager.h"
 #include "../Utilities/SimpleLock.h"
 
-enum class DebugEventType;
+enum class DebugEventType : uint8_t;
 struct DebugEventInfo;
 struct EventViewerDisplayOptions;
 class Cpu;

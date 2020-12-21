@@ -11,8 +11,8 @@ class IInputProvider;
 class Console;
 class SystemActionManager;
 struct ControllerData;
-enum class ControllerType;
-enum class ExpansionPortDevice;
+enum class ControllerType : uint8_t;
+enum class ExpansionPortDevice : uint8_t;
 
 class ControlManager : public ISerializable
 {

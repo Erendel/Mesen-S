@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "../Utilities/VirtualFile.h"
 
+#pragma pack(push, 1)
 struct SnesCartInformation
 {
 	uint8_t MakerCode[2];
@@ -26,7 +27,7 @@ struct SnesCartInformation
 	uint8_t CpuVectors[0x20];
 };
 
-enum class CoprocessorType
+enum class CoprocessorType : uint8_t
 {
 	None,
 	DSP1,
@@ -91,3 +92,4 @@ namespace CartFlags
 		CopierHeader = 32
 	};
 }
+#pragma pack(pop)
