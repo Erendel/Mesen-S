@@ -46,8 +46,20 @@ extern "C" {
         if (breakpoints != nullptr) {
             array<Mesen::GUI::Debugger::Breakpoint^>^ bps = gcnew array<Mesen::GUI::Debugger::Breakpoint^>(execs + reads + writes);
             DebugApi::GetBreakpoints((Mesen::GUI::CpuType)cpuType, bps, execs, reads, writes);
-            pin_ptr<Mesen::GUI::Debugger::Breakpoint^> bps_start = &bps[0];
-            memcpy(breakpoints, bps_start, execs + reads + writes);
+
+            for (auto i = 0; i < execs + reads + writes; ++i)
+            {
+                breakpoints[i].enabled = bps[i]->Enabled;
+                breakpoints[i].startAddr = bps[i]->StartAddress;
+                breakpoints[i].endAddr = bps[i]->EndAddress;
+                breakpoints[i].type = (::BreakpointTypeFlags)bps[i]->Type;
+
+                auto arr = System::Text::Encoding::UTF8->GetBytes(bps[i]->Condition);
+                pin_ptr<unsigned char> arr_start = &arr[0];
+                memcpy(breakpoints[i].condition, arr_start, arr->Length);
+
+                breakpoints[i].markEvent = bps[i]->MarkEvent;
+            }
         }
         else {
             DebugApi::GetBreakpoints((Mesen::GUI::CpuType)cpuType, nullptr, execs, reads, writes);
@@ -65,6 +77,31 @@ extern "C" {
 
     void __stdcall UnregisterNotificationCallback(void* notificationListener) {
         EmuApi::UnregisterNotificationCallback(IntPtr(notificationListener));
+    }
+
+    void __stdcall GetMemoryRegions(mem_region_t* regions, int& count)
+    {
+        if (regions != nullptr)
+        {
+            array<Mesen::GUI::MemoryRegionInfo>^ rs = gcnew array<Mesen::GUI::MemoryRegionInfo>(count);
+            DebugApi::GetMemoryRegions(rs, count);
+
+            for (auto i = 0; i < count; ++i)
+            {
+                auto arr = System::Text::Encoding::UTF8->GetBytes(rs[i].name);
+                pin_ptr<unsigned char> arr_start = &arr[0];
+                memcpy(regions[i].name, arr_start, arr->Length);
+
+                regions[i].startBank = rs[i].startBank;
+                regions[i].endBank = rs[i].endBank;
+                regions[i].startPage = rs[i].startPage;
+                regions[i].endPage = rs[i].endPage;
+            }
+        }
+        else
+        {
+            DebugApi::GetMemoryRegions(nullptr, count);
+        }
     }
 
     uint32_t __stdcall GetMemorySize(::SnesMemoryType type) {
