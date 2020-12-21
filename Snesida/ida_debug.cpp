@@ -1,9 +1,6 @@
 #include <ida.hpp>
 #include <dbg.hpp>
-#include <diskio.hpp>
-#include <loader.hpp>
 #include <deque>
-#include <iostream>
 #include <mutex>
 
 #include "ida_plugin.h"
@@ -309,7 +306,6 @@ static bool read_memory(ea_t ea, void* buffer, size_t size, qstring* errbuf)
 
 static bool read_registers(thid_t tid, int clsmask, regval_t* values, qstring* errbuf)
 {
-	memset(&lastState.MasterClock, 0, sizeof(lastState));
 	GetState(lastState);
 
 	values[static_cast<int>(SNES_REGS::SR_A)].ival = lastState.Cpu.A;
