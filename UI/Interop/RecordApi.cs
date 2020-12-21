@@ -34,6 +34,7 @@ namespace Mesen.GUI
 		CurrentState
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct RecordMovieOptions
 	{
 		private const int AuthorMaxSize = 250;

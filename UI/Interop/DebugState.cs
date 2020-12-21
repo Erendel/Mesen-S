@@ -44,6 +44,7 @@ namespace Mesen.GUI
 		Negative = 0x80
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct CpuState
 	{
 		public UInt64 CycleCount;
@@ -73,6 +74,7 @@ namespace Mesen.GUI
 		public CpuStopState StopState;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct PpuState
 	{
 		public UInt16 Cycle;
@@ -146,6 +148,7 @@ namespace Mesen.GUI
 		public UInt16 FixedColor;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct LayerConfig
 	{
 		public UInt16 TilemapAddress;
@@ -160,6 +163,7 @@ namespace Mesen.GUI
 		[MarshalAs(UnmanagedType.I1)] public bool LargeTiles;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct WindowConfig
 	{
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
@@ -172,6 +176,7 @@ namespace Mesen.GUI
 		public Byte Right;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Mode7Config
 	{
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
@@ -193,7 +198,7 @@ namespace Mesen.GUI
 		public Int16 VScrollLatch;
 	}
 
-	public enum WindowMaskLogic
+	public enum WindowMaskLogic : byte
 	{
 		Or = 0,
 		And = 1,
@@ -201,7 +206,7 @@ namespace Mesen.GUI
 		Xnor = 3
 	}
 
-	public enum ColorWindowMode
+	public enum ColorWindowMode : byte
 	{
 		Never = 0,
 		OutsideWindow = 1,
@@ -209,6 +214,7 @@ namespace Mesen.GUI
 		Always = 3
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct SpcTimer
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool Enabled;
@@ -221,6 +227,7 @@ namespace Mesen.GUI
 		public byte Target;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct SpcState
 	{
 		public UInt64 Cycle;
@@ -255,12 +262,14 @@ namespace Mesen.GUI
 		public SpcTimer Timer2;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct DspState
 	{
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 128)]
 		public byte[] Regs;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct NecDspAccFlags
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool Carry;
@@ -271,6 +280,7 @@ namespace Mesen.GUI
 		[MarshalAs(UnmanagedType.I1)] public bool Sign1;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct NecDspState
 	{
 		public UInt16 A;
@@ -293,6 +303,7 @@ namespace Mesen.GUI
 		public byte SP;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GsuFlags
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool Zero;
@@ -309,6 +320,7 @@ namespace Mesen.GUI
 		[MarshalAs(UnmanagedType.I1)] public bool Irq;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GsuPixelCache
 	{
 		public byte X;
@@ -318,6 +330,7 @@ namespace Mesen.GUI
 		public byte ValidBits;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GsuState
 	{
 		public UInt64 CycleCount;
@@ -372,6 +385,7 @@ namespace Mesen.GUI
 		public GsuPixelCache SecondaryCache;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Cx4Dma
 	{
 		public UInt32 Source;
@@ -381,12 +395,14 @@ namespace Mesen.GUI
 		[MarshalAs(UnmanagedType.I1)] public bool Enabled;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Cx4Suspend
 	{
 		public UInt32 Duration;
 		[MarshalAs(UnmanagedType.I1)] public bool Enabled;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Cx4Cache
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool Enabled;
@@ -404,6 +420,7 @@ namespace Mesen.GUI
 		public UInt16 Pos;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Cx4Bus
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool Enabled;
@@ -413,6 +430,7 @@ namespace Mesen.GUI
 		public UInt32 Address;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Cx4State
 	{
 		public UInt64 CycleCount;
@@ -464,6 +482,7 @@ namespace Mesen.GUI
 		public byte[] Vectors;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct Sa1State
 	{
 		public UInt16 Sa1ResetVector;
@@ -552,20 +571,21 @@ namespace Mesen.GUI
 		public byte[] Banks;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct DebugSa1State
 	{
 		public CpuState Cpu;
 		public Sa1State Sa1;
 	}
 
-	public enum Sa1MathOp
+	public enum Sa1MathOp : byte
 	{
 		Mul = 0,
 		Div = 1,
 		Sum = 2
 	}
 
-	public enum Sa1DmaSrcDevice
+	public enum Sa1DmaSrcDevice : byte
 	{
 		PrgRom = 0,
 		BwRam = 1,
@@ -573,12 +593,13 @@ namespace Mesen.GUI
 		Reserved = 3
 	}
 
-	public enum Sa1DmaDestDevice
+	public enum Sa1DmaDestDevice : byte
 	{
 		InternalRam = 0,
 		BwRam = 1
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct AluState
 	{
 		public byte MultOperand1;
@@ -590,6 +611,7 @@ namespace Mesen.GUI
 		public UInt16 DivResult;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct InternalRegisterState
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool EnableAutoJoypadRead;
@@ -607,7 +629,7 @@ namespace Mesen.GUI
 		public UInt16[] ControllerData;
 	}
 
-	public enum GbMemoryType
+	public enum GbMemoryType : byte
 	{
 		None = 0,
 		PrgRom = (int)SnesMemoryType.GbPrgRom,
@@ -616,7 +638,7 @@ namespace Mesen.GUI
 		BootRom = (int)SnesMemoryType.GbBootRom,
 	}
 
-	public enum RegisterAccess
+	public enum RegisterAccess : byte
 	{
 		None = 0,
 		Read = 1,
@@ -624,6 +646,7 @@ namespace Mesen.GUI
 		ReadWrite = 3
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbMemoryManagerState
 	{
 		public UInt64 CycleCount;
@@ -663,6 +686,7 @@ namespace Mesen.GUI
 		public RegisterAccess[] MemoryAccessType;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbDmaControllerState
 	{
 		public byte OamDmaSource;
@@ -678,6 +702,7 @@ namespace Mesen.GUI
 		[MarshalAs(UnmanagedType.I1)] public bool CgbHdmaRunning;
 	};
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbTimerState
 	{
 		public UInt16 Divider;
@@ -692,12 +717,13 @@ namespace Mesen.GUI
 		public UInt16 TimerDivider;
 	};
 
-	public enum GbType
+	public enum GbType : byte
 	{
 		Gb = 0,
 		Cgb = 1,
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbState
 	{
 		public GbType Type;
@@ -719,6 +745,7 @@ namespace Mesen.GUI
 		Zero = 0x80
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbCpuState
 	{
 		public UInt16 PC;
@@ -740,7 +767,7 @@ namespace Mesen.GUI
 		[MarshalAs(UnmanagedType.I1)] public bool Halted;
 	}
 
-	public enum PpuMode
+	public enum PpuMode : byte
 	{
 		HBlank,
 		VBlank,
@@ -749,6 +776,7 @@ namespace Mesen.GUI
 		NoIrq
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbPpuState
 	{
 		public byte Scanline;
@@ -800,6 +828,7 @@ namespace Mesen.GUI
 		public UInt16[] CgbObjPalettes;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbSquareState
 	{
 		public UInt16 SweepPeriod;
@@ -829,6 +858,7 @@ namespace Mesen.GUI
 		public byte Output;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbNoiseState
 	{
 		public byte Volume;
@@ -851,6 +881,7 @@ namespace Mesen.GUI
 		public byte Output;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbWaveState
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool DacEnabled;
@@ -873,6 +904,7 @@ namespace Mesen.GUI
 		public byte Output;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbApuState
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool ApuEnabled;
@@ -896,6 +928,7 @@ namespace Mesen.GUI
 		public byte FrameSequenceStep;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GbApuDebugState
 	{
 		public GbApuState Common;
@@ -905,6 +938,7 @@ namespace Mesen.GUI
 		public GbNoiseState Noise;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct DebugState
 	{
 		public UInt64 MasterClock;

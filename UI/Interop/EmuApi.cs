@@ -118,6 +118,7 @@ namespace Mesen.GUI
 		[DllImport(DllPath)] public static extern void ClearCheats();
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct ScreenSize
 	{
 		public Int32 Width;
@@ -125,6 +126,7 @@ namespace Mesen.GUI
 		public double Scale;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct InteropRomInfo
 	{
 		public IntPtr RomPath;
@@ -136,6 +138,7 @@ namespace Mesen.GUI
 		public byte[] Sha1;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct RomInfo
 	{
 		public string RomPath;
@@ -159,6 +162,7 @@ namespace Mesen.GUI
 		}
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct SnesCartInformation
 	{
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
@@ -266,6 +270,7 @@ namespace Mesen.GUI
 		SGB2,
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct MissingFirmwareMessage
 	{
 		public IntPtr Filename;

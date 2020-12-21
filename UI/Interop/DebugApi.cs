@@ -208,7 +208,7 @@ namespace Mesen.GUI
 		}
 	}
 
-	public enum SnesMemoryType
+	public enum SnesMemoryType : byte
 	{
 		CpuMemory,
 		SpcMemory,
@@ -349,7 +349,7 @@ namespace Mesen.GUI
 		}
 	}
 
-	[StructLayout(LayoutKind.Sequential)]
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct AddressCounters
 	{
 		public UInt32 Address;
@@ -364,13 +364,14 @@ namespace Mesen.GUI
 		public UInt64 ExecStamp;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct AddressInfo
 	{
 		public Int32 Address;
 		public SnesMemoryType Type;
 	}
 
-	public enum MemoryOperationType
+	public enum MemoryOperationType : byte
 	{
 		Read = 0,
 		Write = 1,
@@ -381,6 +382,7 @@ namespace Mesen.GUI
 		DummyRead = 6
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct MemoryOperationInfo
 	{
 		public UInt32 Address;
@@ -388,7 +390,7 @@ namespace Mesen.GUI
 		public MemoryOperationType Type;
 	}
 
-	public enum DebugEventType
+	public enum DebugEventType : byte
 	{
 		Register,
 		Nmi,
@@ -396,6 +398,7 @@ namespace Mesen.GUI
 		Breakpoint
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct DmaChannelConfig
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool DmaActive;
@@ -420,8 +423,11 @@ namespace Mesen.GUI
 		[MarshalAs(UnmanagedType.I1)] public bool DoTransfer;
 		[MarshalAs(UnmanagedType.I1)] public bool HdmaFinished;
 		[MarshalAs(UnmanagedType.I1)] public bool UnusedFlag;
+
+		public byte UnusedByte;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct DebugEventInfo
 	{
 		public MemoryOperationInfo Operation;
@@ -434,6 +440,7 @@ namespace Mesen.GUI
 		public DmaChannelConfig DmaChannelInfo;
 	};
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct EventViewerDisplayOptions
 	{
 		public UInt32 IrqColor;
@@ -485,12 +492,13 @@ namespace Mesen.GUI
 		public byte[] ShowDmaChannels;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GetTilemapOptions
 	{
 		public byte Layer;
 	}
 
-	public enum TileBackground
+	public enum TileBackground : byte
 	{
 		Default = 0,
 		PaletteColor = 1,
@@ -499,6 +507,7 @@ namespace Mesen.GUI
 		Magenta = 4
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GetTileViewOptions
 	{
 		public TileFormat Format;
@@ -509,12 +518,13 @@ namespace Mesen.GUI
 		public Int32 PageSize;
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct GetSpritePreviewOptions
 	{
 		public Int32 SelectedSprite;
 	}
 
-	public enum TileFormat
+	public enum TileFormat : byte
 	{
 		Bpp2,
 		Bpp4,
@@ -524,7 +534,7 @@ namespace Mesen.GUI
 		Mode7DirectColor,
 	}
 
-	public enum TileLayout
+	public enum TileLayout : byte
 	{
 		Normal,
 		SingleLine8x16,
@@ -532,6 +542,7 @@ namespace Mesen.GUI
 	};
 
 	[Serializable]
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct InteropTraceLoggerOptions
 	{
 		[MarshalAs(UnmanagedType.I1)] public bool LogCpu;
@@ -555,7 +566,7 @@ namespace Mesen.GUI
 		public byte[] Format;
 	}
 
-	public enum EvalResultType
+	public enum EvalResultType : byte
 	{
 		Numeric = 0,
 		Boolean = 1,
@@ -564,6 +575,7 @@ namespace Mesen.GUI
 		OutOfScope = 4
 	}
 	
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct StackFrameInfo
 	{
 		public UInt32 Source;
@@ -573,7 +585,7 @@ namespace Mesen.GUI
 		public StackFrameFlags Flags;
 	};
 
-	public enum StackFrameFlags
+	public enum StackFrameFlags : byte
 	{
 		None = 0,
 		Nmi = 1,
@@ -626,7 +638,7 @@ namespace Mesen.GUI
 		}
 	}
 
-	public enum StepType
+	public enum StepType : byte
 	{
 		Step,
 		StepOut,
@@ -635,9 +647,9 @@ namespace Mesen.GUI
 		SpecificScanline,
 	}
 
-	public enum BreakSource
+	public enum BreakSource : byte
 	{
-		Unspecified = -1,
+		Unspecified = 0xFF,
 		Breakpoint = 0,
 		CpuStep = 1,
 		PpuStep = 2,
@@ -655,6 +667,7 @@ namespace Mesen.GUI
 		GbOamCorruption = 13,
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct BreakEvent
 	{
 		public BreakSource Source;
@@ -662,7 +675,7 @@ namespace Mesen.GUI
 		public Int32 BreakpointId;
 	}
 
-	public enum CdlStripOption
+	public enum CdlStripOption : byte
 	{
 		StripNone = 0,
 		StripUnused = 1,
@@ -681,6 +694,7 @@ namespace Mesen.GUI
 		MemoryMode8 = 0x20,
 	}
 
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct ProfiledFunction
 	{
 		public UInt64 ExclusiveCycles;

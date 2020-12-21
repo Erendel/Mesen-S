@@ -4,7 +4,7 @@ namespace Mesen.GUI
 {
 	public class NotificationListener : IDisposable
 	{
-		public delegate void NotificationCallback(int type, IntPtr parameter);
+		public delegate void NotificationCallback(ConsoleNotificationType type, IntPtr parameter);
 		public delegate void NotificationEventHandler(NotificationEventArgs e);
 		public event NotificationEventHandler OnNotification;
 
@@ -14,7 +14,7 @@ namespace Mesen.GUI
 
 		public NotificationListener()
 		{
-			_callback = (int type, IntPtr parameter) => {
+			_callback = (ConsoleNotificationType type, IntPtr parameter) => {
 				this.ProcessNotification(type, parameter);
 			};
 			_notificationListener = EmuApi.RegisterNotificationCallback(_callback);
@@ -28,11 +28,11 @@ namespace Mesen.GUI
 			}
 		}
 
-		public void ProcessNotification(int type, IntPtr parameter)
+		public void ProcessNotification(ConsoleNotificationType type, IntPtr parameter)
 		{
 			if(this.OnNotification != null) {
 				this.OnNotification(new NotificationEventArgs() {
-					NotificationType = (ConsoleNotificationType)type,
+					NotificationType = type,
 					Parameter = parameter
 				});
 			}
@@ -45,7 +45,7 @@ namespace Mesen.GUI
 		public IntPtr Parameter;
 	}
 
-	public enum ConsoleNotificationType
+	public enum ConsoleNotificationType : byte
 	{
 		GameLoaded = 0,
 		StateLoaded = 1,
