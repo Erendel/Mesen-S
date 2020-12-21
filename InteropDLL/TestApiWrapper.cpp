@@ -20,7 +20,7 @@ DllExport void __stdcall RomTestRecord(char* filename, bool reset)
 
 DllExport void __stdcall RomTestStop()
 {
-	if (_recordedRomTest.get())
+	if (_recordedRomTest)
 	{
 		_recordedRomTest->Stop();
 		_recordedRomTest.reset();

@@ -22,7 +22,7 @@ DllExport void __stdcall SetMouseMovement(int16_t x, int16_t y)
 
 DllExport void __stdcall UpdateInputDevices()
 {
-	if (_keyManager.get())
+	if (_keyManager)
 	{
 		_keyManager->UpdateDevices();
 	}
@@ -39,7 +39,7 @@ DllExport void __stdcall GetPressedKeys(uint32_t* keyBuffer)
 
 DllExport void __stdcall DisableAllKeys(bool disabled)
 {
-	if (_keyManager.get())
+	if (_keyManager)
 	{
 		_keyManager->SetDisabled(disabled);
 	}
@@ -47,7 +47,7 @@ DllExport void __stdcall DisableAllKeys(bool disabled)
 
 DllExport void __stdcall SetKeyState(int32_t scanCode, bool state)
 {
-	if (_keyManager.get())
+	if (_keyManager)
 	{
 		_keyManager->SetKeyState(scanCode, state);
 		_shortcutKeyHandler->ProcessKeys();
@@ -56,7 +56,7 @@ DllExport void __stdcall SetKeyState(int32_t scanCode, bool state)
 
 DllExport void __stdcall ResetKeyState()
 {
-	if (_keyManager.get())
+	if (_keyManager)
 	{
 		_keyManager->ResetKeyState();
 	}

@@ -97,7 +97,7 @@ DllExport void __stdcall InitDll()
 DllExport void __stdcall InitializeEmu(const char* homeFolder, void* windowHandle, void* viewerHandle, bool noAudio,
                                        bool noVideo, bool noInput)
 {
-	if (!_console.get())
+	if (!_console)
 	{
 		return;
 	}
@@ -147,7 +147,7 @@ DllExport void __stdcall SetMasterVolume(double volume, ConsoleId consoleId)
 {
 	auto con = GetConsoleById(consoleId);
 
-	if (!con.get())
+	if (!con)
 	{
 		return;
 	}
@@ -161,7 +161,7 @@ DllExport void __stdcall SetVideoScale(double scale, ConsoleId consoleId)
 {
 	auto con = GetConsoleById(consoleId);
 
-	if (!con.get())
+	if (!con)
 	{
 		return;
 	}
@@ -193,7 +193,7 @@ DllExport void __stdcall AddKnownGameFolder(char* folder) { FolderUtilities::Add
 
 DllExport void __stdcall GetRomInfo(InteropRomInfo& info)
 {
-	if (!_console.get())
+	if (!_console)
 	{
 		return;
 	}
@@ -219,7 +219,7 @@ DllExport void __stdcall GetRomInfo(InteropRomInfo& info)
 
 DllExport void __stdcall TakeScreenshot()
 {
-	if (_console.get())
+	if (_console)
 	{
 		_console->GetVideoDecoder()->TakeScreenshot();
 	}
@@ -249,7 +249,7 @@ DllExport void __stdcall Stop()
 {
 	GameClient::Disconnect();
 
-	if (_console.get())
+	if (_console)
 	{
 		_console->Stop(true);
 	}
@@ -261,7 +261,7 @@ DllExport void __stdcall Pause(ConsoleId consoleId)
 	{
 		auto con = GetConsoleById(consoleId);
 
-		if (con.get())
+		if (con)
 		{
 			con->Pause();
 		}
@@ -274,7 +274,7 @@ DllExport void __stdcall Resume(ConsoleId consoleId)
 	{
 		auto con = GetConsoleById(consoleId);
 
-		if (con.get())
+		if (con)
 		{
 			con->Resume();
 		}
@@ -284,7 +284,7 @@ DllExport void __stdcall Resume(ConsoleId consoleId)
 DllExport bool __stdcall IsPaused(ConsoleId consoleId)
 {
 	auto console = GetConsoleById(consoleId);
-	if (console.get())
+	if (console)
 	{
 		return console->IsPaused();
 	}
@@ -322,7 +322,7 @@ DllExport void __stdcall Release()
 
 	_shortcutKeyHandler.reset();
 
-	if (_console.get())
+	if (_console)
 	{
 		_console->Stop(true);
 		_console->Release();
@@ -363,7 +363,7 @@ DllExport ScreenSize __stdcall GetScreenSize(bool ignoreScale, ConsoleId console
 
 DllExport void __stdcall ClearCheats()
 {
-	if (_console.get())
+	if (_console)
 	{
 		_console->GetCheatManager()->ClearCheats();
 	}
@@ -371,7 +371,7 @@ DllExport void __stdcall ClearCheats()
 
 DllExport void __stdcall SetCheats(uint32_t codes[], uint32_t length)
 {
-	if (_console.get())
+	if (_console)
 	{
 		_console->GetCheatManager()->SetCheats(codes, length);
 	}
@@ -381,7 +381,7 @@ DllExport void __stdcall WriteLogEntry(char* message) { MessageManager::Log(mess
 
 DllExport void __stdcall SaveState(uint32_t stateIndex)
 {
-	if (_console.get())
+	if (_console)
 	{
 		_console->GetSaveStateManager()->SaveState(stateIndex);
 	}
@@ -389,7 +389,7 @@ DllExport void __stdcall SaveState(uint32_t stateIndex)
 
 DllExport void __stdcall LoadState(uint32_t stateIndex)
 {
-	if (_console.get())
+	if (_console)
 	{
 		_console->GetSaveStateManager()->LoadState(stateIndex);
 	}
@@ -397,7 +397,7 @@ DllExport void __stdcall LoadState(uint32_t stateIndex)
 
 DllExport void __stdcall SaveStateFile(char* filepath)
 {
-	if (_console.get())
+	if (_console)
 	{
 		_console->GetSaveStateManager()->SaveState(filepath);
 	}
@@ -405,7 +405,7 @@ DllExport void __stdcall SaveStateFile(char* filepath)
 
 DllExport void __stdcall LoadStateFile(char* filepath)
 {
-	if (_console.get())
+	if (_console)
 	{
 		_console->GetSaveStateManager()->LoadState(filepath);
 	}
@@ -413,7 +413,7 @@ DllExport void __stdcall LoadStateFile(char* filepath)
 
 DllExport void __stdcall LoadRecentGame(char* filepath, bool resetGame)
 {
-	if (_console.get())
+	if (_console)
 	{
 		_console->GetSaveStateManager()->LoadRecentGame(filepath, resetGame);
 	}

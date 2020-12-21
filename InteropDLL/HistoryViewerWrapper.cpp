@@ -59,7 +59,7 @@ DllExport void __stdcall HistoryViewerInitialize(void* windowHandle, void* viewe
 
 DllExport void __stdcall HistoryViewerRelease()
 {
-	if (!_historyConsole.get())
+	if (!_historyConsole)
 	{
 		return;
 	}
@@ -73,7 +73,7 @@ DllExport void __stdcall HistoryViewerRelease()
 
 DllExport uint32_t __stdcall HistoryViewerGetHistoryLength()
 {
-	if (_historyConsole.get())
+	if (_historyConsole)
 	{
 		return _historyConsole->GetHistoryViewer()->GetHistoryLength();
 	}
@@ -82,7 +82,7 @@ DllExport uint32_t __stdcall HistoryViewerGetHistoryLength()
 
 DllExport void __stdcall HistoryViewerGetSegments(uint32_t* segmentBuffer, uint32_t& bufferSize)
 {
-	if (_historyConsole.get())
+	if (_historyConsole)
 	{
 		_historyConsole->GetHistoryViewer()->GetHistorySegments(segmentBuffer, bufferSize);
 	}
@@ -90,7 +90,7 @@ DllExport void __stdcall HistoryViewerGetSegments(uint32_t* segmentBuffer, uint3
 
 DllExport bool __stdcall HistoryViewerCreateSaveState(const char* outputFile, uint32_t position)
 {
-	if (_historyConsole.get())
+	if (_historyConsole)
 	{
 		return _historyConsole->GetHistoryViewer()->CreateSaveState(outputFile, position);
 	}
@@ -99,7 +99,7 @@ DllExport bool __stdcall HistoryViewerCreateSaveState(const char* outputFile, ui
 
 DllExport bool __stdcall HistoryViewerSaveMovie(const char* movieFile, uint32_t startPosition, uint32_t endPosition)
 {
-	if (_historyConsole.get())
+	if (_historyConsole)
 	{
 		return _historyConsole->GetHistoryViewer()->SaveMovie(movieFile, startPosition, endPosition);
 	}
@@ -108,7 +108,7 @@ DllExport bool __stdcall HistoryViewerSaveMovie(const char* movieFile, uint32_t 
 
 DllExport void __stdcall HistoryViewerResumeGameplay(uint32_t resumeAtSecond)
 {
-	if (_historyConsole.get())
+	if (_historyConsole)
 	{
 		_historyConsole->GetHistoryViewer()->ResumeGameplay(_console, resumeAtSecond);
 	}
@@ -116,7 +116,7 @@ DllExport void __stdcall HistoryViewerResumeGameplay(uint32_t resumeAtSecond)
 
 DllExport void __stdcall HistoryViewerSetPosition(uint32_t seekPosition)
 {
-	if (_historyConsole.get())
+	if (_historyConsole)
 	{
 		_historyConsole->GetHistoryViewer()->SeekTo(seekPosition);
 	}
@@ -124,7 +124,7 @@ DllExport void __stdcall HistoryViewerSetPosition(uint32_t seekPosition)
 
 DllExport uint32_t __stdcall HistoryViewerGetPosition()
 {
-	if (_historyConsole.get())
+	if (_historyConsole)
 	{
 		return _historyConsole->GetHistoryViewer()->GetPosition();
 	}
