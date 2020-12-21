@@ -78,7 +78,7 @@ namespace Mesen.GUI.Debugger
 		public bool IsAbsoluteAddress { get { return !MemoryType.IsRelativeMemory(); } }
 		public bool IsCpuBreakpoint { get { return this._isCpuBreakpoint; } }
 
-		private BreakpointTypeFlags Type
+		public BreakpointTypeFlags Type
 		{
 			get
 			{
