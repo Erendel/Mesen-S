@@ -322,30 +322,6 @@ DllExport const char* __stdcall GetDebuggerLog()
 	return _logString.c_str();
 }
 
-DllExport void __stdcall GetMemoryRegions(mem_region_t* regions, int& count)
-{
-	auto mem = GetMemoryManager();
-
-	if (mem)
-	{
-		auto* mappings = mem->GetMemoryMappings();
-		count = 0;
-
-		if (mappings)
-		{
-			count = mappings->GetRegionsCount();
-
-			if (regions)
-			{
-				for (auto i = 0; i < count; ++i)
-				{
-					regions[i] = mappings->GetRegionByIndex(i);
-				}
-			}
-		}
-	}
-}
-
 DllExport void __stdcall SetMemoryState(SnesMemoryType type, uint8_t* buffer, int32_t length)
 {
 	auto dbg = GetDebugger();
