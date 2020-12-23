@@ -91,7 +91,9 @@ namespace Mesen.GUI.Forms
 
 			SaveStateManager.InitializeStateMenu(mnuSaveState, true, _shortcuts);
 			SaveStateManager.InitializeStateMenu(mnuLoadState, false, _shortcuts);
+#if !IDA_DBG
 			BindShortcuts();
+#endif
 
 			Task.Run(() => {
 				Thread.Sleep(25);
