@@ -95,8 +95,8 @@ namespace Mesen.GUI
 		[DllImport(DllPath)] public static extern void SetLabel(uint address, SnesMemoryType memType, string label, string comment);
 		[DllImport(DllPath)] public static extern void ClearLabels();
 
-		[DllImport(DllPath)] public static extern void SetBreakpoints([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] [In] InteropBreakpoint[] breakpoints, UInt32 length);
-		[DllImport(DllPath)] public static extern void GetBreakpoints(CpuType cpuType, [Out] Breakpoint[] breakpoints, ref Int32 execs, ref Int32 reads, ref Int32 writes);
+		[DllImport(DllPath)] public static extern void SetBreakpoints([In] InteropBreakpoint[] breakpoints, UInt32 length);
+		[DllImport(DllPath)] public static extern void GetBreakpoints(CpuType cpuType, [In, Out] InteropBreakpoint[] breakpoints, ref Int32 execs, ref Int32 reads, ref Int32 writes);
 
 		[DllImport(DllPath)] public static extern void SaveRomToDisk([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(Utf8Marshaler))]string filename, [MarshalAs(UnmanagedType.I1)]bool saveAsIps, CdlStripOption cdlStripOption);
 
