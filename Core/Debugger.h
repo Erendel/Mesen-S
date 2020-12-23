@@ -34,7 +34,7 @@ class GsuDebugger;
 class NecDspDebugger;
 class Cx4Debugger;
 class GbDebugger;
-class Breakpoint;
+struct Breakpoint;
 class IEventManager;
 class IAssembler;
 class Gameboy;
