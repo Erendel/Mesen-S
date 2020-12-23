@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Mesen.GUI.Debugger
 {
+	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct InteropBreakpoint
 	{
 		public CpuType CpuType;

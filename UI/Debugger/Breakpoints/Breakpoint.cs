@@ -234,7 +234,7 @@ namespace Mesen.GUI.Debugger
 		}
 	}
 
-	public enum BreakpointAddressType
+	public enum BreakpointAddressType : byte
 	{
 		AnyAddress,
 		SingleAddress,
@@ -242,7 +242,7 @@ namespace Mesen.GUI.Debugger
 	}
 	
 	[Flags]
-	public enum BreakpointTypeFlags
+	public enum BreakpointTypeFlags : byte
 	{
 		None = 0,
 		Execute = 1,
