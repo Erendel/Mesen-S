@@ -13,11 +13,11 @@ bool Breakpoint::Matches(uint32_t memoryAddr, AddressInfo& info)
 		}
 		else if (endAddr == -1)
 		{
-			return (int32_t)memoryAddr == startAddr;
+			return static_cast<int32_t>(memoryAddr) == startAddr;
 		}
 		else
 		{
-			return (int32_t)memoryAddr >= startAddr && (int32_t)memoryAddr <= endAddr;
+			return static_cast<int32_t>(memoryAddr) >= startAddr && static_cast<int32_t>(memoryAddr) <= endAddr;
 		}
 	}
 	else if (memoryType == info.Type)
