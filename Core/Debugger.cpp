@@ -890,13 +890,13 @@ void Debugger::GetBreakpoints(CpuType cpuType, Breakpoint* breakpoints, int& exe
 {
 	switch (cpuType)
 	{
-	case CpuType::Cpu: return _cpuDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, reads, writes, execs);
-	case CpuType::Spc: return _spcDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, reads, writes, execs);
+	case CpuType::Cpu: return _cpuDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, execs, reads, writes);
+	case CpuType::Spc: return _spcDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, execs, reads, writes);
 	case CpuType::Gsu:
 		{
 			if (_gsuDebugger)
 			{
-				return _gsuDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, reads, writes, execs);
+				return _gsuDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, execs, reads, writes);
 			}
 		}
 		break;
@@ -904,7 +904,7 @@ void Debugger::GetBreakpoints(CpuType cpuType, Breakpoint* breakpoints, int& exe
 		{
 			if (_sa1Debugger)
 			{
-				return _sa1Debugger->GetBreakpointManager()->GetBreakpoints(breakpoints, reads, writes, execs);
+				return _sa1Debugger->GetBreakpointManager()->GetBreakpoints(breakpoints, execs, reads, writes);
 			}
 		}
 		break;
@@ -912,7 +912,7 @@ void Debugger::GetBreakpoints(CpuType cpuType, Breakpoint* breakpoints, int& exe
 		{
 			if (_necDspDebugger)
 			{
-				return _necDspDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, reads, writes, execs);
+				return _necDspDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, execs, reads, writes);
 			}
 		}
 		break;
@@ -920,7 +920,7 @@ void Debugger::GetBreakpoints(CpuType cpuType, Breakpoint* breakpoints, int& exe
 		{
 			if (_cx4Debugger)
 			{
-				return _cx4Debugger->GetBreakpointManager()->GetBreakpoints(breakpoints, reads, writes, execs);
+				return _cx4Debugger->GetBreakpointManager()->GetBreakpoints(breakpoints, execs, reads, writes);
 			}
 		}
 		break;
@@ -928,7 +928,7 @@ void Debugger::GetBreakpoints(CpuType cpuType, Breakpoint* breakpoints, int& exe
 		{
 			if (_gbDebugger)
 			{
-				return _gbDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, reads, writes, execs);
+				return _gbDebugger->GetBreakpointManager()->GetBreakpoints(breakpoints, execs, reads, writes);
 			}
 		}
 		break;
