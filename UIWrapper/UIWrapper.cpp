@@ -44,21 +44,22 @@ extern "C" {
 
 	void __stdcall GetBreakpoints(::CpuType cpuType, ::Breakpoint* breakpoints, int& execs, int& reads, int& writes) {
 		if (breakpoints != nullptr) {
-			array<Mesen::GUI::Debugger::Breakpoint^>^ bps = gcnew array<Mesen::GUI::Debugger::Breakpoint^>(execs + reads + writes);
+			array<Mesen::GUI::Debugger::InteropBreakpoint>^ bps = gcnew array<Mesen::GUI::Debugger::InteropBreakpoint>(execs + reads + writes);
+
 			DebugApi::GetBreakpoints((Mesen::GUI::CpuType)cpuType, bps, execs, reads, writes);
 
 			for (auto i = 0; i < execs + reads + writes; ++i)
 			{
-				breakpoints[i].enabled = bps[i]->Enabled;
-				breakpoints[i].startAddr = bps[i]->StartAddress;
-				breakpoints[i].endAddr = bps[i]->EndAddress;
-				breakpoints[i].type = (::BreakpointTypeFlags)bps[i]->Type;
+				breakpoints[i].enabled = bps[i].Enabled;
+				breakpoints[i].startAddr = bps[i].StartAddress;
+				breakpoints[i].endAddr = bps[i].EndAddress;
+				breakpoints[i].cpuType = (::CpuType)bps[i].CpuType;
+				breakpoints[i].markEvent = bps[i].MarkEvent;
+				breakpoints[i].memoryType = (::SnesMemoryType)bps[i].MemoryType;
+				breakpoints[i].type = (::BreakpointTypeFlags)bps[i].Type;
 
-				auto arr = System::Text::Encoding::UTF8->GetBytes(bps[i]->Condition);
-				pin_ptr<unsigned char> arr_start = &arr[0];
-				memcpy(breakpoints[i].condition, arr_start, arr->Length);
-
-				breakpoints[i].markEvent = bps[i]->MarkEvent;
+				pin_ptr<unsigned char> arr_start = &bps[i].Condition[0];
+				memcpy(breakpoints[i].condition, arr_start, sizeof(breakpoints[i].condition));
 			}
 		}
 		else {
@@ -66,8 +67,41 @@ extern "C" {
 		}
 	}
 
+	void __stdcall SetBreakpoints(::Breakpoint breakpoints[], uint32_t length)
+	{
+		array<Mesen::GUI::Debugger::InteropBreakpoint>^ bps = gcnew array<Mesen::GUI::Debugger::InteropBreakpoint>(length);
+
+		for (uint32_t i = 0; i < length; ++i)
+		{
+			bps[i].Enabled = breakpoints[i].enabled;
+			bps[i].StartAddress = breakpoints[i].startAddr;
+			bps[i].EndAddress = breakpoints[i].endAddr;
+			bps[i].CpuType = (Mesen::GUI::CpuType)breakpoints[i].cpuType;
+			bps[i].MarkEvent = breakpoints[i].markEvent;
+			bps[i].MemoryType = (Mesen::GUI::SnesMemoryType)breakpoints[i].memoryType;
+			bps[i].Type = (Mesen::GUI::Debugger::BreakpointTypeFlags)breakpoints[i].type;
+			bps[i].Condition = gcnew array<unsigned char>(sizeof(breakpoints[i].condition));
+			pin_ptr<unsigned char> ptr = &bps[i].Condition[0];
+			memcpy(ptr, breakpoints[i].condition, sizeof(breakpoints[i].condition));
+		}
+		
+		DebugApi::SetBreakpoints(bps, length);
+	}
+
 	unsigned int __stdcall GetPcAddress() {
 		return DebugApi::GetPcAddress();
+	}
+
+	::AddressInfo __stdcall GetAbsoluteAddress(::AddressInfo relAddress)
+	{
+		auto result = DebugApi::GetAbsoluteAddress(Mesen::GUI::AddressInfo{relAddress.Address, (Mesen::GUI::SnesMemoryType)relAddress.Type});
+		return {result.Address, (::SnesMemoryType)result.Type};
+	}
+
+	::AddressInfo __stdcall GetRelativeAddress(::AddressInfo absAddress, ::CpuType cpuType)
+	{
+		auto result = DebugApi::GetRelativeAddress(Mesen::GUI::AddressInfo{absAddress.Address, (Mesen::GUI::SnesMemoryType)absAddress.Type}, (Mesen::GUI::CpuType)cpuType);
+		return {result.Address, (::SnesMemoryType)result.Type};
 	}
 
 	void* __stdcall RegisterNotificationCallback(NotificationListenerCallback callback) {

@@ -21,8 +21,11 @@ void __stdcall CloseGui();
 
 void __stdcall ResumeExecution();
 unsigned int __stdcall GetPcAddress();
+::AddressInfo __stdcall GetAbsoluteAddress(::AddressInfo relAddress);
+::AddressInfo __stdcall GetRelativeAddress(::AddressInfo absAddress, ::CpuType cpuType);
 void __stdcall Step(::CpuType cpuType, int instructionCount, ::StepType type);
 void __stdcall GetBreakpoints(::CpuType cpuType, ::Breakpoint* breakpoints, int& execs, int& reads, int& writes);
+void __stdcall SetBreakpoints(::Breakpoint breakpoints[], uint32_t length);
 uint32_t __stdcall GetMemorySize(::SnesMemoryType type);
 void __stdcall GetMemoryState(::SnesMemoryType type, uint8_t* buffer);
 void __stdcall GetState(::DebugState& state);
