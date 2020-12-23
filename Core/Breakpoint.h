@@ -8,9 +8,8 @@ enum class BreakpointTypeFlags : uint8_t;
 enum class BreakpointCategory : uint8_t;
 
 #pragma pack(push, 1)
-class Breakpoint
+struct Breakpoint
 {
-public:
 	bool Matches(uint32_t memoryAddr, AddressInfo& info);
 	bool HasBreakpointType(int arrIndex);
 	string GetCondition();
