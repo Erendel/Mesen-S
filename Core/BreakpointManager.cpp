@@ -94,7 +94,8 @@ int BreakpointManager::GetBreakpointTypeArrayIndex(MemoryOperationType type)
 	switch (type)
 	{
 	default:
-	case MemoryOperationType::ExecOperand:
+		return -1;
+	//case MemoryOperationType::ExecOperand:
 	case MemoryOperationType::ExecOpCode:
 		return 0;
 
@@ -112,7 +113,7 @@ int BreakpointManager::InternalCheckBreakpoint(MemoryOperationInfo operationInfo
 {
 	int arrIndex = GetBreakpointTypeArrayIndex(operationInfo.Type);
 
-	if (!_hasBreakpointType[arrIndex])
+	if (arrIndex == -1 || !_hasBreakpointType[arrIndex])
 	{
 		return -1;
 	}
@@ -121,7 +122,7 @@ int BreakpointManager::InternalCheckBreakpoint(MemoryOperationInfo operationInfo
 	_debugger->GetState(state, false);
 	EvalResultType resultType;
 	unordered_map<int, Breakpoint>& breakpoints = _breakpoints[arrIndex];
-	for (auto it = breakpoints.begin(); it != breakpoints.end(); it++)
+	for (auto it = breakpoints.begin(); it != breakpoints.end(); ++it)
 	{
 		if (it->second.Matches(operationInfo.Address, address))
 		{
