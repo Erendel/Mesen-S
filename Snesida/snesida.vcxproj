@@ -59,6 +59,7 @@
       <PreprocessorDefinitions>__NT__;__IDP__;__X64__;USE_STANDARD_FILE_FUNCTIONS;_DEBUG;SNESIDA_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>d:\idasdk75\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
