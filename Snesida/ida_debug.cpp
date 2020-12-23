@@ -82,15 +82,14 @@ static void processNotification(ConsoleNotificationType type, void* parameter)
 					debug_events.push_back(ev);
 				}
 				break;
-			default:
+			case BreakSource::Breakpoint:
 				{
-					ev.ea = evt->Operation.Address;
+					ev.ea = evt->Operation.Address | ((((evt->Operation.Address >> 16) & 0xFF) <= 0x7D ? 0x800000 : 0x000000));
 					ev.set_eid(BREAKPOINT);
 					ev.set_bpt().hea = ev.set_bpt().kea = ev.ea;
 
 					debug_events.push_back(ev);
-				}
-				break;
+				} break;
 			}
 		}
 		break;
@@ -178,81 +177,95 @@ static bool unregister_events_callback()
 	return true;
 }
 
+#include <Windows.h>
+
 static bool update_bpts(int* nbpts, update_bpt_info_t* bpts, int nadd, int ndel, qstring* errbuf)
 {
+	*nbpts = 0;
+	
 	// move breakpoints list to shared
+	Breakpoint* oldBpts = nullptr;
 	int execs = 0, reads = 0, writes = 0;
-	GetBreakpoints(CpuType::Cpu, nullptr, execs, reads, writes); // set bpts to null to get counts
+	GetBreakpoints(CpuType::Cpu, oldBpts, execs, reads, writes); // set bpts to null to get counts
 
 	int total = execs + reads + writes;
 
-	Breakpoint* oldBpts = (Breakpoint*)malloc(total);
-	if (oldBpts == nullptr)
+	if (total > 0)
 	{
-		return false;
+		oldBpts = new Breakpoint[total];
+		GetBreakpoints(CpuType::Cpu, oldBpts, execs, reads, writes);
 	}
 
-	GetBreakpoints(CpuType::Cpu, oldBpts, execs, reads, writes);
+	auto *newBpts = new Breakpoint[total + nadd - ndel];
+	int newCount = 0;
+
+	bool* add = new bool[execs + reads + writes];
+
+	for (auto i = 0; i < execs + reads + writes; ++i)
+	{
+		add[i] = true;
+	}
+
+	for (auto i = 0; i < ndel; ++i)
+	{
+		int offset;
+		int max_offset;
+
+		switch (bpts[nadd + i].type)
+		{
+		case BPT_EXEC:
+			{
+				offset = 0;
+				max_offset = offset + execs;
+			}
+			break;
+		case BPT_READ:
+			{
+				offset = execs;
+				max_offset = offset + reads;
+			}
+			break;
+		case BPT_WRITE:
+			{
+				offset = execs + reads;
+				max_offset = offset + writes;
+			}
+			break;
+		default:
+			continue;
+		}
+
+		bpts[nadd + i].code = BPT_OK;
+
+		auto bpAddrStart = GetAbsoluteAddress({static_cast<int32_t>(bpts[nadd + i].ea), SnesMemoryType::CpuMemory});
+		auto bpAddrEnd = GetAbsoluteAddress({static_cast<int32_t>(bpts[nadd + i].ea + bpts[nadd + i].size), SnesMemoryType::CpuMemory});
+
+		for (auto j = 0; oldBpts && j < execs + reads + writes; ++j)
+		{
+			if (j >= offset && j < max_offset && bpAddrStart.Address >= oldBpts[j].startAddr && bpAddrEnd.Address <= oldBpts[j].endAddr)
+			{
+				add[j] = false;
+				*nbpts += 1;
+			}
+		}
+	}
+
+	for (auto j = 0; oldBpts && j < execs + reads + writes; ++j)
+	{
+		if (add[j])
+		{
+			memcpy(&newBpts[newCount++], &oldBpts[j], sizeof(Breakpoint));
+		}
+	}
 
 	total += nadd - ndel;
 
-	Breakpoint* newBpts = (Breakpoint*)malloc(total);
-
-	if (newBpts == nullptr)
-	{
-		free(oldBpts);
-		return false;
-	}
-
-	int newCount = 0;
-
-	for (int j = 0; j < execs + reads + writes; ++j)
-	{
-		for (int i = 0; i < ndel; ++i)
-		{
-			int offset = 0;
-
-			switch (bpts[nadd + i].type)
-			{
-			case BPT_EXEC:
-				{
-					offset = 0;
-				}
-				break;
-			case BPT_READ:
-				{
-					offset = execs;
-				}
-				break;
-			case BPT_WRITE:
-				{
-					offset = execs + reads;
-				}
-				break;
-			default:
-				continue;
-			}
-
-			Breakpoint* typeBpts = &oldBpts[offset];
-
-			if (static_cast<int32_t>(bpts[nadd + i].ea) >= typeBpts[j].startAddr && (static_cast<int32_t>(bpts[nadd + i].ea
-			) + bpts[nadd + i].size <= typeBpts[j].endAddr))
-			{
-				continue;
-			}
-		}
-
-		memcpy(&newBpts[newCount++], &oldBpts[j], sizeof(Breakpoint));
-		*nbpts += 1;
-	}
-
-	for (int i = 0; i < nadd; ++i)
+	for (auto i = 0; i < nadd; ++i)
 	{
 		auto type = static_cast<BreakpointTypeFlags>(0);
-		int count = 0;
 
 		if (bpts[i].type & BPT_SOFT) {
-			type = BreakpointTypeFlags::ExecuteReadWrite;
+			type = BreakpointTypeFlags::Execute;
 		}
 		else if (bpts[i].type & BPT_READ) {
 			type = BreakpointTypeFlags::Read;
@@ -264,23 +277,30 @@ static bool update_bpts(int* nbpts, update_bpt_info_t* bpts, int nadd, int ndel,
 			type = static_cast<BreakpointTypeFlags>(static_cast<int>(type) | static_cast<int>(BreakpointTypeFlags::Execute));
 		}
 
+		bpts[i].code = BPT_OK;
+
+		auto bpAddrStart = GetAbsoluteAddress({static_cast<int32_t>(bpts[i].ea), SnesMemoryType::CpuMemory});
+		auto bpAddrEnd = GetAbsoluteAddress({static_cast<int32_t>(bpts[i].ea + bpts[i].size), SnesMemoryType::CpuMemory});
+		
 		Breakpoint newBp = {
 			CpuType::Cpu,
-			SnesMemoryType::CpuMemory,
+			bpAddrStart.Type, // should be PrgRom
 			type,
-			static_cast<int32_t>(bpts[i].ea),
-			static_cast<int32_t>(bpts[i].ea + bpts[i].size),
+			static_cast<int32_t>(bpAddrStart.Address),
+			static_cast<int32_t>(bpAddrEnd.Address),
 			true,
 			true,
-			""
 		};
 
 		memcpy(&newBpts[newCount++], &newBp, sizeof(Breakpoint));
 		*nbpts += 1;
 	}
 
-	free(oldBpts);
-	free(newBpts);
+	SetBreakpoints(newBpts, newCount);
+
+	delete[] add;
+	delete[] oldBpts;
+	delete[] newBpts;
 
 	return true;
 }
@@ -555,12 +575,17 @@ static ssize_t idaapi idd_notify(void* user_data, int notification_code, va_list
 	case debugger_t::ev_resume:
 		{
 			debug_event_t* event = va_arg(va, debug_event_t*);
+			dbg_notification_t req = get_running_notification();
 
 			switch (event->eid())
 			{
 			case BREAKPOINT:
+			case PROCESS_SUSPENDED:
 				{
-					thread_continue(event->tid);
+					if (req == dbg_null || req == dbg_run_to)
+					{
+						thread_continue(event->tid);
+					}
 				}
 			default:
 				retcode = DRC_OK;
@@ -635,6 +660,27 @@ static ssize_t idaapi idd_notify(void* user_data, int notification_code, va_list
 			int ndel = va_arg(va, int);
 			qstring* errbuf = va_arg(va, qstring*);
 			retcode = update_bpts(nbpts, bpts, nadd, ndel, errbuf) ? DRC_OK : DRC_FAILED;
+		} break;
+	case debugger_t::ev_check_bpt:
+		{
+			int* bptvc = va_arg(va, int*);
+			bpttype_t type = va_arg(va, bpttype_t);
+			ea_t ea = va_arg(va, ea_t);
+			int len = va_arg(va, int);
+
+			switch (type)
+			{
+			case BPT_EXEC:
+			case BPT_READ:
+			case BPT_WRITE:
+			case BPT_RDWR:
+			case BPT_SOFT:
+				*bptvc = BPT_OK;
+				break;
+			default:
+				*bptvc = BPT_BAD_TYPE;
+			}
+			retcode = DRC_OK;
 		}
 		break;
 		//default: {
@@ -654,8 +700,8 @@ debugger_t debugger{
 	"65816",
 
 	DBG_FLAG_NOHOST | DBG_FLAG_CAN_CONT_BPT | DBG_FLAG_SAFE | DBG_FLAG_FAKE_ATTACH | DBG_FLAG_NOPASSWORD |
-	DBG_FLAG_NOPARAMETERS | DBG_FLAG_ANYSIZE_HWBPT | DBG_FLAG_DEBTHREAD,
-	DBG_HAS_REQUEST_PAUSE | DBG_HAS_SET_RESUME_MODE | DBG_HAS_THREAD_SUSPEND | DBG_HAS_THREAD_CONTINUE
+	DBG_FLAG_NOPARAMETERS | DBG_FLAG_ANYSIZE_HWBPT | DBG_FLAG_DEBTHREAD | DBG_FLAG_PREFER_SWBPTS,
+	DBG_HAS_REQUEST_PAUSE | DBG_HAS_SET_RESUME_MODE | DBG_HAS_THREAD_SUSPEND | DBG_HAS_THREAD_CONTINUE | DBG_HAS_CHECK_BPT
 	/*| DBG_HAS_MAP_ADDRESS*/,
 
 	register_classes,
