@@ -18,14 +18,7 @@ namespace Mesen.GUI.Forms
 	{
 		SystemDefault = 0,
 		English = 1,
-		French = 2,
-		Japanese = 3,
-		Russian = 4,
-		Spanish = 5,
-		Ukrainian = 6,
-		Portuguese = 7,
-		Catalan = 8,
-		Chinese = 9,
+		German = 2,
 	}
 
 	class ResourceHelper
@@ -43,14 +36,7 @@ namespace Mesen.GUI.Forms
 		{
 			switch(ResourceHelper.GetCurrentLanguage()) {
 				case Language.English: return "en";
-				case Language.French: return "fr";
-				case Language.Japanese: return "ja";
-				case Language.Russian: return "ru";
-				case Language.Spanish: return "es";
-				case Language.Ukrainian: return "uk";
-				case Language.Portuguese: return "pt";
-				case Language.Catalan: return "ca";
-				case Language.Chinese: return "zh";
+				case Language.German: return "de";
 			}
 
 			return "";
@@ -67,13 +53,7 @@ namespace Mesen.GUI.Forms
 				switch(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName) {
 					default:
 					case "en": language = Language.English; break;
-					case "fr": language = Language.French; break;
-					case "ja": language = Language.Japanese; break;
-					case "ru": language = Language.Russian; break;
-					case "es": language = Language.Spanish; break;
-					case "uk": language = Language.Ukrainian; break;
-					case "pt": language = Language.Portuguese; break;
-					case "zh": language = Language.Chinese; break;
+					case "de": language = Language.German; break;
 				}
 			}
 
@@ -82,14 +62,7 @@ namespace Mesen.GUI.Forms
 			switch(language) {
 				default:
 				case Language.English: filename = enFilename; break;
-				case Language.French: filename = "resources.fr.xml"; break;
-				case Language.Japanese: filename = "resources.ja.xml"; break;
-				case Language.Russian: filename = "resources.ru.xml"; break;
-				case Language.Spanish: filename = "resources.es.xml"; break;
-				case Language.Ukrainian: filename = "resources.uk.xml"; break;
-				case Language.Portuguese: filename = "resources.pt.xml"; break;
-				case Language.Catalan: filename = "resources.ca.xml"; break;
-				case Language.Chinese: filename = "resources.zh.xml"; break;
+				case Language.German: filename = "resources.de.xml"; break;
 			}
 
 			_language = language;

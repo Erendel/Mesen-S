@@ -17,6 +17,7 @@ class MessageManager
 private:
 	static IMessageManager* _messageManager;
 	static std::unordered_map<string, string> _enResources;
+	static std::unordered_map<string, string> _deResources;
 
 	static bool _osdEnabled;
 	static SimpleLock _logLock;

@@ -52,6 +52,9 @@ namespace Mesen.GUI.Forms
 
 		protected override void OnLoad(EventArgs e)
 		{
+			ResourceHelper.LoadResources(ConfigManager.Config.Preferences.DisplayLanguage);
+			ResourceHelper.UpdateEmuLanguage();
+
 			base.OnLoad(e);
 			RestoreLocation(ConfigManager.Config.WindowLocation, ConfigManager.Config.WindowSize);
 		}
@@ -569,7 +572,10 @@ namespace Mesen.GUI.Forms
 			using(frmPreferences frm = new frmPreferences()) {
 				frm.ShowDialog(sender, this);
 				ConfigManager.Config.Preferences.ApplyConfig();
-				if(!EmuRunner.IsRunning()) {
+				ResourceHelper.LoadResources(ConfigManager.Config.Preferences.DisplayLanguage);
+				ResourceHelper.UpdateEmuLanguage();
+				ResourceHelper.ApplyResources(this);
+				if (!EmuRunner.IsRunning()) {
 					ShowGameScreen(GameScreenMode.RecentGames);
 				}
 				if(frm.NeedRestart) {

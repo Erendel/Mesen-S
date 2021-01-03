@@ -49,6 +49,8 @@ void EmuSettings::ProcessString(string& str, const char** strPointer)
 	*strPointer = str.c_str();
 }
 
+Language EmuSettings::_displayLanguage = Language::English;
+
 void EmuSettings::SetVideoConfig(VideoConfig config)
 {
 	_video = config;

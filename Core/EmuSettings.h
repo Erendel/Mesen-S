@@ -5,11 +5,20 @@
 
 class Console;
 
+enum class Language
+{
+	//SystemDefault = 0,  //This value is never used by the C++ core
+	English = 1,
+	German = 2,
+};
+
 class EmuSettings
 {
 private:
 	Console* _console;
 	std::mt19937 _mt;
+
+	static Language _displayLanguage;
 
 	VideoConfig _video;
 	AudioConfig _audio;
@@ -84,4 +93,14 @@ public:
 
 	bool IsInputEnabled();
 	double GetControllerDeadzoneRatio();
+
+	static Language GetDisplayLanguage()
+	{
+		return _displayLanguage;
+	}
+
+	static void SetDisplayLanguage(Language lang)
+	{
+		_displayLanguage = lang;
+	}
 };

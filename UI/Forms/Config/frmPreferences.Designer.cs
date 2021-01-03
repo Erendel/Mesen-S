@@ -316,7 +316,7 @@
 			this.flowLayoutPanel2.Name = "flowLayoutPanel2";
 			this.flowLayoutPanel2.Size = new System.Drawing.Size(534, 26);
 			this.flowLayoutPanel2.TabIndex = 18;
-			this.flowLayoutPanel2.Visible = false;
+			this.flowLayoutPanel2.Visible = true;
 			// 
 			// lblDisplayLanguage
 			// 

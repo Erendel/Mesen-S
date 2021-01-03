@@ -922,14 +922,7 @@
 		<Enum ID="Language">
 			<Value ID="SystemDefault">User Account Default</Value>
 			<Value ID="English">English</Value>
-			<Value ID="French">Français</Value>
-			<Value ID="Japanese">日本語</Value>
-			<Value ID="Portuguese">Português</Value>
-			<Value ID="Russian">Русский</Value>
-			<Value ID="Spanish">Español</Value>
-			<Value ID="Ukrainian">Українська</Value>
-			<Value ID="Catalan">Català</Value>
-			<Value ID="Chinese">中文</Value>
+			<Value ID="German">Deutsch</Value>
 		</Enum>
 		<Enum ID="RamState">
 			<Value ID="Random">Random Values (Default)</Value>

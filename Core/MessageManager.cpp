@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "MessageManager.h"
+#include "EmuSettings.h"
 
 std::unordered_map<string, string> MessageManager::_enResources = {
 	{"Cheats", u8"Cheats"},
@@ -84,6 +85,83 @@ std::unordered_map<string, string> MessageManager::_enResources = {
 	{"VideoRecorderStopped", u8"Recording saved to: %1"},
 };
 
+std::unordered_map<string, string> MessageManager::_deResources = {
+	{"Cheats", u8"Cheats"},
+	{"Debug", u8"Debug"},
+	{"EmulationSpeed", u8"Emulationsgeschwindigkeit"},
+	{"ClockRate", u8"Taktrate"},
+	{"Error", u8"Fehler"},
+	{"GameInfo", u8"Spielinfo"},
+	{"GameLoaded", u8"Spiel geladen"},
+	{"Input", u8"Eingabe"},
+	{"Patch", u8"Patch"},
+	{"Movies", u8"Filme"},
+	{"NetPlay", u8"Net Play"},
+	{"Overclock", u8"Übertaktung"},
+	{"Region", u8"Region"},
+	{"SaveStates", u8"Zwischenstände"},
+	{"ScreenshotSaved", u8"Screenshot gespeicher"},
+	{"SoundRecorder", u8"Tonaufnahme"},
+	{"Test", u8"Test"},
+	{"VideoRecorder", u8"Videoaufnahme"},
+
+	{"ApplyingPatch", u8"Wende Patch an: %1"},
+	{"CheatApplied", u8"1 Cheat angewendet."},
+	{"CheatsApplied", u8"%1 Cheats angewendet."},
+	{"CheatsDisabled", u8"Alle Cheats deaktiviert."},
+	{"CoinInsertedSlot", u8"Münze eingeworfen (Schlitz %1)"},
+	{"ConnectedToServer", u8"Mit dem Server verbunden."},
+	{"ConnectedAsPlayer", u8"Verbunden als Spieler %1"},
+	{"ConnectedAsSpectator", u8"Verbunden als Beobachter."},
+	{"ConnectionLost", u8"Verbindung zum Server unterbrochen."},
+	{"CouldNotConnect", u8"Konnte keine Verbindung zum Server aufbauen."},
+	{"CouldNotInitializeAudioSystem", u8"Konnte Tonsystem nicht initialisieren"},
+	{"CouldNotFindRom", u8"Konnte passende Spiel - ROM nicht finden. (% 1)"},
+	{"CouldNotWriteToFile", u8"Konnte nicht in Datei schreiben: %1"},
+	{"CouldNotLoadFile", u8"Datei konnte nicht geladen werden: %1"},
+	{"EmulationMaximumSpeed", u8"Maximalgeschwindigkeit"},
+	{"EmulationSpeedPercent", u8"%1%"},
+	{"FdsDiskInserted", u8"Diskette %1 Seite %2 eingelegt."},
+	{"Frame", u8"Bild"},
+	{"GameCrash", u8"Das Spiel ist abgestürzt (%1)"},
+	{"KeyboardModeDisabled", u8"Tastaturmodus deaktiviert."},
+	{"KeyboardModeEnabled", u8"Tastaturmodus aktiviert."},
+	{"Lag", u8"Verzögerung"},
+	{"Mapper", u8"Mapper: %1, SubMapper: %2"},
+	{"MovieEnded", u8"Film beendet."},
+	{"MovieInvalid", u8"Ungültige Filmdatei."},
+	{"MovieMissingRom", u8"Fehlendes ROM (%1) benötigt, um Film wiederzugeben."},
+	{"MovieNewerVersion", u8"Filme, die mit einer neueren Version von Mesen-S erstellt wurden, können nicht geladen  werden. Bitte laden Sie die aktuellste Version herunter."},
+	{"MovieIncompatibleVersion", u8"Dieser Film ist mit dieser Version von Mesen-S inkompatibel."},
+	{"MoviePlaying", u8"Gebe Film wieder: %1"},
+	{"MovieRecordingTo", u8"Nehme Film in Datei auf: %1"},
+	{"MovieSaved", u8"Film wurde in Datei gespeichert: %1"},
+	{"NetplayVersionMismatch", u8"%1 führt nicht dieselbe Version von Mesen-S aus und wurde getrennt."},
+	{"NetplayNotAllowed", u8"Diese Aktion ist verboten, während Sie mit einem Server verbunden sind."},
+	{"OverclockEnabled", u8"Übertaktung aktiviert."},
+	{"OverclockDisabled", u8"Übertaktung deaktiviert."},
+	{"PrgSizeWarning", u8"PRG-Größe ist kleiner als 32kb"},
+	{"SaveStateEmpty", u8"Zwischenstand-Platz ist leer."},
+	{"SaveStateIncompatibleVersion", u8"Zwischenstand ist inkompatibel mit dieser Version von Mesen-S."},
+	{"SaveStateInvalidFile", u8"Ungültige Zwischenstanddatei."},
+	{"SaveStateWrongSystemSnes", u8"Fehler: Zwischenstand kann nicht geladen werden (falscher Konsolentyp: SNES)"},
+	{"SaveStateWrongSystemGb", u8"Fehler: Zwischenstand kann nicht geladen werden (falscher Konsolentyp: Game Boy)"},
+	{"SaveStateLoaded", u8"Zwischenstand #%1 geladen."},
+	{"SaveStateMissingRom", u8"Fehlende ROM (%1) benötigt, um Zwischenstand zu laden."},
+	{"SaveStateNewerVersion", u8"Zwischenstände, die mit einer neueren Version von Mesen-S erstellt wurden, können nicht geladen werden. Bitte laden Sie die aktuellste Version herunter."	},
+	{"SaveStateSaved", u8"Zwischenstand #%1 gespeichert."},
+	{"SaveStateSlotSelected", u8"Platz #%1 ausgewählt."},
+	{"ScanlineTimingWarning", u8"PPU-Timing wurde verändert."},
+	{"ServerStarted", u8"Server gestartet (Port: %1)"},
+	{"ServerStopped", u8"Server gestoppt"},
+	{"SoundRecorderStarted", u8"Nehme Ton in Datei auf: %1"},
+	{"SoundRecorderStopped", u8"Tonaufnahme wurde in Datei gespeichert: %1"},
+	{"TestFileSavedTo", u8"Testdatei wurde gespeichert in: %1"},
+	{"UnsupportedMapper", u8"Nicht unterstützter Mapper (%1), Spiel kann nicht geladen werden."},
+	{"VideoRecorderStarted", u8"Nehme Film in Datei auf: %1"},
+	{"VideoRecorderStopped", u8"Film wurde gespeichert in: %1"},
+};
+
 std::list<string> MessageManager::_log;
 SimpleLock MessageManager::_logLock;
 SimpleLock MessageManager::_messageLock;
@@ -113,29 +191,22 @@ void MessageManager::SetOsdState(bool enabled)
 string MessageManager::Localize(string key)
 {
 	std::unordered_map<string, string>* resources = &_enResources;
-	/*switch(EmulationSettings::GetDisplayLanguage()) {
+	switch(EmuSettings::GetDisplayLanguage()) {
 		case Language::English: resources = &_enResources; break;
-		case Language::French: resources = &_frResources; break;
-		case Language::Japanese: resources = &_jaResources; break;
-		case Language::Russian: resources = &_ruResources; break;
-		case Language::Spanish: resources = &_esResources; break;
-		case Language::Ukrainian: resources = &_ukResources; break;
-		case Language::Portuguese: resources = &_ptResources; break;
-		case Language::Catalan: resources = &_caResources; break;
-		case Language::Chinese: resources = &_zhResources; break;
-	}*/
+		case Language::German: resources = &_deResources; break;
+	}
 	if (resources)
 	{
 		if (resources->find(key) != resources->end())
 		{
 			return (*resources)[key];
-		} /* else if(EmulationSettings::GetDisplayLanguage() != Language::English) {
+		} else if(EmuSettings::GetDisplayLanguage() != Language::English) {
 			//Fallback on English if resource key is missing another language
 			resources = &_enResources;
 			if(resources->find(key) != resources->end()) {
 				return (*resources)[key];
 			}
-		}*/
+		}
 	}
 
 	return key;

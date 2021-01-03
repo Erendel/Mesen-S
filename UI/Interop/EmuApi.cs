@@ -82,6 +82,7 @@ namespace Mesen.GUI
 		);
 
 		[DllImport(DllPath)] public static extern void SetDisplayLanguage(Language lang);
+
 		[DllImport(DllPath)] public static extern void SetFullscreenMode([MarshalAs(UnmanagedType.I1)]bool fullscreen, IntPtr windowHandle, UInt32 monitorWidth, UInt32 monitorHeight);
 
 		[DllImport(DllPath)] public static extern ScreenSize GetScreenSize([MarshalAs(UnmanagedType.I1)]bool ignoreScale, ConsoleId consoleId = ConsoleId.Main);
